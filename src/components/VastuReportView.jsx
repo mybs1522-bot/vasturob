@@ -8,13 +8,34 @@ import { ALL_INDIAN_STATES, analyzeFloorPlanWithAI } from '../utils/aiVisionScan
 import { saveLead, saveVastuReport } from '@/lib/supabase';
 import { openRazorpayCheckout } from '@/lib/razorpay';
 
-export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
+export default function VastuReportView({ vastuData = {}, userData = null, onRetry }) {
   const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'ai_scan' | 'remedies' | 'yantras'
   const [isReportUnlocked, setIsReportUnlocked] = useState(false);
   const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [userPhone, setUserPhone] = useState('');
+
+  // Auto-fetch user details already provided for free report
+  const getInitialUser = () => {
+    if (userData && (userData.name || userData.full_name)) return userData;
+    try {
+      const u = localStorage.getItem('vastu_user');
+      return u ? JSON.parse(u) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const initialUser = getInitialUser();
+  const [userName, setUserName] = useState(() => initialUser?.name || initialUser?.full_name || '');
+  const [userPhone, setUserPhone] = useState(() => initialUser?.phone || '');
   const [payStep, setPayStep] = useState(1); // 1: details | 2: payment checkout | 3: success notice
+
+  React.useEffect(() => {
+    const currUser = getInitialUser();
+    if (currUser) {
+      if (currUser.name || currUser.full_name) setUserName(currUser.name || currUser.full_name);
+      if (currUser.phone) setUserPhone(currUser.phone);
+    }
+  }, [userData, isPaywallModalOpen]);
 
   // Evergreen 15-Minute Countdown Timer (14m 59s)
   const [timeLeft, setTimeLeft] = useState(899);
@@ -123,10 +144,11 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
 
             <button
               type="button"
-              onClick={onReCalibrate}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-1 hover:bg-slate-200"
+              onClick={onRetry}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-1 hover:bg-slate-200 cursor-pointer"
+              title="Start fresh from beginning"
             >
-              <RefreshCw className="w-3 h-3" /> Re-Orient
+              <RefreshCw className="w-3 h-3" /> Retry
             </button>
           </div>
         </div>

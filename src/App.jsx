@@ -179,6 +179,19 @@ export default function App() {
     setWizardStep(4);
   };
 
+  const handleResetSession = () => {
+    setImageUrl(null);
+    setSvgContent(null);
+    setPlacedRooms([]);
+    setSelectedRoomType(null);
+    setNorthAngle(0);
+    setUserData(null);
+    try {
+      localStorage.removeItem('vastu_user');
+    } catch (e) {}
+    setWizardStep(1);
+  };
+
   const vastuReport = useMemo(() => {
     return evaluateVastu(placedRooms, northAngle, centerPos.x, centerPos.y);
   }, [placedRooms, northAngle, centerPos]);
@@ -496,7 +509,7 @@ export default function App() {
 
         {/* STEP 4: Vastu Report */}
         {wizardStep === 4 && (
-          <VastuReportView vastuData={vastuReport} onReCalibrate={() => setWizardStep(3)} />
+          <VastuReportView vastuData={vastuReport} userData={userData} onRetry={handleResetSession} />
         )}
       </main>
 
