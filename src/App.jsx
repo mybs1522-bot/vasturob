@@ -257,8 +257,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Sequential Mobile Step Bar (HIDDEN on Step 1 start page as requested) */}
-      {wizardStep > 1 && (
+      {/* Sequential Mobile Step Bar (HIDDEN on Step 1 start page and Step 4 report page) */}
+      {wizardStep > 1 && wizardStep < 4 && (
         <div className="bg-white border-b border-slate-200 p-2 sm:hidden">
           <div className="flex items-center justify-between px-1 text-[10px] sm:text-xs font-bold text-slate-600">
             <button type="button" onClick={() => setWizardStep(1)} className={`whitespace-nowrap ${wizardStep === 1 ? 'text-amber-600 font-extrabold' : ''}`}>1. Start</button>

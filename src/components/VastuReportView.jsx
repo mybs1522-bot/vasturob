@@ -132,6 +132,17 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
         </div>
       </div>
 
+      {/* Brief Report Free Section Header */}
+      <div className="flex items-center justify-between pt-1 border-b border-slate-200/80 pb-1.5">
+        <h2 className="text-xs font-black text-slate-900 tracking-wider font-heading uppercase flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+          Brief Report
+        </h2>
+        <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+          Free Evaluation Summary
+        </span>
+      </div>
+
       {/* 2. ULTRA-COMPACT 4-TILE SUMMARY GRID */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {/* Tile 1: Vastu Score */}
@@ -188,7 +199,15 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
 
       {/* 3. PROMINENT UNLOCK FULL REPORT PAYWALL CARD (₹899) */}
       {!isReportUnlocked ? (
-        <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/90 p-3.5 sm:p-5 shadow-lg space-y-3">
+        <div className="space-y-2 pt-2">
+          {/* Minimal Professional Callout Title */}
+          <div className="text-center space-y-0.5">
+            <h3 className="text-xs sm:text-sm font-black text-slate-900 tracking-wider font-heading uppercase">
+              Need More Details and Remedies? Unlock Full Report
+            </h3>
+          </div>
+
+          <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/90 p-3.5 sm:p-5 shadow-lg space-y-3">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center shadow-md flex-shrink-0">
@@ -239,6 +258,7 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             </div>
           </div>
         </div>
+      </div>
       ) : (
         /* 4. UNLOCKED FULL DETAILED REPORT TABS & POST-PAYMENT EXPERT REVIEW NOTICE */
         <div className="space-y-4 animate-fade-in">
