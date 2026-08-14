@@ -422,23 +422,67 @@ export default function App() {
               <span className="text-[10px] sm:text-xs font-bold text-amber-700 font-mono whitespace-nowrap truncate">Step 2: Position Room Boxes ({placedRooms.length})</span>
             </div>
 
-            {/* Scan Notice Banner */}
+            {/* Scan Notice Banner with Retry Button */}
             {scanNotice && (
-              <div className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+              <div className={`p-3 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
                 scanNotice.type === 'success'
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
                   : scanNotice.type === 'scanning'
                   ? 'bg-blue-50 border-blue-200 text-blue-900 animate-pulse'
                   : 'bg-amber-50 border-amber-200 text-amber-900'
               }`}>
-                {scanNotice.type === 'success' ? (
-                  <Sparkles className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                ) : scanNotice.type === 'scanning' ? (
-                  <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 animate-spin" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                )}
-                <span>{scanNotice.message}</span>
+                <div className="flex items-center gap-2">
+                  {scanNotice.type === 'success' ? (
+                    <Sparkles className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  ) : scanNotice.type === 'scanning' ? (
+                    <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 animate-spin" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  )}
+                  <span>{scanNotice.message}</span>
+                </div>
+
+                {/* Always offer Retry Plan Processing option */}
+                <button
+                  type="button"
+                  onClick={() => handleImageUpload(imageUrl, svgContent)}
+                  disabled={scanNotice.type === 'scanning'}
+                  className="px-3 py-1 rounded-lg bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-[11px] flex items-center gap-1 shadow-2xs hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
+                  title="Re-run floor plan AI analysis"
+                >
+                  <RefreshCw className={`w-3 h-3 text-slate-950 ${scanNotice.type === 'scanning' ? 'animate-spin' : ''}`} />
+                  Retry Processing
+                </button>
+              </div>
+            )}
+
+            {/* Fallback Retry Callout Card if Plan didn't process rooms on first try */}
+            {placedRooms.length === 0 && scanNotice?.type !== 'scanning' && (
+              <div className="p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-400 text-center space-y-2 shadow-xs">
+                <div className="flex items-center justify-center gap-2 text-slate-900 font-black text-xs sm:text-sm">
+                  <AlertCircle className="w-4.5 h-4.5 text-amber-600 flex-shrink-0" />
+                  <span>Floor Plan Analysis Retry Required</span>
+                </div>
+                <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed font-medium">
+                  We could not automatically detect room boxes on the first attempt. Click <strong>Retry Plan Processing</strong> below to re-scan your image, or tap the room pills (+ Kitchen, + Bedroom) below to add boxes manually.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleImageUpload(imageUrl, svgContent)}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-slate-950" />
+                    Retry Plan Processing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWizardStep(1)}
+                    className="px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                  >
+                    Re-upload Image
+                  </button>
+                </div>
               </div>
             )}
 
