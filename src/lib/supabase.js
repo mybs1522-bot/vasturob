@@ -82,7 +82,7 @@ export async function saveLead(lead) {
   // Sync to Supabase if client is ready
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('leads').insert([newLead]);
+      await supabase.from('leads').upsert([newLead], { onConflict: 'id' });
     } catch (e) {
       console.warn('Supabase saveLead sync error:', e);
     }
@@ -92,6 +92,21 @@ export async function saveLead(lead) {
   window.dispatchEvent(new CustomEvent('vastuscope_lead_added', { detail: newLead }));
 
   return newLead;
+}
+
+export async function updateLeadStatus(id, status) {
+  const current = getLocalData(LOCAL_LEADS_KEY, defaultLeads);
+  const updated = current.map(item => item.id === id ? { ...item, status } : item);
+  setLocalData(LOCAL_LEADS_KEY, updated);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('leads').update({ status }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateLeadStatus error:', e);
+    }
+  }
+  return updated;
 }
 
 export async function getLeads() {
@@ -147,7 +162,7 @@ export async function saveConsultation(consultation) {
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('expert_consultations').insert([newConsultation]);
+      await supabase.from('expert_consultations').upsert([newConsultation], { onConflict: 'id' });
     } catch (e) {
       console.warn('Supabase saveConsultation error:', e);
     }
@@ -213,7 +228,7 @@ export async function saveVastuReport(report) {
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('vastu_reports').insert([newReport]);
+      await supabase.from('vastu_reports').upsert([newReport], { onConflict: 'id' });
     } catch (e) {
       console.warn('Supabase saveVastuReport error:', e);
     }

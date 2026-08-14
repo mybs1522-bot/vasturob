@@ -1,10 +1,12 @@
 -- ========================================================
 -- VastuScope Studio — Supabase Database Schema
+-- Run this script in your Supabase SQL Editor:
+-- https://supabase.com/dashboard/project/auetvxiigqoeiijdtpbb/sql
 -- ========================================================
 
 -- 1. Create LEADS Table
 CREATE TABLE IF NOT EXISTS public.leads (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT,
@@ -15,8 +17,8 @@ CREATE TABLE IF NOT EXISTS public.leads (
 
 -- 2. Create VASTU_REPORTS Table
 CREATE TABLE IF NOT EXISTS public.vastu_reports (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    report_id TEXT NOT NULL UNIQUE,
+    id TEXT PRIMARY KEY,
+    report_id TEXT NOT NULL,
     user_name TEXT,
     user_phone TEXT,
     user_email TEXT,
@@ -29,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.vastu_reports (
 
 -- 3. Create EXPERT_CONSULTATIONS Table (WhatsApp Chat Bookings ₹999)
 CREATE TABLE IF NOT EXISTS public.expert_consultations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY,
     customer_name TEXT NOT NULL,
     whatsapp_phone TEXT NOT NULL,
     amount_paid NUMERIC(10, 2) DEFAULT 999.00,
@@ -44,11 +46,11 @@ ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vastu_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expert_consultations ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable read access for all users" ON public.leads FOR SELECT USING (true);
-CREATE POLICY "Enable insert access for all users" ON public.leads FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable all access for all users" ON public.leads;
+CREATE POLICY "Enable all access for all users" ON public.leads FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Enable read access for all users" ON public.vastu_reports FOR SELECT USING (true);
-CREATE POLICY "Enable insert access for all users" ON public.vastu_reports FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable all access for all users" ON public.vastu_reports;
+CREATE POLICY "Enable all access for all users" ON public.vastu_reports FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Enable read access for all users" ON public.expert_consultations FOR SELECT USING (true);
-CREATE POLICY "Enable insert access for all users" ON public.expert_consultations FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable all access for all users" ON public.expert_consultations;
+CREATE POLICY "Enable all access for all users" ON public.expert_consultations FOR ALL USING (true) WITH CHECK (true);
