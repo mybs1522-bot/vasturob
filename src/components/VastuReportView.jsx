@@ -16,6 +16,22 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
   const [userPhone, setUserPhone] = useState('');
   const [payStep, setPayStep] = useState(1); // 1: details | 2: payment checkout | 3: success notice
 
+  // Evergreen 15-Minute Countdown Timer (14m 59s)
+  const [timeLeft, setTimeLeft] = useState(899);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 899));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+  };
+
   const evaluatedRooms = useMemo(() => {
     return vastuData.roomResults || vastuData.evaluatedRooms || [];
   }, [vastuData]);
@@ -82,7 +98,7 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
       <div className="clean-card p-3 bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs">
+            <div className="w-7 h-7 rounded-lg bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold text-xs">
               <Brain className="w-3.5 h-3.5" />
             </div>
             <div>
@@ -172,15 +188,16 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
 
       {/* 3. PROMINENT UNLOCK FULL REPORT PAYWALL CARD (₹899) */}
       {!isReportUnlocked ? (
-        <div className="rounded-2xl border-2 border-amber-400 bg-amber-50/90 p-3.5 sm:p-5 shadow-md space-y-3">
+        <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/90 p-3.5 sm:p-5 shadow-lg space-y-3">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm flex-shrink-0">
-                <Lock className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center shadow-md flex-shrink-0">
+                <Lock className="w-5 h-5 text-amber-400" />
               </div>
               <div className="space-y-0.5">
-                <div className="inline-flex items-center gap-1 text-[9.5px] font-black text-amber-900 uppercase tracking-widest bg-amber-200/80 px-2 py-0.5 rounded-full font-mono">
-                  <span>🔒 Full Vedic Audit Locked</span>
+                <div className="inline-flex items-center gap-1.5 text-[9.5px] font-black text-amber-950 uppercase tracking-widest bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-400 px-2.5 py-0.5 rounded-full font-mono shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                  <span>⚡ 70% OFF • Offer Expires in {formatTimer(timeLeft)}</span>
                 </div>
                 <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
                   Unlock Full Expert Vastu Audit Report
@@ -195,10 +212,10 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             <button
               type="button"
               onClick={() => setIsPaywallModalOpen(true)}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:scale-102 transition-all whitespace-nowrap"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
             >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Unlock Full Report for ₹899 &rarr;</span>
+              <Lock className="w-4 h-4 text-slate-950" />
+              <span>Unlock Full Report for <span className="line-through text-slate-700/70 font-normal mr-0.5">₹2,999</span> <span className="text-sm sm:text-base font-black text-slate-950">₹899</span> &rarr;</span>
             </button>
           </div>
 
@@ -255,8 +272,8 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             <button
               type="button"
               onClick={() => setActiveTab('rooms')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'rooms' ? 'bg-amber-600 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
               Room-by-Room Audit ({evaluatedRooms.length})
@@ -265,8 +282,8 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             <button
               type="button"
               onClick={() => setActiveTab('ai_scan')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                activeTab === 'ai_scan' ? 'bg-slate-900 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+              className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all ${
+                activeTab === 'ai_scan' ? 'bg-slate-950 text-amber-400 border border-amber-400/40 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
               <Brain className="w-3.5 h-3.5 text-amber-400" /> Neural Vision Scan Report
@@ -275,8 +292,8 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             <button
               type="button"
               onClick={() => setActiveTab('remedies')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'remedies' ? 'bg-amber-600 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
               Zero-Demolition Remedies
@@ -285,8 +302,8 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             <button
               type="button"
               onClick={() => setActiveTab('yantras')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'yantras' ? 'bg-amber-600 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
               Vedic Yantras &amp; Rituals
@@ -494,14 +511,14 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
             {payStep === 1 && (
               <form onSubmit={handleUnlockPayment} className="space-y-4">
                 <div className="text-center space-y-1 pt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-600 text-white flex items-center justify-center mx-auto shadow-md">
-                    <Lock className="w-6 h-6" />
+                  <div className="w-12 h-12 rounded-2xl border-2 border-amber-400/60 overflow-hidden mx-auto shadow-md">
+                    <img src="/vastu_logo.jpg" className="w-full h-full object-cover" alt="VastuScope Logo" />
                   </div>
-                  <h3 className="text-lg font-black text-slate-900">Unlock Full Vastu Report</h3>
+                  <h3 className="text-lg font-black text-slate-900 font-heading">Unlock Full Vastu Report</h3>
                   <p className="text-xs text-slate-500">Enter your details to request expert Vastu review</p>
 
-                  <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 px-3 py-1 rounded-full text-xs font-mono font-black border border-amber-300 mt-1">
-                    <span>Expert Review Fee: ₹899</span>
+                  <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-400 text-slate-950 px-3.5 py-1 rounded-full text-xs font-mono font-black border border-amber-400/60 shadow-2xs mt-1">
+                    <span>Special Price: <span className="line-through text-slate-700/70 font-normal mr-0.5">₹2,999</span> ₹899</span>
                   </div>
                 </div>
 
@@ -537,9 +554,9 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-102 transition-all cursor-pointer"
                 >
-                  Proceed to Pay ₹899 →
+                  <span>Proceed to Pay <span className="line-through text-slate-700/70 font-normal mr-0.5">₹2,999</span> <span className="text-base font-black">₹899</span> &rarr;</span>
                 </button>
               </form>
             )}
@@ -565,9 +582,9 @@ export default function VastuReportView({ vastuData = {}, onReCalibrate }) {
                 <button
                   type="button"
                   onClick={handleConfirmUnlock}
-                  className="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-102 transition-all cursor-pointer"
                 >
-                  <Lock className="w-4 h-4" /> Pay ₹899 &amp; Confirm Booking
+                  <Lock className="w-4 h-4 text-slate-950" /> Pay <span className="line-through text-slate-700/70 font-normal mr-0.5">₹2,999</span> <span className="text-base font-black">₹899</span> &amp; Unlock Report
                 </button>
               </div>
             )}
