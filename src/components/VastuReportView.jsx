@@ -7,6 +7,7 @@ import {
 import { ALL_INDIAN_STATES, analyzeFloorPlanWithAI } from '../utils/aiVisionScanner';
 import { saveLead, saveVastuReport } from '@/lib/supabase';
 import { openRazorpayCheckout } from '@/lib/razorpay';
+import { sendReportConfirmationEmail } from '@/lib/emailService';
 
 export default function VastuReportView({ vastuData = {}, userData = null, onRetry }) {
   const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'ai_scan' | 'remedies' | 'yantras'
@@ -80,14 +81,19 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
       prefillPhone: userPhone,
       onSuccess: (paymentDetails) => {
         setIsReportUnlocked(true);
-        saveLead({ full_name: userName, phone: userPhone, email: '', vastu_score: score, status: 'converted' });
+        const userEmail = userData?.email || initialUser?.email || '';
+        saveLead({ full_name: userName, phone: userPhone, email: userEmail, vastu_score: score, status: 'converted' });
         saveVastuReport({ 
           user_name: userName, 
           user_phone: userPhone, 
+          user_email: userEmail,
           overall_score: score, 
           placed_rooms: evaluatedRooms,
           payment_id: paymentDetails.paymentId 
         });
+        if (userEmail) {
+          sendReportConfirmationEmail({ toEmail: userEmail, userName: userName, isPaid: true });
+        }
         setPayStep(3);
       },
       onFailure: (err) => {

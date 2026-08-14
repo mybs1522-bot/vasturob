@@ -9,6 +9,7 @@ import VastuExpertModal from './components/VastuExpertModal';
 import LeadCaptureModal from './components/LeadCaptureModal';
 import AdminPanel from './components/AdminPanel';
 import { saveLead } from './lib/supabase';
+import { sendReportConfirmationEmail } from './lib/emailService';
 import { convertPdfFileToDataUrl } from './utils/pdfHelper';
 import { evaluateVastu } from './utils/vastuEngine';
 import { autoDetectRoomsFromFloorPlan } from './utils/floorPlanScanner';
@@ -175,6 +176,9 @@ export default function App() {
       email: leadInfo.email, 
       vastu_score: vastuReport?.overallScore || 88 
     });
+    if (leadInfo.email) {
+      sendReportConfirmationEmail({ toEmail: leadInfo.email, userName: leadInfo.name });
+    }
     setIsLeadModalOpen(false);
     setWizardStep(4);
   };

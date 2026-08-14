@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { saveLead } from '@/lib/supabase';
+import { sendReportConfirmationEmail } from '@/lib/emailService';
 
 export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
   const [name, setName] = useState('');
@@ -31,6 +32,7 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
 
     setError('');
     saveLead({ full_name: name, phone, email, vastu_score: 88 });
+    sendReportConfirmationEmail({ toEmail: email, userName: name });
     onSubmit({ name, phone, email });
   };
 
