@@ -8,7 +8,7 @@ function compressImage(dataUrl) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 1024;
+      const MAX = 1600;
       let w = img.width;
       let h = img.height;
       if (w > MAX || h > MAX) {
@@ -20,7 +20,7 @@ function compressImage(dataUrl) {
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', 0.7));
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;

@@ -30,18 +30,39 @@ module.exports = async function handler(req, res) {
 
     const dataUrl = `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`;
 
-    const promptText = `Analyze this floor plan layout. Identify room labels in the drawing.
+    const promptText = `You are a high-precision architectural AI scanner specializing in floor plan analysis and Vastu layout auditing.
+Examine this architectural floor plan image meticulously from top-left to bottom-right.
 
-Return ONLY a JSON array, no markdown, no explanation text:
+Read EVERY printed text label, room title, or abbreviation inside room boundaries:
+- KITCHEN / KIT / COOKING -> typeId: "kitchen"
+- MASTER BEDROOM / M.BED / BEDROOM 1 -> typeId: "master_bedroom"
+- BEDROOM 2 / BEDROOM 3 / KIDS BED / GUEST BED -> typeId: "kids_bedroom"
+- LIVING / HALL / DRAWING / GREAT ROOM -> typeId: "living_room"
+- DINING / EATING -> typeId: "dining"
+- TOILET / BATH / WC / WASHROOM / POWDER -> typeId: "toilet"
+- MAIN ENTRANCE / ENTRY / FOYER / PORCH -> typeId: "entrance"
+- PUJA / PRAYER / POOJA -> typeId: "puja_room"
+- STORE / PANTRY -> typeId: "store_room"
+- BALCONY / TERRACE / VERANDAH -> typeId: "balcony"
+- STAIRS / STAIRCASE -> typeId: "staircase"
+
+For EVERY room label found, estimate its EXACT center location on a 0-100 percentage grid:
+- xPct: horizontal center of the room label (0 = extreme left edge, 100 = extreme right edge)
+- yPct: vertical center of the room label (0 = top edge, 100 = bottom edge)
+
+CRITICAL INSTRUCTIONS:
+1. Scan carefully for small text like "KITCHEN", "BEDROOM", "TOILET", "ENTRY".
+2. If the plan shows multiple bedrooms or toilets, list each one separately with its unique xPct and yPct.
+3. Return ONLY a valid JSON array of objects. Do not include markdown code fences, comments, or extra text.
+
+Example format:
 [
-  {"typeId":"kitchen","name":"KITCHEN","xPct":45,"yPct":35},
-  {"typeId":"master_bedroom","name":"MASTER BEDROOM","xPct":20,"yPct":70},
-  {"typeId":"living_room","name":"LIVING ROOM","xPct":50,"yPct":60},
-  {"typeId":"toilet","name":"TOILET","xPct":80,"yPct":20}
-]
-
-Allowed typeIds: master_bedroom, kids_bedroom, kitchen, living_room, entrance, toilet, puja_room, dining, store_room, balcony, staircase.
-xPct and yPct are positions from 0 to 100 on the layout image.`;
+  {"typeId":"kitchen","name":"KITCHEN","xPct":72,"yPct":28},
+  {"typeId":"master_bedroom","name":"MASTER BEDROOM","xPct":22,"yPct":78},
+  {"typeId":"living_room","name":"LIVING ROOM","xPct":45,"yPct":50},
+  {"typeId":"toilet","name":"TOILET","xPct":85,"yPct":25},
+  {"typeId":"entrance","name":"MAIN ENTRANCE","xPct":50,"yPct":92}
+]`;
 
     const models = ['qwen/qwen3.6-27b'];
 
@@ -63,7 +84,7 @@ xPct and yPct are positions from 0 to 100 on the layout image.`;
                 { type: 'text', text: promptText },
               ],
             }],
-            temperature: 0.1,
+            temperature: 0.05,
             max_tokens: 2048,
           }),
         });
