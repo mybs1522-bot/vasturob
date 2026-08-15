@@ -7,6 +7,14 @@ import {
 import { useLanguage } from '@/lib/i18n';
 import { saveVastuReport } from '@/lib/supabase';
 
+// Sample preview rooms to ensure a rich frosted background blur even before rooms are placed
+const DEFAULT_PREVIEW_ROOMS = [
+  { id: '1', name: 'Master Bedroom', zone: { id: 'SW', name: 'South-West', color: '#b45309', lord: 'Nirriti Dev' }, rating: 'ideal', description: 'South-West zone ensures stability, leadership authority, and deep restful sleep.', remedy: '' },
+  { id: '2', name: 'Kitchen (Agni)', zone: { id: 'NE', name: 'North-East', color: '#38bdf8', lord: 'Lord Shiva' }, rating: 'defect', description: 'Fire element in Water zone causes cash burn, sudden expenses, and restlessness.', remedy: 'Apply 3-inch elemental green color tape and install neutralizer pyramid.' },
+  { id: '3', name: 'Main Entrance', zone: { id: 'N', name: 'North', color: '#0284c7', lord: 'Lord Kuber' }, rating: 'ideal', description: 'Kuber gateway attracts new career opportunities, business wealth, and prosperity.', remedy: '' },
+  { id: '4', name: 'Washroom / Toilet', zone: { id: 'SE', name: 'South-East', color: '#ef4444', lord: 'Agni Dev' }, rating: 'defect', description: 'Disposal energy in Fire zone suppresses cash liquidity and causes digestive troubles.', remedy: 'Install 3-inch copper metal strip around the commode base boundary.' },
+];
+
 export default function VastuReportView({ vastuData, userData, onRetry }) {
   const { lang, t } = useLanguage();
   const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'remedies' | 'yantras'
@@ -54,14 +62,16 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   const seconds = String(timeLeft % 60).padStart(2, '0');
 
   const {
-    overallScore = 52,
+    overallScore = 49,
     totalRooms = 0,
     doshasCount = 4,
-    idealCount = 1,
+    idealCount = 2,
     evaluatedRooms = [],
     summary = {},
     chartAngles = []
   } = vastuData || {};
+
+  const displayRooms = evaluatedRooms.length > 0 ? evaluatedRooms : DEFAULT_PREVIEW_ROOMS;
 
   // Status interpretation based on score
   const getScoreStatus = (score) => {
@@ -119,7 +129,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
     <div className={`space-y-3.5 sm:space-y-5 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
       
       {/* ========================================================================= */}
-      {/* PART 1: ULTRA-COMPACT FREE OVERVIEW (LESS THAN 30% MOBILE SCREEN)         */}
+      {/* PART 1: ULTRA-COMPACT FREE OVERVIEW                                       */}
       {/* ========================================================================= */}
       <div className="clean-card p-2.5 sm:p-4 bg-white border border-amber-300 shadow-md rounded-2xl space-y-2 sm:space-y-3">
         
@@ -145,7 +155,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
           </button>
         </div>
 
-        {/* 3-Column Horizontal Grid (Fits in 1 single row on ALL mobile screens) */}
+        {/* 3-Column Horizontal Grid */}
         <div className="grid grid-cols-3 gap-1.5 text-center">
           {/* Box 1: Prosperity Score */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-1 sm:p-2.5 flex flex-col justify-center items-center">
@@ -191,25 +201,25 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
         <div className="grid grid-cols-4 gap-1 pt-1 border-t border-slate-100 text-center">
           <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
             <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'धन' : 'CASH'}</span>
-            <span className="text-[8px] sm:text-[11px] font-black text-amber-700 block">{summary.wealthScore || 48}%</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-amber-700 block">{summary.wealthScore || 47}%</span>
           </div>
           <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
             <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'स्वास्थ्य' : 'HEALTH'}</span>
-            <span className="text-[8px] sm:text-[11px] font-black text-emerald-700 block">{summary.healthScore || 54}%</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-emerald-700 block">{summary.healthScore || 51}%</span>
           </div>
           <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
             <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'शांति' : 'HARMONY'}</span>
-            <span className="text-[8px] sm:text-[11px] font-black text-blue-700 block">{summary.relationshipScore || 50}%</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-blue-700 block">{summary.relationshipScore || 48}%</span>
           </div>
           <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
             <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'करियर' : 'CAREER'}</span>
-            <span className="text-[8px] sm:text-[11px] font-black text-purple-700 block">{summary.careerScore || 52}%</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-purple-700 block">{summary.careerScore || 50}%</span>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* SLIM EVERGREEN COUNTDOWN TIMER (2 Hours 37 Minutes)                      */}
+      {/* SLIM EVERGREEN COUNTDOWN TIMER                                           */}
       {/* ========================================================================= */}
       <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-yellow-500/15 border border-amber-400/60 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shadow-xs">
         <div className="flex items-center gap-1.5 truncate">
@@ -228,7 +238,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
       </div>
 
       {/* ========================================================================= */}
-      {/* PART 2: DETAILED REPORT & REMEDIES (BEHIND GLASSMORPHISM EFFECT)           */}
+      {/* PART 2: DETAILED REPORT & REMEDIES (BEHIND FROSTED BLUR EFFECT)           */}
       {/* ========================================================================= */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
@@ -246,25 +256,25 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
           </div>
         </div>
 
-        {/* Outer Container with Glassmorphism Effect */}
-        <div className="relative rounded-2xl sm:rounded-3xl border-2 border-amber-400/80 overflow-hidden shadow-xl bg-white">
+        {/* Outer Container with Light Frosted Background */}
+        <div className="relative rounded-2xl sm:rounded-3xl border-2 border-amber-400/80 overflow-hidden shadow-xl bg-white min-h-[380px]">
           
-          {/* Glassmorphism Frosted Blur Overlay (Shown when Report is Locked) */}
+          {/* Light Frosted Blur Overlay (Shown when Report is Locked - NOT BLACK!) */}
           {!isReportUnlocked && (
-            <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn select-none">
-              <div className="bg-white/95 backdrop-blur-xl border-2 border-amber-400 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full text-center shadow-2xl space-y-3 sm:space-y-4 text-slate-900 animate-in zoom-in-95 duration-300">
+            <div className="absolute inset-0 z-30 bg-white/40 backdrop-blur-[5px] flex items-center justify-center p-3 sm:p-6 animate-fadeIn select-none">
+              <div className="bg-white/95 backdrop-blur-xl border-2 border-amber-400 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full text-center shadow-2xl space-y-3 text-slate-900 animate-in zoom-in-95 duration-300">
                 
                 {/* Glowing Lock Badge */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center mx-auto shadow-md ring-2 ring-amber-400/30">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/30">
                   <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2 py-0.5 rounded-full inline-block">
-                    {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ उपाय सुरक्षित हैं' : '🔒 FULL REMEDY BLUEPRINT LOCKED'}
+                  <span className="text-[9px] font-mono font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
+                    {isHi ? '🔒 16 दिशाओं के वैदिक उपाय बंद हैं' : '🔒 16-ZONE REMEDIAL BLUEPRINT LOCKED'}
                   </span>
                   <h3 className="text-sm sm:text-base font-black text-slate-950 font-heading">
-                    {isHi ? 'कमरेवार सटीक वैदिक उपाय अनलॉक करें' : 'Unlock Room-by-Room Vedic Remedies'}
+                    {isHi ? 'कमरेवार सटीक वैदिक उपाय प्राप्त करें' : 'Unlock Room-by-Room Vedic Remedies'}
                   </h3>
                   <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed font-medium">
                     {isHi 
@@ -293,21 +303,21 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                   </div>
                 </div>
 
-                {/* CTA Button without Price inside text */}
+                {/* Single Prominent Action Button: Get Detailed Report */}
                 <button
                   type="button"
                   onClick={handleUnlockClick}
-                  className="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <Lock className="w-3.5 h-3.5 text-slate-950" />
-                  <span>{isHi ? 'संपूर्ण विस्तृत रिपोर्ट अनलॉक करें →' : 'Unlock Full 16-Zone Detailed Report →'}</span>
+                  <Lock className="w-4 h-4 text-slate-950" />
+                  <span>{isHi ? 'विस्तृत रिपोर्ट प्राप्त करें →' : 'Get Detailed Report →'}</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Underneath Content (Blurred when Locked, Crystal-Clear when Unlocked) */}
-          <div className={`p-4 sm:p-6 space-y-4 sm:space-y-6 ${!isReportUnlocked ? 'filter blur-[4px] pointer-events-none select-none opacity-50' : ''}`}>
+          {/* Underneath Report Content (Blurred under Frosted Glass) */}
+          <div className={`p-4 sm:p-6 space-y-4 sm:space-y-6 ${!isReportUnlocked ? 'filter blur-[3px] pointer-events-none select-none opacity-60' : ''}`}>
             
             <div className="flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 p-3 rounded-xl">
               <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0" />
@@ -334,7 +344,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                   activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room (${evaluatedRooms.length})`}
+                {isHi ? `कमरेवार विश्लेषण (${displayRooms.length})` : `Room-by-Room (${displayRooms.length})`}
               </button>
 
               <button
@@ -361,59 +371,50 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
             {/* TAB 1: Room-by-Room Microscopic Audit */}
             {activeTab === 'rooms' && (
               <div className="space-y-2.5">
-                {evaluatedRooms.length === 0 ? (
-                  <div className="clean-card p-4 bg-white border border-slate-200 text-center space-y-1">
-                    <Layers className="w-5 h-5 text-slate-400 mx-auto" />
-                    <h4 className="font-extrabold text-xs text-slate-800">
-                      {isHi ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
-                    </h4>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-2.5">
-                    {evaluatedRooms.map((room, idx) => (
-                      <div
-                        key={room.id || idx}
-                        className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5 hover:border-amber-400 transition-all"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
-                            <h4 className="font-extrabold text-xs sm:text-sm text-slate-900">{room.name}</h4>
-                            {room.zone && (
-                              <span className="text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded-full font-mono border border-amber-200">
-                                {isHi ? `${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `${room.zone.id}`}
-                              </span>
-                            )}
-                          </div>
-
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                            room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {room.rating === 'ideal' || room.rating === 'favorable' 
-                              ? (isHi ? '✅ शुभ' : '✅ Auspicious') 
-                              : (isHi ? '⚠️ दोष' : '⚠️ Defect')}
-                          </span>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {displayRooms.map((room, idx) => (
+                    <div
+                      key={room.id || idx}
+                      className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5 hover:border-amber-400 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
+                          <h4 className="font-extrabold text-xs sm:text-sm text-slate-900">{room.name}</h4>
+                          {room.zone && (
+                            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded-full font-mono border border-amber-200">
+                              {isHi ? `${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `${room.zone.id}`}
+                            </span>
+                          )}
                         </div>
 
-                        <p className="text-[11px] text-slate-600 leading-relaxed">
-                          {room.description || 'Room zone evaluated.'}
-                        </p>
-
-                        {room.remedy && (
-                          <div className="bg-amber-50/70 p-2 rounded-lg border border-amber-200 text-[11px] text-amber-900 font-medium">
-                            <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy:'}</strong> {room.remedy}
-                          </div>
-                        )}
-
-                        {room.zone?.lord && (
-                          <div className="text-[10px] text-slate-500 font-mono pt-1 flex items-center gap-1.5 border-t border-slate-100">
-                            <span className="font-bold text-slate-700">{isHi ? 'देवता:' : 'Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
-                          </div>
-                        )}
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                          room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {room.rating === 'ideal' || room.rating === 'favorable' 
+                            ? (isHi ? '✅ शुभ' : '✅ Auspicious') 
+                            : (isHi ? '⚠️ दोष' : '⚠️ Defect')}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        {room.description || 'Room zone evaluated.'}
+                      </p>
+
+                      {room.remedy && (
+                        <div className="bg-amber-50/70 p-2 rounded-lg border border-amber-200 text-[11px] text-amber-900 font-medium">
+                          <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy:'}</strong> {room.remedy}
+                        </div>
+                      )}
+
+                      {room.zone?.lord && (
+                        <div className="text-[10px] text-slate-500 font-mono pt-1 flex items-center gap-1.5 border-t border-slate-100">
+                          <span className="font-bold text-slate-700">{isHi ? 'देवता:' : 'Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -431,7 +432,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                   </p>
                 </div>
 
-                {evaluatedRooms.filter(r => r.remedy).map((r, idx) => (
+                {displayRooms.filter(r => r.remedy).map((r, idx) => (
                   <div key={idx} className="clean-card p-3 bg-white border border-slate-200 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-xs text-slate-900">{r.name} ({r.zone?.id})</span>
