@@ -7,6 +7,7 @@ import { useLanguage } from '@/lib/i18n';
 export default function HeroAscii({ onNavigateToStart }) {
   const canvasRef = useRef(null);
   const { lang, toggleLang, t } = useLanguage();
+  const isHi = lang === 'hi';
 
   // Pure HTML5 Vastu Chakra & Directional Degrees Animation Canvas
   useEffect(() => {
@@ -209,26 +210,26 @@ export default function HeroAscii({ onNavigateToStart }) {
           {/* Top decorative line */}
           <div className="flex items-center justify-center gap-2 opacity-80 w-full max-w-md mx-auto">
             <div className="w-8 sm:w-12 h-px bg-amber-500"></div>
-            <span className="text-amber-400 text-[9px] sm:text-xs font-mono tracking-widest uppercase font-bold whitespace-nowrap">
-              {lang === 'hi' ? '100% सटीक वैदिक महावास्तु इंजन' : '100% VASTU PRECISION ENGINE'}
+            <span className={`text-amber-400 text-[9px] sm:text-xs uppercase font-bold whitespace-nowrap ${isHi ? 'font-hindi tracking-normal' : 'font-mono tracking-widest'}`}>
+              {isHi ? '100% सटीक वैदिक महावास्तु' : '100% VASTU PRECISION ENGINE'}
             </span>
             <div className="w-8 sm:w-12 h-px bg-amber-500"></div>
           </div>
 
           {/* Title */}
           <div className="relative text-center">
-            <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight font-heading tracking-tight">
-              {lang === 'hi' ? 'घर का संपूर्ण वास्तु' : 'PERFECT VASTU'}
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 mt-1 sm:mt-2">
-                {lang === 'hi' ? 'सुख, शांति व समृद्धि' : 'ALIGNMENT & WEALTH'}
+            <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-black text-white leading-tight ${isHi ? 'font-hindi tracking-normal' : 'font-heading tracking-tight'}`}>
+              {isHi ? 'घर का संपूर्ण वास्तु' : 'PERFECT VASTU'}
+              <span className={`block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 mt-1 sm:mt-2 ${isHi ? 'font-hindi tracking-normal' : ''}`}>
+                {isHi ? 'सुख, शांति व समृद्धि' : 'ALIGNMENT & WEALTH'}
               </span>
             </h1>
           </div>
 
           {/* Description */}
-          <p className="text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed font-sans opacity-95 max-w-lg mx-auto text-center">
-            {lang === 'hi'
-              ? 'प्राचीन वैदिक ज्यामिति और आधुनिक AI का संगम। अपने घर की 16 दिशाओं का विश्लेषण करें और बिना तोड़फोड़ सुख-समृद्धि पाएं।'
+          <p className={`text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed opacity-95 max-w-lg mx-auto text-center ${isHi ? 'font-hindi tracking-normal' : 'font-sans'}`}>
+            {isHi
+              ? 'प्राचीन वैदिक ज्यामिति और आधुनिक AI का संगम। अपने घर की 16 दिशाओं का विश्लेषण करें और बिना तोड़फोड़ सुख-शांति व समृद्धि पाएं।'
               : 'Where ancient Vedic geometry meets modern floor plan AI. Discover your home\'s 16 directional energy zones and unlock 100% wealth & peace.'
             }
           </p>
@@ -238,10 +239,10 @@ export default function HeroAscii({ onNavigateToStart }) {
             <button 
               type="button"
               onClick={onNavigateToStart}
-              className="px-6 py-3.5 sm:px-9 sm:py-4 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black font-sans text-xs sm:text-base rounded-xl transition-all duration-200 shadow-2xl shadow-amber-400/30 hover:scale-105 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+              className={`px-6 py-3.5 sm:px-9 sm:py-4 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-base rounded-xl transition-all duration-200 shadow-2xl shadow-amber-400/30 hover:scale-105 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${isHi ? 'font-hindi tracking-normal' : 'font-sans'}`}
             >
               <Compass className="w-5 h-5 text-slate-950" />
-              <span>{lang === 'hi' ? 'घर का नक्शा स्कैन करें' : 'SCAN FLOOR PLAN NOW'}</span>
+              <span>{isHi ? 'घर का नक्शा स्कैन करें' : 'SCAN FLOOR PLAN NOW'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Poppins', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -59,7 +59,16 @@ body {
 }
 
 .font-heading {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', 'Noto Sans Devanagari', 'Poppins', sans-serif;
+}
+
+/* Devanagari Font Smoothing & Ligature Protection */
+.font-hindi,
+[lang="hi"],
+:lang(hi) {
+  font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif !important;
+  letter-spacing: 0 !important;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pres" 1, "abvs" 1, "blws" 1, "psts" 1;
 }
 
 /* Clean Card Utilities */
