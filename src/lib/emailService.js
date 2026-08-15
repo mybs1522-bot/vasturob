@@ -102,7 +102,7 @@ export async function sendReportConfirmationEmail({ toEmail, userName, score = 8
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'VastuScope Studio <onboarding@resend.dev>',
+        from: 'VastuScope Studio <vastu@avada.space>',
         to: [toEmail],
         subject: `✨ Namaste ${name}, Your Vastu Audit Report is Being Prepared by Our Experts`,
         html: htmlBody,
