@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import { saveVastuReport } from '@/lib/supabase';
+import { openRazorpayCheckout } from '@/lib/razorpay';
 
 // Sample preview rooms to ensure a rich frosted background blur even before rooms are placed
 const DEFAULT_PREVIEW_ROOMS = [
@@ -100,25 +101,45 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
       alert(isHi ? 'कृपया नाम और WhatsApp नंबर दर्ज करें' : 'Please enter your Name and WhatsApp number.');
       return;
     }
-    setIsReportUnlocked(true);
-    setIsPaywallModalOpen(false);
+
     setIsDownloading(true);
-    try {
-      await saveVastuReport({
-        user_name: userName,
-        user_phone: userPhone,
-        user_email: userData?.email || '',
-        property_type: userData?.propertyType || 'Residential',
-        overall_score: overallScore,
-        doshas_count: doshasCount,
-        report_data: vastuData
-      });
-      alert(isHi ? '✅ आपकी संपूर्ण विस्तृत वास्तु रिपोर्ट और वैदिक उपाय अनलॉक हो गए हैं!' : '✅ Your Certified Detailed Report & Remedies have been unlocked!');
-    } catch (err) {
-      console.error('Save Failed:', err);
-    } finally {
-      setIsDownloading(false);
-    }
+
+    openRazorpayCheckout({
+      amount: 899,
+      name: 'VastuScope Studio',
+      description: 'Unlock 16-Zone Detailed Report & Non-Demolition Remedies',
+      prefillName: userName,
+      prefillPhone: userPhone,
+      prefillEmail: userData?.email || '',
+      onSuccess: async (paymentDetails) => {
+        try {
+          await saveVastuReport({
+            user_name: userName,
+            user_phone: userPhone,
+            user_email: userData?.email || '',
+            property_type: userData?.propertyType || 'Residential',
+            overall_score: overallScore,
+            doshas_count: doshasCount,
+            is_paid: true,
+            payment_id: paymentDetails.paymentId,
+            report_data: vastuData
+          });
+        } catch (err) {
+          console.error('Report save failed:', err);
+        }
+        setIsReportUnlocked(true);
+        setIsPaywallModalOpen(false);
+        setIsDownloading(false);
+        alert(isHi ? '✅ भुगतान सफल! आपकी संपूर्ण विस्तृत वास्तु रिपोर्ट और वैदिक उपाय अनलॉक हो गए हैं।' : '✅ Payment Successful! Your Certified Detailed Report & Remedies have been unlocked.');
+      },
+      onFailure: (err) => {
+        setIsDownloading(false);
+        console.warn('Payment failed or cancelled:', err);
+        if (err !== 'Payment dismissed by user') {
+          alert(isHi ? 'भुगतान प्रक्रिया पूरी नहीं हो सकी। कृपया पुनः प्रयास करें।' : 'Payment could not be completed. Please try again.');
+        }
+      }
+    });
   };
 
   const handleCloseModal = () => {
