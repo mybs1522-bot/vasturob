@@ -262,21 +262,10 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Language Switcher */}
-          <button
-            type="button"
-            onClick={toggleLang}
-            className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-300 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
-            title="Switch Language / भाषा बदलें"
-          >
-            <Globe className="w-3.5 h-3.5 text-amber-700" />
-            <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
-          </button>
-
           <button
             type="button"
             onClick={() => navigateTo('/')}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
             title="Back to Landing Page"
           >
             <Home className="w-4 h-4" />

@@ -108,18 +108,9 @@ export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOp
           <button
             type="button"
             onClick={onNavigateToStart}
-            className="bg-amber-400 text-slate-950 px-3 py-0.5 rounded-full font-black text-[11px] hover:bg-yellow-300 transition-all hidden sm:inline shadow-sm cursor-pointer whitespace-nowrap"
+            className="bg-amber-400 text-slate-950 px-3.5 py-1 rounded-full font-black text-xs hover:bg-yellow-300 transition-all shadow-sm cursor-pointer whitespace-nowrap"
           >
             {isHi ? 'घर का दोष जांचें →' : 'Diagnose Your Risk Now →'}
-          </button>
-          <button
-            type="button"
-            onClick={toggleLang}
-            className="px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-[10px] font-black flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap"
-            title="Switch Language / भाषा बदलें"
-          >
-            <Globe className="w-3 h-3 text-amber-400" />
-            <span>{isHi ? 'English' : 'हिन्दी'}</span>
           </button>
         </div>
       </div>

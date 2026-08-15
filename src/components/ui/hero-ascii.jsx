@@ -184,18 +184,7 @@ export default function HeroAscii({ onNavigateToStart }) {
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <button
-              type="button"
-              onClick={toggleLang}
-              className="px-3 py-1 rounded-full bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-black flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              title="Switch Language / भाषा बदलें"
-            >
-              <Globe className="w-3.5 h-3.5 text-amber-400" />
-              <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
-            </button>
-
-            <div className="hidden md:flex items-center gap-3 text-xs font-mono text-amber-200/70 border-l border-white/20 pl-3">
+            <div className="flex items-center gap-3 text-xs font-mono text-amber-200/70">
               <span>LAT: 28.6139° N</span>
               <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
               <span>LONG: 77.2090° E</span>
