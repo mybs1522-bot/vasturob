@@ -14,7 +14,7 @@ import { convertPdfFileToDataUrl } from './utils/pdfHelper';
 import { evaluateVastu } from './utils/vastuEngine';
 import { autoDetectRoomsFromFloorPlan } from './utils/floorPlanScanner';
 import { scanFloorPlanWithGeminiVision } from './utils/geminiVisionScanner';
-import { Compass, HelpCircle, FileText, ArrowRight, ArrowLeft, Upload, Grid, Pencil, MessageSquare, ShieldCheck, Home, AlertCircle, Sparkles, Key, Check } from 'lucide-react';
+import { Compass, HelpCircle, FileText, ArrowRight, ArrowLeft, Upload, Grid, Pencil, MessageSquare, ShieldCheck, Home, AlertCircle, Sparkles, Key, Check, RefreshCw } from 'lucide-react';
 
 export default function App() {
   // Path Routing: '/' for Landing Page, '/start' for Studio App
