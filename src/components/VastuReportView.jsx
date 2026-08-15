@@ -522,7 +522,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Lock className="w-4 h-4 text-slate-950" />
-                <span>{isHi ? '₹899 का सुरक्षित भुगतान करें →' : 'Pay ₹899 Securely & Unlock →'}</span>
+                <span>{isHi ? 'संपूर्ण रिपोर्ट अनलॉक करें →' : 'Unlock Full Report →'}</span>
               </button>
             </div>
           </div>
