@@ -9,6 +9,7 @@ import VastuExpertModal from './components/VastuExpertModal';
 import LeadCaptureModal from './components/LeadCaptureModal';
 import AdminPanel from './components/AdminPanel';
 import LanguageSelectorModal, { SmoothLanguageLoader } from './components/LanguageSelectorModal';
+import { useLanguage } from './lib/i18n';
 import { saveLead, saveVastuReport } from './lib/supabase';
 import { sendReportConfirmationEmail } from './lib/emailService';
 import { convertPdfFileToDataUrl } from './utils/pdfHelper';
