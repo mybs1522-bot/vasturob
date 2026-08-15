@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useLanguage } from '../lib/i18n';
+import { useLanguage, translations } from '../lib/i18n';
 import { Sparkles, Globe, Check, Compass } from 'lucide-react';
 
 export default function LanguageSelectorModal({ isOpen, onClose }) {
   const { lang, setLang, t } = useLanguage();
-  const [selected, setSelected] = useState(lang);
+  const [selected, setSelected] = useState(lang || 'en');
 
   if (!isOpen) return null;
 
@@ -15,6 +15,9 @@ export default function LanguageSelectorModal({ isOpen, onClose }) {
     } catch {}
     onClose();
   };
+
+  const enDesc = translations?.en?.lang_en_desc || 'Standard Architectural & MahaVastu terms';
+  const hiDesc = translations?.hi?.lang_hi_desc || '16 महावास्तु दिशाएं, वैदिक उपाय व संपूर्ण विश्लेषण';
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
@@ -55,7 +58,7 @@ export default function LanguageSelectorModal({ isOpen, onClose }) {
                   <span>English</span>
                   {selected === 'en' && <span className="text-[10px] bg-amber-400 text-slate-950 font-bold px-1.5 py-0.2 rounded font-mono">SELECTED</span>}
                 </div>
-                <span className="text-xs text-slate-400">{translations.en.lang_en_desc}</span>
+                <span className="text-xs text-slate-400">{enDesc}</span>
               </div>
             </div>
             {selected === 'en' && <Check className="w-5 h-5 text-amber-400 flex-shrink-0" />}
@@ -78,7 +81,7 @@ export default function LanguageSelectorModal({ isOpen, onClose }) {
                   <span>हिन्दी (Hindi)</span>
                   {selected === 'hi' && <span className="text-[10px] bg-amber-400 text-slate-950 font-bold px-1.5 py-0.2 rounded font-mono">चयनित</span>}
                 </div>
-                <span className="text-xs text-amber-200/80">{translations.hi.lang_hi_desc}</span>
+                <span className="text-xs text-amber-200/80">{hiDesc}</span>
               </div>
             </div>
             {selected === 'hi' && <Check className="w-5 h-5 text-amber-400 flex-shrink-0" />}
