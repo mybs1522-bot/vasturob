@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { saveLead } from '@/lib/supabase';
 import { sendReportConfirmationEmail } from '@/lib/emailService';
+import { useLanguage } from '@/lib/i18n';
 
 export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
+  const { lang } = useLanguage();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -18,15 +20,15 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Please enter your full name');
+      setError(lang === 'hi' ? 'कृपया अपना पूरा नाम दर्ज करें' : 'Please enter your full name');
       return;
     }
     if (!phone.trim() || phone.trim().length < 10) {
-      setError('Please enter a valid 10-digit mobile number');
+      setError(lang === 'hi' ? 'कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit mobile number');
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email address');
+      setError(lang === 'hi' ? 'कृपया मान्य ईमेल पता दर्ज करें' : 'Please enter a valid email address');
       return;
     }
 
@@ -46,7 +48,7 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="absolute top-4 right-4 h-8 w-8 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10"
+          className="absolute top-4 right-4 h-8 w-8 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -58,10 +60,12 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
           </div>
           <div className="space-y-1">
             <h2 className="text-xl font-extrabold text-slate-900 tracking-tight font-heading">
-              Unlock Your Vastu Audit
+              {lang === 'hi' ? 'अपनी वास्तु रिपोर्ट प्राप्त करें' : 'Unlock Your Vastu Audit'}
             </h2>
             <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              Enter your details below to generate your instant 16-Zone Vastu Score and custom report.
+              {lang === 'hi' 
+                ? '16 दिशाओं का सटीक स्कोर और कस्टमाइज्ड रिपोर्ट पाने के लिए अपना विवरण दर्ज करें।' 
+                : 'Enter your details below to generate your instant 16-Zone Vastu Score and custom report.'}
             </p>
           </div>
         </CardHeader>
@@ -77,13 +81,15 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
 
             {/* Name Field */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-name" className="text-xs font-bold text-slate-700">Full Name *</Label>
+              <Label htmlFor="lead-name" className="text-xs font-bold text-slate-700">
+                {lang === 'hi' ? 'पूरा नाम *' : 'Full Name *'}
+              </Label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <Input
                   id="lead-name"
                   type="text"
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder={lang === 'hi' ? 'उदा. राहुल शर्मा' : 'e.g. Rahul Sharma'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-9 text-xs"
@@ -94,13 +100,15 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
 
             {/* Phone Field */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-phone" className="text-xs font-bold text-slate-700">Mobile Number (WhatsApp) *</Label>
+              <Label htmlFor="lead-phone" className="text-xs font-bold text-slate-700">
+                {lang === 'hi' ? 'मोबाइल नंबर (WhatsApp) *' : 'Mobile Number (WhatsApp) *'}
+              </Label>
               <div className="relative">
                 <PhoneCall className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <Input
                   id="lead-phone"
                   type="tel"
-                  placeholder="e.g. 9876543210"
+                  placeholder="9876543210"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   maxLength={10}
@@ -112,13 +120,15 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
 
             {/* Email Field */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-email" className="text-xs font-bold text-slate-700">Email Address *</Label>
+              <Label htmlFor="lead-email" className="text-xs font-bold text-slate-700">
+                {lang === 'hi' ? 'ईमेल पता *' : 'Email Address *'}
+              </Label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <Input
                   id="lead-email"
                   type="email"
-                  placeholder="e.g. rahul@example.com"
+                  placeholder="rahul@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-9 text-xs"
@@ -132,14 +142,16 @@ export default function LeadCaptureModal({ isOpen, onClose, onSubmit }) {
               type="submit"
               className="w-full h-11 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer mt-2"
             >
-              Get My Report <ArrowRight className="w-4 h-4" />
+              <span>{lang === 'hi' ? 'मेरी रिपोर्ट देखें' : 'Get My Report'}</span>
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
         </CardContent>
 
         <CardFooter className="flex justify-center border-t py-3 bg-slate-50/50">
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> 100% Secure &amp; Confidential Analysis
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>{lang === 'hi' ? '100% सुरक्षित व गोपनीय वैदिक विश्लेषण' : '100% Secure & Confidential Analysis'}</span>
           </div>
         </CardFooter>
       </Card>

@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { saveConsultation } from '@/lib/supabase';
 import { openRazorpayCheckout } from '@/lib/razorpay';
+import { useLanguage } from '@/lib/i18n';
 
 export default function VastuExpertModal({ isOpen, onClose }) {
+  const { lang } = useLanguage();
   const [step, setStep] = useState(1); // 1: Details | 2: Payment ₹999 | 3: Success
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card'
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!isOpen) return null;
@@ -46,10 +47,6 @@ export default function VastuExpertModal({ isOpen, onClose }) {
     });
   };
 
-  const handleConfirmPayment = () => {
-    triggerRazorpayPayment();
-  };
-
   const handleReset = () => {
     setStep(1);
     setName('');
@@ -66,7 +63,7 @@ export default function VastuExpertModal({ isOpen, onClose }) {
           variant="ghost"
           size="icon"
           onClick={handleReset}
-          className="absolute top-4 right-4 h-8 w-8 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10"
+          className="absolute top-4 right-4 h-8 w-8 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -80,151 +77,98 @@ export default function VastuExpertModal({ isOpen, onClose }) {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-extrabold text-slate-900 font-heading">
-                  Chat with Certified Vastu Expert
+                  {lang === 'hi' ? 'प्रमाणित वास्तु विशेषज्ञ से सीधा परामर्श' : 'Chat with Certified Vastu Expert'}
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                  No floor plan required! Our Senior Vastu Acharya will chat with you on WhatsApp and understand your requirement.
+                  {lang === 'hi' 
+                    ? 'नक्शे की जरूरत नहीं! हमारे वरिष्ठ वास्तु आचार्य WhatsApp पर आपसे बात कर संपूर्ण समाधान देंगे।' 
+                    : 'No floor plan required! Our Senior Vastu Acharya will chat with you on WhatsApp and understand your requirement.'}
                 </p>
                 <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-black text-amber-900 font-mono mt-1">
-                  <span>Consultation Fee: ₹999</span>
+                  <span>{lang === 'hi' ? 'परामर्श शुल्क: ₹999' : 'Consultation Fee: ₹999'}</span>
                 </div>
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4 px-6 sm:px-8">
               <div className="space-y-1.5">
-                <Label htmlFor="expert-name" className="text-xs font-bold text-slate-700">Your Full Name</Label>
+                <Label htmlFor="expert-name" className="text-xs font-bold text-slate-700">
+                  {lang === 'hi' ? 'आपका पूरा नाम' : 'Your Full Name'}
+                </Label>
                 <Input
                   id="expert-name"
                   type="text"
                   required
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder={lang === 'hi' ? 'उदा. राजेश शर्मा' : 'e.g. Rajesh Sharma'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="text-xs"
+                  className="h-11 rounded-xl"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="expert-phone" className="text-xs font-bold text-slate-700">WhatsApp Mobile Number (For Expert Chat)</Label>
+                <Label htmlFor="expert-phone" className="text-xs font-bold text-slate-700">
+                  {lang === 'hi' ? 'WhatsApp मोबाइल नंबर' : 'WhatsApp Phone Number'}
+                </Label>
                 <Input
                   id="expert-phone"
                   type="tel"
                   required
-                  placeholder="+91 98765 43210"
+                  placeholder="9876543210"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="text-xs"
+                  className="h-11 rounded-xl"
                 />
+              </div>
+
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
+                <div className="font-extrabold flex items-center gap-1">
+                  <ShieldCheck className="w-4 h-4 text-amber-700" />
+                  {lang === 'hi' ? '100% व्यक्तिगत व गोपनीय परामर्श' : '100% Confidential Consultation'}
+                </div>
+                <p className="text-[11px] text-slate-600">
+                  {lang === 'hi' 
+                    ? 'भुगतान के बाद 30 मिनट के भीतर वास्तु विशेषज्ञ आपके WhatsApp पर संपर्क करेंगे।' 
+                    : 'Our expert will initiate a direct WhatsApp message within 30 minutes after payment.'}
+                </p>
               </div>
             </CardContent>
 
-            <CardFooter className="pt-2 pb-6 px-6 sm:px-8">
+            <CardFooter className="px-6 sm:px-8 pb-6 pt-2">
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-md transition-all cursor-pointer"
+                disabled={isProcessing}
+                className="w-full h-12 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg cursor-pointer"
               >
-                Proceed to Pay ₹999 →
+                <Lock className="w-4 h-4 mr-1 text-slate-950" />
+                <span>{lang === 'hi' ? '₹999 सुरक्षित भुगतान करें' : 'Proceed to Pay ₹999 & Chat'}</span>
               </Button>
             </CardFooter>
           </form>
         )}
 
-        {/* STEP 2: Payment ₹999 Checkout */}
-        {step === 2 && (
-          <div className="space-y-4 p-6 sm:p-8">
-            <div className="text-center space-y-1">
-              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 font-mono">
-                Payment Required
-              </span>
-              <h3 className="text-lg font-extrabold text-slate-900">Schedule Expert Chat</h3>
-              <p className="text-xs text-muted-foreground">Completing payment for {name} ({phone})</p>
-            </div>
-
-            {/* Price Box */}
-            <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-center justify-between shadow-md">
-              <div>
-                <p className="text-[11px] text-slate-400 font-medium">1-on-1 WhatsApp Chat Consultation</p>
-                <p className="text-xs font-bold text-slate-200">Senior Vastu Acharya Chat</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-black text-amber-400 font-mono">₹999</p>
-                <p className="text-[10px] text-slate-400">Inclusive of Taxes</p>
-              </div>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div className="space-y-2">
-              <Label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                Select Payment Method:
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant={paymentMethod === 'upi' ? 'default' : 'outline'}
-                  onClick={() => setPaymentMethod('upi')}
-                  className={`h-auto p-3 flex items-center justify-start gap-2 ${
-                    paymentMethod === 'upi' ? 'bg-amber-50 border-amber-600 text-slate-900 hover:bg-amber-100 font-bold' : ''
-                  }`}
-                >
-                  <QrCode className="w-4 h-4 text-amber-600" />
-                  <span className="text-xs font-bold">UPI / QR</span>
-                </Button>
-
-                <Button
-                  type="button"
-                  variant={paymentMethod === 'card' ? 'default' : 'outline'}
-                  onClick={() => setPaymentMethod('card')}
-                  className={`h-auto p-3 flex items-center justify-start gap-2 ${
-                    paymentMethod === 'card' ? 'bg-amber-50 border-amber-600 text-slate-900 hover:bg-amber-100 font-bold' : ''
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4 text-amber-600" />
-                  <span className="text-xs font-bold">Card</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Pay Button */}
-            <Button
-              type="button"
-              onClick={handleConfirmPayment}
-              className="w-full h-11 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
-            >
-              <Lock className="w-4 h-4" /> Pay ₹999 &amp; Start WhatsApp Chat
-            </Button>
-
-            <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>256-bit Encrypted Secure Checkout</span>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: Payment Successful Confirmation */}
+        {/* STEP 3: Success Screen */}
         {step === 3 && (
-          <div className="text-center p-6 sm:p-8 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+          <div className="text-center p-8 space-y-4">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-mono">
-                Payment Successful • ₹999 Received
-              </span>
-              <h3 className="text-lg font-extrabold text-slate-900">Expert Chat Initiated!</h3>
-              <p className="text-xs text-slate-600 max-w-xs mx-auto">
-                Thank you <strong>{name}</strong>! Your payment of <strong>₹999</strong> has been verified. Our Senior Certified Vastu Acharya will message you on WhatsApp at{' '}
-                <strong className="text-slate-900">{phone}</strong> within 5 minutes.
+              <h3 className="text-xl font-extrabold text-slate-900 font-heading">
+                {lang === 'hi' ? 'परामर्श बुक हो गया!' : 'Consultation Booked!'}
+              </h3>
+              <p className="text-xs text-slate-600">
+                {lang === 'hi'
+                  ? `धन्यवाद ${name}! हमारे वरिष्ठ वास्तु विशेषज्ञ शीघ्र ही ${phone} पर आपसे WhatsApp द्वारा संपर्क करेंगे।`
+                  : `Thank you ${name}! Our senior Vastu expert will initiate your WhatsApp chat on ${phone} shortly.`}
               </p>
             </div>
-
             <Button
               type="button"
               onClick={handleReset}
-              className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+              className="w-full h-11 bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer"
             >
-              Done
+              {lang === 'hi' ? 'पूर्ण हुआ' : 'Done'}
             </Button>
           </div>
         )}

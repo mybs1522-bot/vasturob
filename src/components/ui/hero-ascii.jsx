@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { Compass, ArrowRight } from 'lucide-react';
+import { Compass, ArrowRight, Globe } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function HeroAscii({ onNavigateToStart }) {
   const canvasRef = useRef(null);
+  const { lang, toggleLang, t } = useLanguage();
 
   // Pure HTML5 Vastu Chakra & Directional Degrees Animation Canvas
   useEffect(() => {
@@ -122,23 +124,31 @@ export default function HeroAscii({ onNavigateToStart }) {
         ctx.stroke();
       }
 
+      // Central Sri Yantra / Vastu Purusha Emblem Core
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, Math.PI * 2);
+      ctx.fillStyle = '#facc15';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+
       ctx.restore();
 
-      // 3. Render Floating Directions & Degrees Particle Matrix
-      floatingElements.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
+      // 3. Render Floating Ambient Particles
+      floatingElements.forEach((el) => {
+        el.x += el.speedX;
+        el.y += el.speedY;
+        if (el.x < 0) el.x = canvas.width;
+        if (el.x > canvas.width) el.x = 0;
+        if (el.y < 0) el.y = canvas.height;
+        if (el.y > canvas.height) el.y = 0;
 
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.font = 'bold 10px monospace';
-        ctx.fillStyle = p.isGold 
-          ? `rgba(250, 204, 21, ${p.alpha * 0.7})` 
-          : `rgba(255, 255, 255, ${p.alpha * 0.5})`;
-        ctx.fillText(p.text, p.x, p.y);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = el.isGold ? `rgba(250, 204, 21, ${el.alpha * 0.7})` : `rgba(255, 255, 255, ${el.alpha * 0.4})`;
+        ctx.fillText(el.text, el.x, el.y);
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -163,19 +173,32 @@ export default function HeroAscii({ onNavigateToStart }) {
       {/* Top Header Bar inside Hero */}
       <div className="relative z-20 border-b border-white/15 bg-black/40 backdrop-blur-xs">
         <div className="w-full px-4 sm:px-8 lg:px-12 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4 mx-auto sm:mx-0">
+          <div className="flex items-center gap-2 sm:gap-4">
             <div className="font-mono text-amber-400 text-base sm:text-xl font-bold tracking-widest flex items-center gap-2 cursor-pointer">
               <img src="/vastu_logo.jpg" className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-amber-400/40 object-cover shadow-sm" alt="VastuScope Logo" />
               <span>VASTUSCOPE</span>
             </div>
             <div className="h-4 w-px bg-white/30"></div>
-            <span className="text-amber-300/80 text-[10px] sm:text-xs font-mono tracking-wider">16-ZONE ENGINE</span>
+            <span className="text-amber-300/80 text-[10px] sm:text-xs font-mono tracking-wider hidden sm:inline">16-ZONE ENGINE</span>
           </div>
           
-          <div className="hidden sm:flex items-center gap-3 text-xs font-mono text-amber-200/70">
-            <span>LAT: 28.6139° N</span>
-            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
-            <span>LONG: 77.2090° E</span>
+          <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="px-3 py-1 rounded-full bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-black flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+              title="Switch Language / भाषा बदलें"
+            >
+              <Globe className="w-3.5 h-3.5 text-amber-400" />
+              <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+            </button>
+
+            <div className="hidden md:flex items-center gap-3 text-xs font-mono text-amber-200/70 border-l border-white/20 pl-3">
+              <span>LAT: 28.6139° N</span>
+              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
+              <span>LONG: 77.2090° E</span>
+            </div>
           </div>
         </div>
       </div>
@@ -187,7 +210,7 @@ export default function HeroAscii({ onNavigateToStart }) {
           <div className="flex items-center justify-center gap-2 opacity-80 w-full max-w-md mx-auto">
             <div className="w-8 sm:w-12 h-px bg-amber-500"></div>
             <span className="text-amber-400 text-[9px] sm:text-xs font-mono tracking-widest uppercase font-bold whitespace-nowrap">
-              100% VASTU PRECISION ENGINE
+              {lang === 'hi' ? '100% सटीक वैदिक महावास्तु इंजन' : '100% VASTU PRECISION ENGINE'}
             </span>
             <div className="w-8 sm:w-12 h-px bg-amber-500"></div>
           </div>
@@ -195,16 +218,19 @@ export default function HeroAscii({ onNavigateToStart }) {
           {/* Title */}
           <div className="relative text-center">
             <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight font-heading tracking-tight">
-              PERFECT VASTU
+              {lang === 'hi' ? 'घर का संपूर्ण वास्तु' : 'PERFECT VASTU'}
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 mt-1 sm:mt-2">
-                ALIGNMENT &amp; WEALTH
+                {lang === 'hi' ? 'सुख, शांति व समृद्धि' : 'ALIGNMENT & WEALTH'}
               </span>
             </h1>
           </div>
 
           {/* Description */}
           <p className="text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed font-sans opacity-95 max-w-lg mx-auto text-center">
-            Where ancient Vedic geometry meets modern floor plan AI. Discover your home&apos;s 16 directional energy zones and unlock 100% wealth &amp; peace.
+            {lang === 'hi'
+              ? 'प्राचीन वैदिक ज्यामिति और आधुनिक AI का संगम। अपने घर की 16 दिशाओं का विश्लेषण करें और बिना तोड़फोड़ सुख-समृद्धि पाएं।'
+              : 'Where ancient Vedic geometry meets modern floor plan AI. Discover your home\'s 16 directional energy zones and unlock 100% wealth & peace.'
+            }
           </p>
 
           {/* CTA Button */}
@@ -215,7 +241,7 @@ export default function HeroAscii({ onNavigateToStart }) {
               className="px-6 py-3.5 sm:px-9 sm:py-4 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black font-sans text-xs sm:text-base rounded-xl transition-all duration-200 shadow-2xl shadow-amber-400/30 hover:scale-105 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
             >
               <Compass className="w-5 h-5 text-slate-950" />
-              <span>SCAN FLOOR PLAN NOW</span>
+              <span>{lang === 'hi' ? 'घर का नक्शा स्कैन करें' : 'SCAN FLOOR PLAN NOW'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
