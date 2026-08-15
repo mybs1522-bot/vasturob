@@ -149,30 +149,6 @@ export default function FloorPlanCanvas({
     setPlacedRooms((prev) => [...prev, newRoomBox]);
   };
 
-  const handleAddRoomBox = (roomTypeId) => {
-    const rType = ROOM_TYPES.find((r) => r.id === roomTypeId) || ROOM_TYPES[0];
-    const count = placedRooms.length;
-    const spawnPositions = [
-      { x: 580, y: 420 },
-      { x: 220, y: 430 },
-      { x: 400, y: 520 },
-      { x: 220, y: 180 },
-      { x: 400, y: 300 },
-      { x: 580, y: 180 },
-    ];
-    const pos = spawnPositions[count % spawnPositions.length] || { x: 300 + count * 20, y: 250 + count * 20 };
-
-    const newRoomBox = {
-      id: `room_${Date.now()}`,
-      typeId: rType.id,
-      name: rType.name,
-      color: rType.color,
-      x: pos.x,
-      y: pos.y,
-    };
-    setPlacedRooms((prev) => [...prev, newRoomBox]);
-  };
-
   const handleStartDragPin = (e, roomId) => {
     e.stopPropagation();
     setDraggingRoomId(roomId);
@@ -218,15 +194,6 @@ export default function FloorPlanCanvas({
       reader.readAsDataURL(file);
     }
   };
-
-  const blackPillsList = [
-    { id: 'kitchen', label: '+ Kitchen' },
-    { id: 'master_bedroom', label: '+ Bedroom' },
-    { id: 'toilet', label: '+ Washroom' },
-    { id: 'living_room', label: '+ Living' },
-    { id: 'entrance', label: '+ Main Door' },
-    { id: 'puja_room', label: '+ Puja' },
-  ];
 
   return (
     <div className="clean-card p-3 sm:p-4 space-y-3 bg-white">
