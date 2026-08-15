@@ -75,13 +75,14 @@ Return ONLY a JSON array, no markdown:
     generationConfig: { temperature: 0.1, maxOutputTokens: 2048 },
   };
 
-  // Models confirmed available via ListModels API (Aug 2026)
+  // Try multiple model names for maximum compatibility
   const models = [
-    'gemini-flash-latest',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-pro-latest',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-pro',
+    'gemini-pro-vision',
   ];
 
   let rawResponseText = '';

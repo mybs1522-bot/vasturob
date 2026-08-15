@@ -1,5 +1,5 @@
-export default async function handler(req, res) {
-  // Set CORS headers
+module.exports = async function handler(req, res) {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -8,27 +8,35 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { path } = req.query;
-  const targetPath = Array.isArray(path) ? path.join('/') : path || '';
-
-  // Reconstruct query params (excluding 'path' which is the catch-all param)
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  const params = new URLSearchParams(url.search);
-  params.delete('path');
-
-  const googleUrl = `https://generativelanguage.googleapis.com/${targetPath}?${params.toString()}`;
-
   try {
-    const response = await fetch(googleUrl, {
+    // Extract path segments from catch-all route
+    const pathSegments = req.query.path;
+    const targetPath = Array.isArray(pathSegments) ? pathSegments.join('/') : (pathSegments || '');
+
+    // Extract the API key from query params
+    const apiKey = req.query.key || '';
+
+    const googleUrl = `https://generativelanguage.googleapis.com/${targetPath}?key=${apiKey}`;
+
+    console.log('[Gemini Proxy] Forwarding to:', googleUrl.replace(apiKey, 'REDACTED'));
+
+    const fetchOptions = {
       method: req.method,
       headers: { 'Content-Type': 'application/json' },
-      body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
-    });
+    };
 
+    if (req.method === 'POST' && req.body) {
+      fetchOptions.body = JSON.stringify(req.body);
+    }
+
+    const response = await fetch(googleUrl, fetchOptions);
     const data = await response.json();
+
+    console.log('[Gemini Proxy] Google responded with status:', response.status);
+
     return res.status(response.status).json(data);
   } catch (error) {
-    console.error('Gemini proxy error:', error);
-    return res.status(502).json({ error: { message: error.message } });
+    console.error('[Gemini Proxy] Error:', error.message);
+    return res.status(502).json({ error: { message: 'Proxy error: ' + error.message } });
   }
-}
+};
