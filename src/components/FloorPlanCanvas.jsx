@@ -274,27 +274,6 @@ export default function FloorPlanCanvas({
         </div>
       </div>
 
-      {/* Black Pills for Adding Room Boxes */}
-      {isCustomGridMode && (
-        <div className="space-y-1">
-          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">
-            Tap to Add Room Boxes on Floor Plan:
-          </span>
-          <div className="grid grid-cols-3 gap-1.5">
-            {blackPillsList.map((pill) => (
-              <button
-                key={pill.id}
-                type="button"
-                onClick={() => handleAddRoomBox(pill.id)}
-                className="bg-slate-900 hover:bg-slate-800 text-white px-2 py-1.5 rounded-full text-[9px] sm:text-[9.5px] font-bold tracking-wide flex items-center justify-center shadow-2xs transition-all hover:scale-102 active:scale-95 text-center whitespace-nowrap cursor-pointer"
-              >
-                <span>{pill.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Viewport Canvas Box */}
       <div
         ref={containerRef}

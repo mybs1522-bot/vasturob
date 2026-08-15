@@ -110,7 +110,7 @@ export default function App() {
         setPlacedRooms([]);
         setScanNotice({
           type: 'error',
-          message: `⚠️ Could not read floor plan automatically. Please tap the room buttons below to place boxes manually.`
+          message: `⚠️ Could not read floor plan automatically. Click 'Retry Processing' above to scan again.`
         });
         return;
       }
@@ -119,7 +119,7 @@ export default function App() {
     setPlacedRooms([]);
     setScanNotice({
       type: 'manual',
-      message: '⚠️ Please tap the black room pills (+ Kitchen, + Bedroom, + Washroom) below to place your room boxes!'
+      message: 'Floor plan loaded. Ready for analysis.'
     });
   };
 
@@ -131,7 +131,7 @@ export default function App() {
     setPlacedRooms([]);
     setScanNotice({
       type: 'manual',
-      message: '✍️ Hand drawing loaded! Tap the black room pills (+ Kitchen, + Bedroom, + Washroom) below to place your room boxes.'
+      message: '✍️ Hand drawing loaded! Ready for analysis.'
     });
     setWizardStep(2);
   };
@@ -469,7 +469,7 @@ export default function App() {
                   <span>Floor Plan Analysis Retry Required</span>
                 </div>
                 <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed font-medium">
-                  We could not automatically detect room boxes on the first attempt. Click <strong>Retry Plan Processing</strong> below to re-scan your image, or tap the room pills (+ Kitchen, + Bedroom) below to add boxes manually.
+                  We could not automatically detect room boxes on the first attempt. Click <strong>Retry Plan Processing</strong> below to re-scan your image.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   <button
