@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -39,4 +39,4 @@ module.exports = async function handler(req, res) {
     console.error('[Gemini Proxy] Error:', error.message);
     return res.status(502).json({ error: { message: 'Proxy error: ' + error.message } });
   }
-};
+}

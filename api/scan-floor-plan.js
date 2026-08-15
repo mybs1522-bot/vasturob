@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -49,16 +49,14 @@ Example output:
 [
   {"typeId":"kitchen","name":"KITCHEN","xPct":72,"yPct":28},
   {"typeId":"master_bedroom","name":"MASTER BEDROOM","xPct":22,"yPct":78},
-  {"typeId":"living_room","name":"LIVING ROOM","xPct":45,"yPct":50},
-  {"typeId":"toilet","name":"WASHROOM","xPct":85,"yPct":25},
-  {"typeId":"entrance","name":"MAIN ENTRANCE","xPct":50,"yPct":92}
+  {"typeId":"living_room","name":"LIVING ROOM","xPct":45,"yPct":50}
 ]`;
 
-    // High-accuracy vision models on OpenRouter
+    // High-accuracy vision models on OpenRouter (Verified working)
     const models = [
       'qwen/qwen2.5-vl-72b-instruct',
       'google/gemini-2.5-flash',
-      'nvidia/nemotron-nano-12b-v2-vl:free'
+      'openai/gpt-4o-mini'
     ];
 
     let lastError = '';
@@ -82,7 +80,7 @@ Example output:
                 { type: 'text', text: promptText },
               ],
             }],
-            temperature: 0.05,
+            temperature: 0.1,
             max_tokens: 2048,
           }),
         });
@@ -128,4 +126,4 @@ Example output:
     console.error('[OpenRouter Vision] Server error:', error);
     return res.status(500).json({ error: { message: error.message } });
   }
-};
+}
