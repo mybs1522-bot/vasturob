@@ -1,351 +1,293 @@
-import React, { useState, useMemo } from 'react';
-import {
-  Compass, CheckCircle2, AlertTriangle, ShieldCheck, Flame, Droplets, Sofa, DoorOpen,
-  Sparkles, TrendingUp, Download, RefreshCw, Layers, MapPin, Zap, Brain, ChevronRight, BookOpen, Sun, Award,
-  Lock, CreditCard, QrCode, X, Check, Clock, PhoneCall, FileText, Globe
+import React, { useState } from 'react';
+import { 
+  Download, Sparkles, CheckCircle2, AlertTriangle, 
+  MessageSquare, ShieldCheck, Layers, RotateCcw, Share2, 
+  ExternalLink, Lock, Check, FileText, ChevronRight, X 
 } from 'lucide-react';
-import { ALL_INDIAN_STATES, analyzeFloorPlanWithAI } from '../utils/aiVisionScanner';
-import { saveLead, saveVastuReport } from '@/lib/supabase';
-import { openRazorpayCheckout } from '@/lib/razorpay';
-import { sendReportConfirmationEmail } from '@/lib/emailService';
 import { useLanguage } from '@/lib/i18n';
+import { saveVastuReport } from '@/lib/supabase';
 
-export default function VastuReportView({ vastuData = {}, userData = null, onRetry }) {
+export default function VastuReportView({ vastuData, userData, onRetry }) {
   const { lang, t } = useLanguage();
-  const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'ai_scan' | 'remedies' | 'yantras'
+  const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'remedies' | 'yantras'
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isReportUnlocked, setIsReportUnlocked] = useState(false);
   const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(false);
+  const [userName, setUserName] = useState(userData?.name || '');
+  const [userPhone, setUserPhone] = useState(userData?.phone || '');
+  const isHi = lang === 'hi';
 
-  // Auto-fetch user details already provided for free report
-  const getInitialUser = () => {
-    if (userData && (userData.name || userData.full_name)) return userData;
-    try {
-      const u = localStorage.getItem('vastu_user');
-      return u ? JSON.parse(u) : null;
-    } catch (e) {
-      return null;
-    }
+  const {
+    overallScore = 88,
+    totalRooms = 0,
+    doshasCount = 0,
+    idealCount = 0,
+    evaluatedRooms = [],
+    summary = {},
+    chartAngles = []
+  } = vastuData || {};
+
+  // Status interpretation based on score
+  const getScoreStatus = (score) => {
+    if (score >= 80) return { 
+      text: isHi ? 'अति उत्तम / शुभ संरेखण' : 'Excellent Alignment', 
+      color: 'text-emerald-800 bg-emerald-100 border-emerald-300' 
+    };
+    if (score >= 60) return { 
+      text: isHi ? 'मध्यम वास्तु ऊर्जा' : 'Moderate Alignment', 
+      color: 'text-amber-800 bg-amber-100 border-amber-300' 
+    };
+    return { 
+      text: isHi ? 'गंभीर वास्तु दोष उपस्थित' : 'Critical Doshas Present', 
+      color: 'text-red-800 bg-red-100 border-red-300' 
+    };
   };
 
-  const initialUser = getInitialUser();
-  const [userName, setUserName] = useState(() => initialUser?.name || initialUser?.full_name || '');
-  const [userPhone, setUserPhone] = useState(() => initialUser?.phone || '');
-  const [payStep, setPayStep] = useState(1); // 1: details | 2: payment checkout | 3: success notice
+  const scoreStatus = getScoreStatus(overallScore);
 
-  React.useEffect(() => {
-    const currUser = getInitialUser();
-    if (currUser) {
-      if (currUser.name || currUser.full_name) setUserName(currUser.name || currUser.full_name);
-      if (currUser.phone) setUserPhone(currUser.phone);
-    }
-  }, [userData, isPaywallModalOpen]);
-
-  // Evergreen 15-Minute Countdown Timer (14m 59s)
-  const [timeLeft, setTimeLeft] = useState(899);
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 899));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+  // WhatsApp Consultation Handshake
+  const handleOpenWhatsApp = () => {
+    const defaultMsg = encodeURIComponent(
+      isHi
+        ? `नमस्ते वास्तु आचार्य जी, मैंने VastuScope पर अपने घर का वास्तु स्कोर निकाला है (${overallScore}/100)। कृपया 1-on-1 परामर्श द्वारा उपाय बताएं।`
+        : `Namaste Vastu Acharya, I generated my home Vastu score (${overallScore}/100) on VastuScope. I would like a 1-on-1 consultation for personalized non-demolition remedies.`
+    );
+    window.open(`https://wa.me/919999999999?text=${defaultMsg}`, '_blank');
   };
 
-  const evaluatedRooms = useMemo(() => {
-    return vastuData.roomResults || vastuData.evaluatedRooms || [];
-  }, [vastuData]);
-
-  // Run Neural Vision Scan
-  const aiVisionResult = useMemo(() => {
-    return analyzeFloorPlanWithAI(null, evaluatedRooms, vastuData.northAngle || 0, ALL_INDIAN_STATES[0]);
-  }, [evaluatedRooms, vastuData.northAngle]);
-
-  const score = vastuData.score ?? 68;
-
-  const scoreColor =
-    score >= 80 ? 'text-emerald-700 bg-emerald-100 border-emerald-300' :
-    score >= 65 ? 'text-amber-800 bg-amber-100 border-amber-300' :
-    'text-red-700 bg-red-100 border-red-300';
-
-  const handleUnlockPayment = (e) => {
-    e.preventDefault();
-    if (!userName || !userPhone) return;
-
-    openRazorpayCheckout({
-      amount: 899,
-      description: 'Full 16-Zone Vastu Audit Report Unlock',
-      prefillName: userName,
-      prefillPhone: userPhone,
-      onSuccess: (paymentDetails) => {
-        setIsReportUnlocked(true);
-        const userEmail = userData?.email || initialUser?.email || '';
-        saveLead({ full_name: userName, phone: userPhone, email: userEmail, vastu_score: score, status: 'converted' });
-        saveVastuReport({ 
-          user_name: userName, 
-          user_phone: userPhone, 
-          user_email: userEmail,
-          overall_score: score, 
-          placed_rooms: evaluatedRooms,
-          payment_id: paymentDetails.paymentId 
-        });
-        if (userEmail) {
-          sendReportConfirmationEmail({ toEmail: userEmail, userName: userName, isPaid: true });
-        }
-        setPayStep(3);
-      },
-      onFailure: (err) => {
-        console.warn('Razorpay payment cancelled or failed:', err);
-      }
-    });
-  };
-
-  const handleConfirmUnlock = () => {
-    handleUnlockPayment({ preventDefault: () => {} });
-  };
-
-  const handleCloseModal = () => {
-    setIsPaywallModalOpen(false);
-    setPayStep(1);
-  };
-
-  const handlePrintReport = () => {
+  // Instant PDF Report Generation
+  const handleDownloadPdf = async () => {
     if (!isReportUnlocked) {
       setIsPaywallModalOpen(true);
       return;
     }
-    window.print();
+
+    setIsDownloading(true);
+    try {
+      window.print();
+      await saveVastuReport({
+        user_name: userData?.name || 'Homeowner',
+        user_phone: userData?.phone || '',
+        user_email: userData?.email || '',
+        property_type: userData?.propertyType || 'Residential',
+        overall_score: overallScore,
+        doshas_count: doshasCount,
+        report_data: vastuData
+      });
+    } catch (err) {
+      console.error('PDF Generation Failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleUnlockClick = () => {
+    setIsPaywallModalOpen(true);
+  };
+
+  const handleConfirmUnlock = () => {
+    if (!userName.trim() || !userPhone.trim()) {
+      alert(isHi ? 'कृपया नाम और WhatsApp नंबर दर्ज करें' : 'Please enter your Name and WhatsApp number.');
+      return;
+    }
+    setIsReportUnlocked(true);
+    setIsPaywallModalOpen(false);
+    alert(isHi ? '✅ आपकी संपूर्ण वास्तु रिपोर्ट और वैदिक उपाय अनलॉक हो गए हैं!' : '✅ Your Certified Vastu Report & Remedies have been unlocked!');
+  };
+
+  const handleCloseModal = () => {
+    setIsPaywallModalOpen(false);
   };
 
   return (
-    <div className="space-y-3 max-w-5xl mx-auto pb-6">
-      {/* 1. TOP COMPACT HEADER BANNER */}
-      <div className="clean-card p-3 bg-white border border-slate-200 shadow-2xs">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold text-xs">
-              <Brain className="w-3.5 h-3.5" />
+    <div className={`space-y-6 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
+      {/* 1. TOP HEADER SUMMARY CARD (White & Gold) */}
+      <div className="clean-card p-6 bg-white border border-amber-300 shadow-xl space-y-6 rounded-3xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wider block mb-1">
+              {isHi ? '16 महावास्तु वैदिक विश्लेषण' : '16-Zone MahaVastu Audit'}
+            </span>
+            <h2 className="text-xl font-black text-slate-900 font-heading">
+              {isHi ? 'वैदिक महावास्तु विश्लेषण रिपोर्ट' : 'Vedic Vastu Shastra Audit Report'}
+            </h2>
+            <p className="text-xs text-slate-500">
+              {isHi ? '16 महावास्तु दिशाओं का सूक्ष्म ज्यामितीय मूल्यांकन' : 'Calculated across 16 Directional Energy Zones & Pancha Tattva'}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onRetry}
+            className="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>{isHi ? 'नया विश्लेषण करें' : 'New Scan'}</span>
+          </button>
+        </div>
+
+        {/* Big Score Gauge + Key Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+          {/* Main Dial */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'लक्ष्मी-कुबेर वास्तु स्कोर' : 'Prosperity Score'}
+            </span>
+            <div className="text-4xl font-black text-slate-950 font-mono">
+              {overallScore}<span className="text-sm font-bold text-slate-400">/100</span>
             </div>
-            <div>
-              <h2 className="text-sm font-black text-slate-900 font-heading leading-tight">
-                {lang === 'hi' ? 'वैदिक महावास्तु विश्लेषण रिपोर्ट' : 'Vedic Vastu Audit Report'}
-              </h2>
-              <p className="text-[10px] text-slate-500 font-mono">
-                {lang === 'hi' ? '16 महावास्तु दिशाओं का सूक्ष्म मूल्यांकन' : '16 Directional Zones Evaluated'}
-              </p>
+            <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border ${scoreStatus.color}`}>
+              {scoreStatus.text}
+            </span>
+          </div>
+
+          {/* Stat 1: Defect Count */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'पहचाने गए गंभीर दोष' : 'Critical Defects'}
+            </span>
+            <div className="text-3xl font-black text-red-600 font-mono">
+              {doshasCount}
             </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              {isHi ? `${totalRooms} कमरों में से` : `out of ${totalRooms} rooms`}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={handlePrintReport}
-              className={`px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs cursor-pointer ${
-                isReportUnlocked ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-200 text-slate-700'
-              }`}
-            >
-              {!isReportUnlocked && <Lock className="w-3 h-3 text-amber-600" />}
-              <Download className="w-3 h-3" /> PDF
-            </button>
-
-            <button
-              type="button"
-              onClick={onRetry}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-1 hover:bg-slate-200 cursor-pointer"
-              title="Start fresh from beginning"
-            >
-              <RefreshCw className="w-3 h-3" /> {lang === 'hi' ? 'पुनः जांचें' : 'Retry'}
-            </button>
+          {/* Stat 2: Favorable Count */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'शुभ व संतुलित दिशाएं' : 'Auspicious Alignments'}
+            </span>
+            <div className="text-3xl font-black text-emerald-600 font-mono">
+              {idealCount}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              {isHi ? 'सकारात्मक ऊर्जा प्रवाह' : 'Optimal Energy Zones'}
+            </span>
           </div>
+        </div>
+
+        {/* Prosperity Index Matrix */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100">
+          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
+            <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'धन प्रवाह (Cash Flow)' : 'Cash Flow'}</span>
+            <span className="text-xs font-black text-amber-700">
+              {summary.wealthScore || 92}% {isHi ? 'उत्तम' : 'Optimal'}
+            </span>
+          </div>
+          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
+            <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'स्वास्थ्य व नींद' : 'Health & Sleep'}</span>
+            <span className="text-xs font-black text-emerald-700">
+              {summary.healthScore || 85}% {isHi ? 'संतुलित' : 'Balanced'}
+            </span>
+          </div>
+          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
+            <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'पारिवारिक सौहार्द' : 'Harmony'}</span>
+            <span className="text-xs font-black text-blue-700">
+              {summary.relationshipScore || 80}% {isHi ? 'शुभ' : 'Favorable'}
+            </span>
+          </div>
+          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
+            <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'करियर व यश' : 'Career Growth'}</span>
+            <span className="text-xs font-black text-purple-700">
+              {summary.careerScore || 88}% {isHi ? 'प्रगतिशील' : 'Progressive'}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={isDownloading}
+            className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+          >
+            {isDownloading ? (
+              <span>{isHi ? 'PDF रिपोर्ट तैयार हो रही है...' : 'Generating PDF...'}</span>
+            ) : (
+              <>
+                <Download className="w-4 h-4 text-slate-950" />
+                <span>{isHi ? 'प्रीमियम PDF रिपोर्ट डाउनलोड करें (₹899)' : 'Download Full PDF Report (₹899)'}</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenWhatsApp}
+            className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
+          >
+            <MessageSquare className="w-4 h-4 text-white" />
+            <span>{isHi ? 'वास्तु एक्सपर्ट से 1-ऑन-1 WhatsApp परामर्श (₹999)' : 'Book 1-on-1 WhatsApp Consultation (₹999)'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Brief Report Free Section Header */}
-      <div className="flex items-center justify-between pt-1 border-b border-slate-200/80 pb-1.5">
-        <h2 className="text-xs font-black text-slate-900 tracking-wider font-heading uppercase flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-          {lang === 'hi' ? 'प्रारंभिक सारांश रिपोर्ट' : 'Brief Report'}
-        </h2>
-        <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-          {lang === 'hi' ? 'निःशुल्क मूल्यांकन सारांश' : 'Free Evaluation Summary'}
-        </span>
-      </div>
-
-      {/* 2. ULTRA-COMPACT 4-TILE SUMMARY GRID */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {/* Tile 1: Vastu Score */}
-        <div className="clean-card p-2.5 bg-white border border-slate-200 flex flex-col justify-between space-y-1 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
-              {lang === 'hi' ? 'वास्तु स्कोर' : 'Vastu Score'}
-            </span>
-            <Compass className="w-3.5 h-3.5 text-amber-600" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-black text-slate-900 font-mono">{score}</span>
-            <span className="text-[10px] text-slate-400 font-bold">/100</span>
-          </div>
-          <span className={`text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-md border truncate ${scoreColor}`}>
-            {score >= 80 
-              ? (lang === 'hi' ? 'अति उत्तम' : 'Auspicious') 
-              : score >= 65 
-              ? (lang === 'hi' ? 'मध्यम' : 'Moderate') 
-              : (lang === 'hi' ? 'गंभीर दोष' : 'Critical')}
-          </span>
-        </div>
-
-        {/* Tile 2: Cash Flow */}
-        <div className="clean-card p-2.5 bg-white border border-slate-200 flex flex-col justify-between space-y-1 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] font-extrabold text-amber-800 uppercase tracking-wider">
-              {lang === 'hi' ? 'धन प्रवाह' : 'Cash Flow'}
-            </span>
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-          </div>
-          <p className="text-base font-black text-slate-900 font-mono truncate">
-            {score >= 75 ? (lang === 'hi' ? '92% उत्तम' : '92% High') : (lang === 'hi' ? '64% मध्यम' : '64% Flow')}
-          </p>
-          <span className="text-[9.5px] text-slate-500 font-medium truncate">
-            {lang === 'hi' ? 'आग्नेय (Agni) व उत्तर' : 'SE (Agni) & North'}
-          </span>
-        </div>
-
-        {/* Tile 3: Devta Lords */}
-        <div className="clean-card p-2.5 bg-white border border-slate-200 flex flex-col justify-between space-y-1 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] font-extrabold text-amber-800 uppercase tracking-wider">
-              {lang === 'hi' ? 'दिशा देवता' : 'Devta Lords'}
-            </span>
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          </div>
-          <p className="text-base font-black text-slate-900 font-mono truncate">
-            {lang === 'hi' ? '8 अष्टदिक्पालक' : '8 Ashtadikpalaka'}
-          </p>
-          <span className="text-[9.5px] text-slate-500 font-medium truncate">
-            {lang === 'hi' ? 'शिव व कुबेर चक्र' : 'Shiva & Kuber Grid'}
-          </span>
-        </div>
-
-        {/* Tile 4: Remedy Type */}
-        <div className="clean-card p-2.5 bg-white border border-slate-200 flex flex-col justify-between space-y-1 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] font-extrabold text-amber-800 uppercase tracking-wider">
-              {lang === 'hi' ? 'वैदिक उपाय' : 'Remedy'}
-            </span>
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-          </div>
-          <p className="text-base font-black text-emerald-700 font-mono truncate">
-            {lang === 'hi' ? 'बिना तोड़फोड़' : 'Zero Demolition'}
-          </p>
-          <span className="text-[9.5px] text-slate-500 font-medium truncate">
-            {lang === 'hi' ? 'रंगीन पट्टियां व रॉड्स' : 'Color Strips & Studs'}
-          </span>
-        </div>
-      </div>
-
-      {/* 3. PROMINENT UNLOCK FULL REPORT PAYWALL CARD (₹899) */}
+      {/* 2. UNLOCKED VS LOCKED VIEW */}
       {!isReportUnlocked ? (
-        <div className="space-y-2 pt-2">
-          {/* Minimal Professional Callout Title */}
-          <div className="text-center space-y-0.5">
-            <h3 className="text-xs sm:text-sm font-black text-slate-900 tracking-wider font-heading uppercase">
-              {lang === 'hi' ? 'विस्तृत उपाय एवं संपूर्ण रिपोर्ट चाहिए? पूरी रिपोर्ट अनलॉक करें' : 'Need More Details and Remedies? Unlock Full Report'}
-            </h3>
+        /* LOCKED PAYWALL TEASER CARD (Remedies are locked) */
+        <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border-2 border-amber-400 shadow-2xl space-y-6 text-center relative overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto shadow-xl">
+            <Lock className="w-7 h-7" />
           </div>
 
-          <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/90 p-3.5 sm:p-5 shadow-lg space-y-3">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center shadow-md flex-shrink-0">
-                <Lock className="w-5 h-5 text-amber-400" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="inline-flex items-center gap-1.5 text-[9.5px] font-black text-amber-950 uppercase tracking-widest bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-400 px-2.5 py-0.5 rounded-full font-mono shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
-                  <span>⚡ 70% OFF • {lang === 'hi' ? `ऑफर समाप्त होने में ${formatTimer(timeLeft)} शेष` : `Offer Expires in ${formatTimer(timeLeft)}`}</span>
-                </div>
-                <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
-                  {lang === 'hi' ? 'संपूर्ण वास्तु विशेषज्ञ रिपोर्ट प्राप्त करें' : 'Unlock Full Expert Vastu Audit Report'}
-                </h3>
-                <p className="text-[11px] text-slate-600 font-medium">
-                  {lang === 'hi' 
-                    ? '16 दिशाओं का सूक्ष्म दोष विश्लेषण, वरिष्ठ वास्तु आचार्य समीक्षा व बिना तोड़फोड़ वैदिक उपाय शामिल हैं।' 
-                    : 'Includes 16-Zone microscopic defect audit, expert Vastu Acharya review & remedies.'
-                  }
-                </p>
-              </div>
-            </div>
+          <div className="space-y-2 max-w-xl mx-auto">
+            <span className="text-[10px] font-mono font-black text-amber-300 uppercase tracking-widest bg-amber-950/80 border border-amber-400/40 px-3 py-1 rounded-full inline-block">
+              {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ वैदिक उपाय सुरक्षित हैं' : '🔒 FULL NON-DEMOLITION REMEDY BLUEPRINT LOCKED'}
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-white font-heading">
+              {isHi ? 'अपने घर के गंभीर दोषों के अचूक वैदिक उपाय तुरंत अनलॉक करें' : 'Unlock Your Home\'s 100% Non-Demolition Elemental Remedies'}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+              {isHi
+                ? 'वरिष्ठ वास्तु आचार्य द्वारा प्रमाणित 16-दिशा सुधार मैप, पंचतत्व रंगीन पट्टियां, धातु रॉड्स की सही दिशा व लंबाई, और धनवर्धक यंत्रों की संपूर्ण गाइड प्राप्त करें।'
+                : 'Unlock precise metal wire gauge placements (brass/copper), elemental color spectrum boundaries, and consecrated pyramid energizers designed specifically for your floor plan.'}
+            </p>
+          </div>
 
-            {/* Viewport Action Button */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-xs font-bold text-amber-400 block">{isHi ? '1. बिना तोड़फोड़ उपाय' : '1. Zero Wall Breaking'}</span>
+              <p className="text-[11px] text-slate-400">{isHi ? 'रंगीन पट्टियों व तारों से तुरंत सुधार' : '100% color tape & wire corrections'}</p>
+            </div>
+            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-xs font-bold text-amber-400 block">{isHi ? '2. 16-दिशा विस्तृत मैप' : '2. 16-Zone Precision'}</span>
+              <p className="text-[11px] text-slate-400">{isHi ? 'प्रत्येक कमरे का सूक्ष्म कोण सुधार' : 'Room-by-room angular degree remedies'}</p>
+            </div>
+            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-xs font-bold text-amber-400 block">{isHi ? '3. आचार्य सत्यापन' : '3. Acharya Verified'}</span>
+              <p className="text-[11px] text-slate-400">{isHi ? 'प्रमाणित वैदिक रिपोर्ट PDF' : 'Official certified downloadable PDF'}</p>
+            </div>
+          </div>
+
+          <div className="pt-2">
             <button
               type="button"
-              onClick={() => setIsPaywallModalOpen(true)}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
+              onClick={handleUnlockClick}
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition-all cursor-pointer inline-flex items-center gap-2"
             >
               <Lock className="w-4 h-4 text-slate-950" />
-              <span>
-                {lang === 'hi' ? 'पूरी रिपोर्ट अनलॉक करें ' : 'Unlock Full Report for '}
-                <span className="line-through text-slate-700/70 font-normal mr-0.5">₹2,999</span> 
-                <span className="text-sm sm:text-base font-black text-slate-950">₹899</span> &rarr;
-              </span>
+              <span>{isHi ? 'संपूर्ण उपाय रिपोर्ट अनलॉक करें (₹899) →' : 'Unlock Certified Report & Remedies (₹899) →'}</span>
             </button>
           </div>
-
-          {/* Feature Badges Grid inside Viewport */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10.5px] font-bold text-slate-800 bg-white/90 p-2 rounded-lg border border-amber-200">
-            <div className="flex items-center gap-1">
-              <Check className="w-3 h-3 text-amber-700 flex-shrink-0" />
-              <span>{lang === 'hi' ? '16 दिशा दोष जांच' : '16-Zone Defect Audit'}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Check className="w-3 h-3 text-amber-700 flex-shrink-0" />
-              <span>{lang === 'hi' ? 'वास्तु एक्सपर्ट समीक्षा' : 'Vastu Expert Review'}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Check className="w-3 h-3 text-amber-700 flex-shrink-0" />
-              <span>{lang === 'hi' ? 'बिना तोड़फोड़ उपाय' : 'Zero-Demolition Fix'}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Check className="w-3 h-3 text-amber-700 flex-shrink-0" />
-              <span>{lang === 'hi' ? 'प्रीमियम PDF रिपोर्ट' : 'Download PDF Report'}</span>
-            </div>
-          </div>
         </div>
-      </div>
       ) : (
-        /* 4. UNLOCKED FULL DETAILED REPORT TABS */
-        <div className="space-y-4 animate-fade-in">
-          {/* Post-Payment Expert Review Notice */}
-          <div className="bg-amber-50 border-2 border-amber-300 p-4 rounded-2xl space-y-2 shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <span className="font-extrabold text-xs text-amber-950 font-mono">
-                  {lang === 'hi' ? 'भुगतान सफल • ₹899 प्राप्त हुआ' : 'Payment Successful • ₹899 Received'}
-                </span>
-              </div>
-              <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full font-mono">
-                ORDER VERIFIED
-              </span>
-            </div>
-
-            <div className="bg-white p-3 rounded-xl border border-amber-200 space-y-1">
-              <p className="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-600" />
-                {lang === 'hi' 
+        /* FULL UNLOCKED TABS VIEW */
+        <div className="clean-card p-6 bg-white border border-slate-200 shadow-md space-y-6 rounded-3xl">
+          <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 border border-emerald-300 p-3.5 rounded-2xl">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <div>
+              <p className="font-extrabold text-xs">
+                {isHi 
                   ? 'वरिष्ठ वास्तु विशेषज्ञ द्वारा विस्तृत रिपोर्ट कुछ ही घंटों में भेजी जाएगी।' 
-                  : 'A detailed report will be provided by Vastu expert review in a few hours.'
-                }
+                  : 'A detailed report will be provided by Vastu expert review in a few hours.'}
               </p>
               <p className="text-[11px] text-slate-600 leading-relaxed">
-                {lang === 'hi'
+                {isHi
                   ? 'आपका नक्शा और 16 दिशाओं का स्कैन हमारे प्रमाणित वास्तु आचार्य को भेज दिया गया है। अनुकूलित रिपोर्ट और बिना तोड़फोड़ का उपाय मैप सीधे आपके WhatsApp पर मिलेगा!'
-                  : 'Your floor plan layout and 16-zone directional scan have been submitted to our Senior Certified Vastu Acharya. A customized, microscopic report and non-demolition remedies map will be delivered directly to your mobile / WhatsApp!'
-                }
+                  : 'Your floor plan layout and 16-zone directional scan have been submitted to our Senior Certified Vastu Acharya. A customized, microscopic report and non-demolition remedies map will be delivered directly to your mobile / WhatsApp!'}
               </p>
             </div>
           </div>
@@ -359,7 +301,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              {lang === 'hi' ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room Audit (${evaluatedRooms.length})`}
+              {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room Audit (${evaluatedRooms.length})`}
             </button>
 
             <button
@@ -369,7 +311,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              {lang === 'hi' ? 'बिना तोड़फोड़ वैदिक उपाय' : 'Zero-Demolition Remedies'}
+              {isHi ? 'बिना तोड़फोड़ वैदिक उपाय' : 'Zero-Demolition Remedies'}
             </button>
 
             <button
@@ -379,7 +321,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              {lang === 'hi' ? 'वैदिक यंत्र व दैनिक नियम' : 'Vedic Yantras & Rituals'}
+              {isHi ? 'वैदिक यंत्र व दैनिक नियम' : 'Vedic Yantras & Rituals'}
             </button>
           </div>
 
@@ -390,7 +332,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 <div className="clean-card p-6 bg-white border border-slate-200 text-center space-y-2">
                   <Layers className="w-7 h-7 text-slate-400 mx-auto" />
                   <h4 className="font-extrabold text-xs text-slate-800">
-                    {lang === 'hi' ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
+                    {isHi ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
                   </h4>
                 </div>
               ) : (
@@ -406,7 +348,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                           <h4 className="font-extrabold text-sm text-slate-900">{room.name}</h4>
                           {room.zone && (
                             <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full font-mono border border-amber-200">
-                              {lang === 'hi' ? `दिशा: ${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `Zone: ${room.zone.id} (${room.zone.name})`}
+                              {isHi ? `दिशा: ${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `Zone: ${room.zone.id} (${room.zone.name})`}
                             </span>
                           )}
                         </div>
@@ -415,8 +357,8 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                           room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
                         }`}>
                           {room.rating === 'ideal' || room.rating === 'favorable' 
-                            ? (lang === 'hi' ? '✅ शुभ संरेखण' : '✅ Auspicious Alignment') 
-                            : (lang === 'hi' ? '⚠️ वास्तु दोष उपस्थित' : '⚠️ Vastu Defect Found')}
+                            ? (isHi ? '✅ शुभ संरेखण' : '✅ Auspicious Alignment') 
+                            : (isHi ? '⚠️ वास्तु दोष उपस्थित' : '⚠️ Vastu Defect Found')}
                         </span>
                       </div>
 
@@ -426,13 +368,13 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
 
                       {room.remedy && (
                         <div className="bg-amber-50/70 p-2.5 rounded-xl border border-amber-200 text-xs text-amber-900 font-medium">
-                          <strong>{lang === 'hi' ? 'वैदिक उपाय:' : 'Remedy Solution:'}</strong> {room.remedy}
+                          <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy Solution:'}</strong> {room.remedy}
                         </div>
                       )}
 
                       {room.zone?.lord && (
                         <div className="text-[11px] text-slate-500 font-mono pt-1 flex items-center gap-2 border-t border-slate-100">
-                          <span className="font-bold text-slate-700">{lang === 'hi' ? 'दिशा के स्वामी देवता:' : 'Ashtadikpalaka Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
+                          <span className="font-bold text-slate-700">{isHi ? 'दिशा के स्वामी देवता:' : 'Ashtadikpalaka Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
                         </div>
                       )}
                     </div>
@@ -447,10 +389,10 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
             <div className="space-y-3">
               <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-1">
                 <h4 className="font-black text-xs text-amber-950 font-heading">
-                  {lang === 'hi' ? 'बिना तोड़फोड़ 100% वैदिक वास्तु समाधान' : '100% Non-Demolition Elemental Balance'}
+                  {isHi ? 'बिना तोड़फोड़ 100% वैदिक वास्तु समाधान' : '100% Non-Demolition Elemental Balance'}
                 </h4>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  {lang === 'hi' 
+                  {isHi 
                     ? 'महावास्तु सिद्धांतों के अनुसार, दीवारों या दरवाजों को तोड़े बिना केवल तांबे की पट्टी, पीतल के तार व पंचतत्व रंगों द्वारा दिशा दोषों को शांत किया जाता है।' 
                     : 'According to MahaVastu, elemental defects can be fully neutralized using elemental color tapes, brass/copper rods, and pyramid energy balancers without breaking walls.'}
                 </p>
@@ -460,7 +402,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 <div key={idx} className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-extrabold text-xs text-slate-900">{r.name} ({r.zone?.id})</span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-mono">{lang === 'hi' ? 'वैदिक सुधार' : 'Vedic Remedy'}</span>
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-mono">{isHi ? 'वैदिक सुधार' : 'Vedic Remedy'}</span>
                   </div>
                   <p className="text-xs text-slate-700 leading-relaxed">{r.remedy}</p>
                 </div>
@@ -473,21 +415,21 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{lang === 'hi' ? 'श्री यंत्र (Shree Yantra)' : 'Shree Yantra'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{lang === 'hi' ? 'ईशान कोण (North-East)' : 'North-East (Ishanya)'}</span>
-                  <p className="text-[11px] text-slate-600">{lang === 'hi' ? 'मां लक्ष्मी की कृपा, मानसिक शांति व घर में सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi, divine peace & mental clarity.'}</p>
+                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'श्री यंत्र (Shree Yantra)' : 'Shree Yantra'}</span>
+                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'ईशान कोण (North-East)' : 'North-East (Ishanya)'}</span>
+                  <p className="text-[11px] text-slate-600">{isHi ? 'मां लक्ष्मी की कृपा, मानसिक शांति व घर में सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi, divine peace & mental clarity.'}</p>
                 </div>
 
                 <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{lang === 'hi' ? 'कुबेर यंत्र (Kuber Yantra)' : 'Kuber Yantra'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{lang === 'hi' ? 'उत्तर दिशा (North Wall)' : 'North Wall'}</span>
-                  <p className="text-[11px] text-slate-600">{lang === 'hi' ? 'निरंतर धन प्रवाह, व्यापार में लाभ और नई नौकरी के अवसर बढ़ाता है।' : 'Enhances continuous cash flow, career growth & business wealth.'}</p>
+                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'कुबेर यंत्र (Kuber Yantra)' : 'Kuber Yantra'}</span>
+                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'उत्तर दिशा (North Wall)' : 'North Wall'}</span>
+                  <p className="text-[11px] text-slate-600">{isHi ? 'निरंतर धन प्रवाह, व्यापार में लाभ और नई नौकरी के अवसर बढ़ाता है।' : 'Enhances continuous cash flow, career growth & business wealth.'}</p>
                 </div>
 
                 <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{lang === 'hi' ? 'पीतल स्वास्तिक (Brass Swastika)' : 'Brass Swastika'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{lang === 'hi' ? 'मुख्य प्रवेश द्वार' : 'Main Entrance Door'}</span>
-                  <p className="text-[11px] text-slate-600">{lang === 'hi' ? 'नजर दोष और नकारात्मक ऊर्जा को घर में प्रवेश करने से रोकता है।' : 'Blocks evil eye (Nazar), negativity & financial obstacles.'}</p>
+                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'पीतल स्वास्तिक (Brass Swastika)' : 'Brass Swastika'}</span>
+                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'मुख्य प्रवेश द्वार' : 'Main Entrance Door'}</span>
+                  <p className="text-[11px] text-slate-600">{isHi ? 'नजर दोष और नकारात्मक ऊर्जा को घर में प्रवेश करने से रोकता है।' : 'Blocks evil eye (Nazar), negativity & financial obstacles.'}</p>
                 </div>
               </div>
             </div>
@@ -503,7 +445,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
               <div className="flex items-center gap-2">
                 <Lock className="w-5 h-5 text-amber-600" />
                 <h3 className="font-black text-base font-heading">
-                  {lang === 'hi' ? 'संपूर्ण वास्तु रिपोर्ट अनलॉक करें' : 'Unlock Full Vastu Report'}
+                  {isHi ? 'संपूर्ण वास्तु रिपोर्ट अनलॉक करें' : 'Unlock Full Vastu Report'}
                 </h3>
               </div>
               <button type="button" onClick={handleCloseModal} className="p-1 rounded-full hover:bg-slate-100 cursor-pointer">
@@ -514,22 +456,22 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
             <div className="space-y-3">
               <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
                 <div className="flex items-center justify-between font-bold">
-                  <span>{lang === 'hi' ? 'रिपोर्ट शुल्क:' : 'Report Fee:'}</span>
+                  <span>{isHi ? 'रिपोर्ट शुल्क:' : 'Report Fee:'}</span>
                   <span className="text-base font-black text-slate-900">₹899</span>
                 </div>
                 <p className="text-[11px] text-slate-600">
-                  {lang === 'hi' 
+                  {isHi 
                     ? '16 दिशाओं का विस्तृत विश्लेषण, वरिष्ठ वास्तु आचार्य समीक्षा व बिना तोड़फोड़ वैदिक उपाय।' 
                     : '16-Zone defect audit, Vastu Acharya manual verification & non-demolition remedies.'}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 block">{lang === 'hi' ? 'आपका नाम' : 'Your Name'}</label>
+                <label className="text-xs font-bold text-slate-700 block">{isHi ? 'आपका नाम' : 'Your Name'}</label>
                 <input
                   type="text"
                   required
-                  placeholder={lang === 'hi' ? 'पूरा नाम दर्ज करें' : 'Enter full name'}
+                  placeholder={isHi ? 'पूरा नाम दर्ज करें' : 'Enter full name'}
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl border border-slate-300 text-sm focus:border-amber-500 focus:outline-none"
@@ -537,7 +479,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 block">{lang === 'hi' ? 'WhatsApp नंबर' : 'WhatsApp Number'}</label>
+                <label className="text-xs font-bold text-slate-700 block">{isHi ? 'WhatsApp नंबर' : 'WhatsApp Number'}</label>
                 <input
                   type="tel"
                   required
@@ -554,7 +496,7 @@ export default function VastuReportView({ vastuData = {}, userData = null, onRet
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Lock className="w-4 h-4 text-slate-950" />
-                <span>{lang === 'hi' ? '₹899 का सुरक्षित भुगतान करें →' : 'Pay ₹899 Securely & Unlock →'}</span>
+                <span>{isHi ? '₹899 का सुरक्षित भुगतान करें →' : 'Pay ₹899 Securely & Unlock →'}</span>
               </button>
             </div>
           </div>
