@@ -51,6 +51,13 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
     }
   });
 
+  // Instant scroll to top when report view opens
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {

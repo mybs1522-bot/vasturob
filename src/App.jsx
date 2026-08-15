@@ -57,6 +57,13 @@ export default function App() {
   // Sequential Steps inside /start: 1: 'start' | 2: 'mark_rooms' | 3: 'set_north' | 4: 'report'
   const [wizardStep, setWizardStep] = useState(1);
 
+  // Auto scroll to top on step or route transition
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [wizardStep, currentPath]);
+
   // Sync browser popstate navigation
   useEffect(() => {
     const handlePopState = () => {
@@ -69,7 +76,7 @@ export default function App() {
   const navigateTo = (path) => {
     window.history.pushState({}, '', path);
     setCurrentPath(path);
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   // UPLOAD FLOOR PLAN: REAL-TIME GEMINI 2.5 FLASH VISION AI SCANNER
