@@ -59,11 +59,12 @@ Example:
   {"typeId":"living_room","name":"LIVING ROOM","xPct":50,"yPct":55}
 ]`;
 
-    // Industry-leading Vision Models on OpenRouter
+    // Gemini Vision Models on OpenRouter
     const models = [
-      'openai/gpt-4o',
       'google/gemini-2.5-flash',
-      'qwen/qwen2.5-vl-72b-instruct'
+      'google/gemini-2.5-pro',
+      'google/gemini-2.5-flash-lite',
+      'google/gemini-3.7-flash'
     ];
 
     let lastError = '';
