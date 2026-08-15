@@ -67,24 +67,26 @@ export default function AdminPanel({ onBackToApp }) {
 
   // Direct WhatsApp Client Launcher
   const handleWhatsAppUser = (phone, name) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const cleanPhone = String(phone || '').replace(/[^0-9]/g, '');
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     const msg = encodeURIComponent(`Namaste ${name || ''}, this is VastuScope Senior Acharya regarding your submitted floor plan and Vastu report.`);
     window.open(`https://wa.me/${formattedPhone}?text=${msg}`, '_blank');
   };
 
-  // Filtered Lists based on search query
-  const filteredReports = reports.filter(r => 
-    (r.user_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (r.user_phone || '').includes(searchQuery) ||
-    (r.user_email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (r.report_id || '').toLowerCase().includes(searchQuery.toLowerCase())
+  // Filtered Lists based on search query with full String() type safety
+  const safeQuery = String(searchQuery || '').toLowerCase();
+
+  const filteredReports = (reports || []).filter(r => 
+    String(r?.user_name || '').toLowerCase().includes(safeQuery) ||
+    String(r?.user_phone || '').toLowerCase().includes(safeQuery) ||
+    String(r?.user_email || '').toLowerCase().includes(safeQuery) ||
+    String(r?.report_id || '').toLowerCase().includes(safeQuery)
   );
 
-  const filteredLeads = leads.filter(l => 
-    (l.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (l.phone || '').includes(searchQuery) ||
-    (l.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredLeads = (leads || []).filter(l => 
+    String(l?.full_name || '').toLowerCase().includes(safeQuery) ||
+    String(l?.phone || '').toLowerCase().includes(safeQuery) ||
+    String(l?.email || '').toLowerCase().includes(safeQuery)
   );
 
   // --- PASSCODE GATE LOCK SCREEN ---
