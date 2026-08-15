@@ -2,14 +2,70 @@ import { createWorker } from 'tesseract.js';
 import { ROOM_TYPES } from './vastuEngine';
 
 /**
- * High-Precision Client-Side OCR Floor Plan Scanner (Tesseract.js Engine)
+ * Pre-process floor plan image with contrast enhancement & grayscale binarization.
+ * Sharpens architectural text labels ("KITCHEN", "BEDROOM", "TOILET") and strips background noise.
+ */
+function preprocessImageForOCR(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const maxDim = 2000;
+      let w = img.width;
+      let h = img.height;
+      if (w < 1200 || h < 1200) {
+        const scale = Math.max(1200 / w, 1200 / h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      } else if (w > maxDim || h > maxDim) {
+        const scale = Math.min(maxDim / w, maxDim / h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      // Contrast Enhancement & Grayscale Binarization
+      try {
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          // Binarize text pixels: dark pixels become pure black, light pixels pure white
+          const binarized = gray < 130 ? 0 : 255;
+          data[i] = binarized;
+          data[i + 1] = binarized;
+          data[i + 2] = binarized;
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        resolve({
+          processedUrl: canvas.toDataURL('image/png'),
+          width: w,
+          height: h,
+        });
+      } catch (e) {
+        resolve({ processedUrl: dataUrl, width: img.width, height: img.height });
+      }
+    };
+    img.onerror = () => resolve({ processedUrl: dataUrl, width: 800, height: 600 });
+    img.src = dataUrl;
+  });
+}
+
+/**
+ * High-Precision Client-Side OCR Floor Plan Scanner (Enhanced Tesseract.js Engine)
  * Runs 100% locally inside the browser. Reads exact text coordinates (x0, y0, x1, y1)
- * directly from the floor plan image and maps room boxes directly to printed labels!
+ * directly from the high-contrast pre-processed floor plan image!
  */
 export async function scanFloorPlanWithGeminiVision(dataUrl) {
-  console.log('[Tesseract OCR] Starting browser OCR scan on floor plan...');
+  console.log('[Tesseract OCR] Preprocessing floor plan for high-contrast OCR...');
 
-  // Default fallback rooms if no text is printed on the image layout
   const fallbackRooms = [
     { typeId: 'kitchen', name: 'KITCHEN', x: 520, y: 220 },
     { typeId: 'master_bedroom', name: 'MASTER BEDROOM', x: 200, y: 450 },
@@ -19,48 +75,62 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
 
   let worker = null;
   try {
-    // 1. Get natural dimensions of uploaded floor plan image
-    const imgDims = await getImageDimensions(dataUrl);
-    const imgW = imgDims.width || 800;
-    const imgH = imgDims.height || 600;
+    // 1. High-contrast binarization preprocessing
+    const { processedUrl, width: imgW, height: imgH } = await preprocessImageForOCR(dataUrl);
 
     // 2. Initialize Tesseract WebAssembly OCR worker
     worker = await createWorker('eng');
-    const { data } = await worker.recognize(dataUrl);
+    const { data } = await worker.recognize(processedUrl);
     await worker.terminate();
     worker = null;
 
-    console.log('[Tesseract OCR] Recognized text:', data.text);
+    console.log('[Tesseract OCR] Recognized full text:\n', data.text);
 
     const detectedRooms = [];
-    const words = data.words || [];
+    // Collect both lines and individual words for comprehensive matching
+    const itemsToScan = [];
+
+    if (Array.isArray(data.lines)) {
+      for (const line of data.lines) {
+        if (line.text && line.bbox) {
+          itemsToScan.push({ text: line.text, bbox: line.bbox });
+        }
+      }
+    }
+
+    if (Array.isArray(data.words)) {
+      for (const word of data.words) {
+        if (word.text && word.bbox) {
+          itemsToScan.push({ text: word.text, bbox: word.bbox });
+        }
+      }
+    }
 
     // Keyword dictionary mapping printed text to room type IDs
     const keywordMap = [
-      { keywords: ['KITCHEN', 'KIT', 'COOKING'], typeId: 'kitchen', name: 'KITCHEN' },
-      { keywords: ['MASTER', 'M.BED', 'BEDROOM 1', 'M.BEDROOM'], typeId: 'master_bedroom', name: 'MASTER BEDROOM' },
-      { keywords: ['BEDROOM', 'BED', 'BEDROOM 2', 'KIDS BED', 'GUEST'], typeId: 'kids_bedroom', name: 'BEDROOM' },
-      { keywords: ['LIVING', 'HALL', 'DRAWING', 'SITTING'], typeId: 'living_room', name: 'LIVING ROOM' },
+      { keywords: ['KITCHEN', 'KIT', 'COOKING', 'PANTRY'], typeId: 'kitchen', name: 'KITCHEN' },
+      { keywords: ['MASTER', 'M.BED', 'BEDROOM 1', 'M.BEDROOM', 'MBED'], typeId: 'master_bedroom', name: 'MASTER BEDROOM' },
+      { keywords: ['BEDROOM', 'BED', 'BEDROOM 2', 'BEDROOM 3', 'KIDS BED', 'GUEST'], typeId: 'kids_bedroom', name: 'BEDROOM' },
+      { keywords: ['LIVING', 'HALL', 'DRAWING', 'SITTING', 'FAMILY'], typeId: 'living_room', name: 'LIVING ROOM' },
       { keywords: ['DINING', 'EATING'], typeId: 'dining', name: 'DINING ROOM' },
-      { keywords: ['TOILET', 'BATH', 'WASHROOM', 'WC', 'POWDER'], typeId: 'toilet', name: 'TOILET' },
-      { keywords: ['ENTRANCE', 'ENTRY', 'FOYER', 'PORCH', 'MAIN DOOR'], typeId: 'entrance', name: 'MAIN ENTRANCE' },
-      { keywords: ['PUJA', 'POOJA', 'PRAYER'], typeId: 'puja_room', name: 'PUJA ROOM' },
-      { keywords: ['STORE', 'PANTRY'], typeId: 'store_room', name: 'STORE ROOM' },
-      { keywords: ['BALCONY', 'TERRACE', 'VERANDAH'], typeId: 'balcony', name: 'BALCONY' },
+      { keywords: ['TOILET', 'BATH', 'WASHROOM', 'WC', 'POWDER', 'BATHROOM'], typeId: 'toilet', name: 'TOILET' },
+      { keywords: ['ENTRANCE', 'ENTRY', 'FOYER', 'PORCH', 'MAIN DOOR', 'VERANDAH'], typeId: 'entrance', name: 'MAIN ENTRANCE' },
+      { keywords: ['PUJA', 'POOJA', 'PRAYER', 'TEMPLE'], typeId: 'puja_room', name: 'PUJA ROOM' },
+      { keywords: ['STORE', 'UTILITY'], typeId: 'store_room', name: 'STORE ROOM' },
+      { keywords: ['BALCONY', 'TERRACE', 'DECK'], typeId: 'balcony', name: 'BALCONY' },
       { keywords: ['STAIRS', 'STAIRCASE', 'STAIR'], typeId: 'staircase', name: 'STAIRCASE' },
     ];
 
-    // 3. Scan words and lines for room label matches
-    for (const w of words) {
-      const cleanWord = (w.text || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (!cleanWord || cleanWord.length < 2) continue;
+    for (const item of itemsToScan) {
+      const cleanText = (item.text || '').toUpperCase().replace(/[^A-Z0-9\s]/g, ' ').trim();
+      if (!cleanText || cleanText.length < 2) continue;
 
       for (const entry of keywordMap) {
-        const matches = entry.keywords.some((kw) => cleanWord.includes(kw) || kw.includes(cleanWord));
-        if (matches && w.bbox) {
+        const matches = entry.keywords.some((kw) => cleanText.includes(kw));
+        if (matches && item.bbox) {
           // Calculate exact center pixel coordinates on the 800x600 canvas
-          const centerX = ((w.bbox.x0 + w.bbox.x1) / 2 / imgW) * 800;
-          const centerY = ((w.bbox.y0 + w.bbox.y1) / 2 / imgH) * 600;
+          const centerX = ((item.bbox.x0 + item.bbox.x1) / 2 / imgW) * 800;
+          const centerY = ((item.bbox.y0 + item.bbox.y1) / 2 / imgH) * 600;
 
           // Clamp to canvas boundaries
           const clampedX = Math.min(Math.max(60, Math.round(centerX)), 740);
@@ -68,7 +138,7 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
 
           // Prevent duplicate boxes at almost identical coordinates
           const isDuplicate = detectedRooms.some(
-            (r) => Math.abs(r.x - clampedX) < 40 && Math.abs(r.y - clampedY) < 40
+            (r) => Math.abs(r.x - clampedX) < 45 && Math.abs(r.y - clampedY) < 45
           );
 
           if (!isDuplicate) {
@@ -113,14 +183,5 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
       y: r.y,
       isAutoDetected: true,
     };
-  });
-}
-
-function getImageDimensions(dataUrl) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve({ width: img.width, height: img.height });
-    img.onerror = () => resolve({ width: 800, height: 600 });
-    img.src = dataUrl;
   });
 }
