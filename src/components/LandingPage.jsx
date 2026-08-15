@@ -6,7 +6,7 @@ import {
   Compass, Sparkles, ShieldCheck, PhoneCall,
   Flame, Droplets, CheckCircle2, Zap, Award,
   AlertTriangle, HeartPulse, DollarSign, Users, Briefcase, Sparkle, Hammer, ShieldAlert, Globe,
-  HelpCircle, ChevronDown, ChevronUp, Lock, CheckSquare, Square, Skull, TrendingDown, ArrowRight, ShieldX, Clock
+  HelpCircle, ChevronDown, ChevronUp, Lock, CheckSquare, Square, Skull, TrendingDown, ArrowRight, ShieldX, Clock, Check
 } from 'lucide-react';
 
 export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOpenAdmin }) {
