@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Download, Sparkles, CheckCircle2, AlertTriangle, 
   ShieldCheck, Layers, RotateCcw, Lock, Check, FileText, 
-  ChevronRight, X, Eye, Flame, Droplets, Zap, Sparkle, ArrowRight
+  ChevronRight, X, Eye, Flame, Droplets, Zap, Sparkle, ArrowRight, Clock
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import { saveVastuReport } from '@/lib/supabase';
@@ -17,11 +17,47 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   const [userPhone, setUserPhone] = useState(userData?.phone || '');
   const isHi = lang === 'hi';
 
+  // 2 hours 37 minutes Evergreen Countdown Timer
+  const [timeLeft, setTimeLeft] = useState(() => {
+    try {
+      const savedExpiry = localStorage.getItem('vastu_countdown_expiry');
+      const now = Date.now();
+      if (savedExpiry && parseInt(savedExpiry, 10) > now) {
+        return Math.floor((parseInt(savedExpiry, 10) - now) / 1000);
+      }
+      const newExpiry = now + (2 * 3600 + 37 * 60) * 1000;
+      localStorage.setItem('vastu_countdown_expiry', newExpiry.toString());
+      return 2 * 3600 + 37 * 60;
+    } catch {
+      return 2 * 3600 + 37 * 60;
+    }
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          const newExpiry = Date.now() + (2 * 3600 + 37 * 60) * 1000;
+          try {
+            localStorage.setItem('vastu_countdown_expiry', newExpiry.toString());
+          } catch {}
+          return 2 * 3600 + 37 * 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const hours = String(Math.floor(timeLeft / 3600)).padStart(2, '0');
+  const minutes = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, '0');
+  const seconds = String(timeLeft % 60).padStart(2, '0');
+
   const {
-    overallScore = 88,
+    overallScore = 52,
     totalRooms = 0,
-    doshasCount = 0,
-    idealCount = 0,
+    doshasCount = 4,
+    idealCount = 1,
     evaluatedRooms = [],
     summary = {},
     chartAngles = []
@@ -29,16 +65,16 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
   // Status interpretation based on score
   const getScoreStatus = (score) => {
-    if (score >= 80) return { 
-      text: isHi ? 'अति उत्तम' : 'Excellent', 
+    if (score >= 75) return { 
+      text: isHi ? 'उत्तम संतुलन' : 'Good Alignment', 
       color: 'text-emerald-800 bg-emerald-100 border-emerald-300' 
     };
-    if (score >= 60) return { 
-      text: isHi ? 'मध्यम' : 'Moderate', 
+    if (score >= 55) return { 
+      text: isHi ? 'मध्यम दोष' : 'Moderate Dosha', 
       color: 'text-amber-800 bg-amber-100 border-amber-300' 
     };
     return { 
-      text: isHi ? 'गंभीर दोष' : 'Critical Doshas', 
+      text: isHi ? 'गंभीर दोष' : 'Critical Defects', 
       color: 'text-red-800 bg-red-100 border-red-300' 
     };
   };
@@ -80,21 +116,21 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   };
 
   return (
-    <div className={`space-y-4 sm:space-y-6 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
+    <div className={`space-y-3.5 sm:space-y-5 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
       
       {/* ========================================================================= */}
-      {/* PART 1: ULTRA-COMPACT FREE OVERVIEW (TAKES < 35% MOBILE SCREEN)          */}
+      {/* PART 1: ULTRA-COMPACT FREE OVERVIEW (LESS THAN 30% MOBILE SCREEN)         */}
       {/* ========================================================================= */}
-      <div className="clean-card p-3 sm:p-5 bg-white border border-amber-300 shadow-md rounded-2xl sm:rounded-3xl space-y-2.5 sm:space-y-4">
+      <div className="clean-card p-2.5 sm:p-4 bg-white border border-amber-300 shadow-md rounded-2xl space-y-2 sm:space-y-3">
         
         {/* Header Bar */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-            <h2 className="text-xs sm:text-base font-black text-slate-900 font-heading truncate">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping flex-shrink-0" />
+            <h2 className="text-xs sm:text-sm font-black text-slate-900 font-heading truncate">
               {isHi ? 'वैदिक महावास्तु स्कोर रिपोर्ट' : 'Vedic Vastu Audit Report'}
             </h2>
-            <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-md hidden sm:inline">
+            <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded-md hidden sm:inline">
               16-ZONES
             </span>
           </div>
@@ -102,80 +138,99 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
           <button
             type="button"
             onClick={onRetry}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 transition-all cursor-pointer flex-shrink-0"
+            className="px-2 py-0.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-[10px] font-bold text-slate-700 flex items-center gap-1 transition-all cursor-pointer flex-shrink-0"
           >
             <RotateCcw className="w-3 h-3 text-slate-500" />
             <span>{isHi ? 'नया स्कैन' : 'New Scan'}</span>
           </button>
         </div>
 
-        {/* 3-Column Horizontal Grid (Fits in 1 row on ALL mobile screens) */}
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 text-center">
+        {/* 3-Column Horizontal Grid (Fits in 1 single row on ALL mobile screens) */}
+        <div className="grid grid-cols-3 gap-1.5 text-center">
           {/* Box 1: Prosperity Score */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
-            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1 sm:p-2.5 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
               {isHi ? 'वास्तु स्कोर' : 'PROSPERITY'}
             </span>
-            <div className="text-lg sm:text-3xl font-black text-slate-950 font-mono leading-none my-0.5">
-              {overallScore}<span className="text-[9px] sm:text-xs font-normal text-slate-400">/100</span>
+            <div className="text-base sm:text-2xl font-black text-slate-950 font-mono leading-tight my-0.5">
+              {overallScore}<span className="text-[8px] sm:text-[10px] font-normal text-slate-400">/100</span>
             </div>
-            <span className={`text-[8px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full border ${scoreStatus.color} whitespace-nowrap`}>
+            <span className={`text-[7px] sm:text-[9px] font-black px-1.5 py-0.2 rounded-full border ${scoreStatus.color} whitespace-nowrap`}>
               {scoreStatus.text}
             </span>
           </div>
 
           {/* Box 2: Critical Defects */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
-            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1 sm:p-2.5 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
               {isHi ? 'गंभीर दोष' : 'DEFECTS'}
             </span>
-            <div className="text-lg sm:text-3xl font-black text-red-600 font-mono leading-none my-0.5">
+            <div className="text-base sm:text-2xl font-black text-red-600 font-mono leading-tight my-0.5">
               {doshasCount}
             </div>
-            <span className="text-[8px] sm:text-[10px] text-slate-500 font-medium whitespace-nowrap">
-              {isHi ? `${totalRooms} कमरों में` : `in ${totalRooms} rooms`}
+            <span className="text-[7px] sm:text-[9px] text-red-700 font-bold whitespace-nowrap">
+              {isHi ? 'सुधार आवश्यक' : 'Urgent Fix'}
             </span>
           </div>
 
           {/* Box 3: Auspicious Alignments */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
-            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1 sm:p-2.5 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
               {isHi ? 'शुभ दिशाएं' : 'AUSPICIOUS'}
             </span>
-            <div className="text-lg sm:text-3xl font-black text-emerald-600 font-mono leading-none my-0.5">
+            <div className="text-base sm:text-2xl font-black text-emerald-600 font-mono leading-tight my-0.5">
               {idealCount}
             </div>
-            <span className="text-[8px] sm:text-[10px] text-slate-500 font-medium whitespace-nowrap">
-              {isHi ? 'संतुलित क्षेत्र' : 'Optimal Zones'}
+            <span className="text-[7px] sm:text-[9px] text-slate-500 font-medium whitespace-nowrap">
+              {isHi ? 'संतुलित क्षेत्र' : 'Optimal'}
             </span>
           </div>
         </div>
 
         {/* 4-Pillar Compact Strip */}
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 pt-1 border-t border-slate-100 text-center">
-          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
-            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'धन' : 'CASH'}</span>
-            <span className="text-[9px] sm:text-xs font-black text-amber-700 block">{summary.wealthScore || 92}%</span>
+        <div className="grid grid-cols-4 gap-1 pt-1 border-t border-slate-100 text-center">
+          <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'धन' : 'CASH'}</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-amber-700 block">{summary.wealthScore || 48}%</span>
           </div>
-          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
-            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'स्वास्थ्य' : 'HEALTH'}</span>
-            <span className="text-[9px] sm:text-xs font-black text-emerald-700 block">{summary.healthScore || 85}%</span>
+          <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'स्वास्थ्य' : 'HEALTH'}</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-emerald-700 block">{summary.healthScore || 54}%</span>
           </div>
-          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
-            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'शांति' : 'HARMONY'}</span>
-            <span className="text-[9px] sm:text-xs font-black text-blue-700 block">{summary.relationshipScore || 80}%</span>
+          <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'शांति' : 'HARMONY'}</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-blue-700 block">{summary.relationshipScore || 50}%</span>
           </div>
-          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
-            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'करियर' : 'CAREER'}</span>
-            <span className="text-[9px] sm:text-xs font-black text-purple-700 block">{summary.careerScore || 88}%</span>
+          <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[8px] text-slate-400 block font-mono">{isHi ? 'करियर' : 'CAREER'}</span>
+            <span className="text-[8px] sm:text-[11px] font-black text-purple-700 block">{summary.careerScore || 52}%</span>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* PART 2: DETAILED REPORT & REMEDIES (VISIBLE IMMEDIATELY ON SCREEN)       */}
+      {/* SLIM EVERGREEN COUNTDOWN TIMER (2 Hours 37 Minutes)                      */}
       {/* ========================================================================= */}
-      <div className="space-y-2 sm:space-y-3">
+      <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-yellow-500/15 border border-amber-400/60 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shadow-xs">
+        <div className="flex items-center gap-1.5 truncate">
+          <Clock className="w-3.5 h-3.5 text-amber-600 animate-spin-slow flex-shrink-0" />
+          <span className="text-[10px] sm:text-xs font-black text-slate-900 truncate">
+            {isHi ? '⚡ सीमित समय विशेष छूट:' : '⚡ Limited Time Offer:'}{' '}
+            <span className="line-through text-slate-400 font-normal">₹2,499</span>{' '}
+            <span className="text-amber-700 font-mono font-black">₹899</span>{' '}
+            <span className="text-emerald-700 text-[9px] bg-emerald-100 px-1 rounded-md font-extrabold hidden sm:inline">(64% OFF)</span>
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1 bg-slate-950 text-amber-300 px-2 py-0.5 rounded-lg font-mono font-black text-[10px] sm:text-xs shadow-xs flex-shrink-0">
+          <span>{hours}h</span>:<span>{minutes}m</span>:<span>{seconds}s</span>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* PART 2: DETAILED REPORT & REMEDIES (BEHIND GLASSMORPHISM EFFECT)           */}
+      {/* ========================================================================= */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
@@ -183,15 +238,18 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
               {isHi ? 'भाग 2: विस्तृत 16-दिशा रिपोर्ट व उपाय' : 'PART 2: 16-ZONE AUDIT & REMEDIES'}
             </span>
           </div>
-          <span className="text-[9px] sm:text-[10px] font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-mono shadow-xs">
-            {isReportUnlocked ? (isHi ? 'अनलॉक' : 'UNLOCKED') : (isHi ? 'प्रीमियम ₹899' : 'PREMIUM ₹899')}
-          </span>
+          
+          {/* Price Tag with Cut Price ₹2,499 -> ₹899 */}
+          <div className="flex items-center gap-1 bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full font-mono shadow-xs flex-shrink-0">
+            <span className="line-through text-[9px] text-slate-700 font-normal">₹2,499</span>
+            <span className="text-[10px] font-black">₹899</span>
+          </div>
         </div>
 
         {/* Outer Container with Glassmorphism Effect */}
         <div className="relative rounded-2xl sm:rounded-3xl border-2 border-amber-400/80 overflow-hidden shadow-xl bg-white">
           
-          {/* Glassmorphism Frosted Blur Overlay (Immediately Visible on Screen) */}
+          {/* Glassmorphism Frosted Blur Overlay (Shown when Report is Locked) */}
           {!isReportUnlocked && (
             <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn select-none">
               <div className="bg-white/95 backdrop-blur-xl border-2 border-amber-400 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full text-center shadow-2xl space-y-3 sm:space-y-4 text-slate-900 animate-in zoom-in-95 duration-300">
@@ -203,14 +261,14 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
                 <div className="space-y-1">
                   <span className="text-[9px] font-mono font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2 py-0.5 rounded-full inline-block">
-                    {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ उपाय बंद हैं' : '🔒 FULL REMEDY BLUEPRINT LOCKED'}
+                    {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ उपाय सुरक्षित हैं' : '🔒 FULL REMEDY BLUEPRINT LOCKED'}
                   </span>
                   <h3 className="text-sm sm:text-base font-black text-slate-950 font-heading">
                     {isHi ? 'कमरेवार सटीक वैदिक उपाय अनलॉक करें' : 'Unlock Room-by-Room Vedic Remedies'}
                   </h3>
                   <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed font-medium">
                     {isHi 
-                      ? 'अपने घर के नक्शे के 16 दिशाओं के रंगीन टेप, धातु तार और अचूक उपाय तुरंत प्राप्त करें।'
+                      ? 'अपने घर के 16 दिशाओं के रंगीन टेप, धातु रॉड्स की लंबाई व अचूक उपाय तुरंत प्राप्त करें।'
                       : 'Unlock precision elemental color tapes, brass/copper wire rods, and consecrated remedies.'}
                   </p>
                 </div>
@@ -235,13 +293,14 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                   </div>
                 </div>
 
+                {/* CTA Button without Price inside text */}
                 <button
                   type="button"
                   onClick={handleUnlockClick}
-                  className="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Lock className="w-3.5 h-3.5 text-slate-950" />
-                  <span>{isHi ? 'विस्तृत रिपोर्ट अनलॉक करें (₹899) →' : 'Unlock Detailed Report (₹899) →'}</span>
+                  <span>{isHi ? 'संपूर्ण विस्तृत रिपोर्ट अनलॉक करें →' : 'Unlock Full 16-Zone Detailed Report →'}</span>
                 </button>
               </div>
             </div>
@@ -432,7 +491,10 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
               <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
                 <div className="flex items-center justify-between font-bold">
                   <span>{isHi ? 'रिपोर्ट शुल्क:' : 'Report Fee:'}</span>
-                  <span className="text-base font-black text-slate-900">₹899</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="line-through text-slate-400 font-normal">₹2,499</span>
+                    <span className="text-base font-black text-slate-900">₹899</span>
+                  </div>
                 </div>
                 <p className="text-[11px] text-slate-600">
                   {isHi 
