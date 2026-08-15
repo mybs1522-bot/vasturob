@@ -56,9 +56,9 @@ Example output:
 
     // High-accuracy vision models on OpenRouter
     const models = [
-      'qwen/qwen3-vl-32b-instruct',
-      'nvidia/nemotron-nano-12b-v2-vl:free',
-      'google/gemma-4-31b-it:free'
+      'qwen/qwen2.5-vl-72b-instruct',
+      'google/gemini-2.5-flash',
+      'nvidia/nemotron-nano-12b-v2-vl:free'
     ];
 
     let lastError = '';

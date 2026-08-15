@@ -20,13 +20,14 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
     drawH = canvasH; drawW = canvasH * imgAspect; offsetX = (canvasW - drawW) / 2; offsetY = 0;
   }
 
-  console.log('[Scanner] 🚀 Calling OpenRouter Qwen3 VL 32B Vision AI exclusively...');
+  console.log('[Scanner] 🚀 Calling OpenRouter Qwen 2.5 VL 72B Vision AI exclusively...');
 
-  // Extract base64 data from dataUrl
+  // Compress and resize image to prevent 4.5MB Serverless Function limits
+  const compressedDataUrl = await compressImage(dataUrl, 1600);
   let mimeType = 'image/jpeg';
-  let base64Data = dataUrl;
-  if (dataUrl.includes('data:')) {
-    const parts = dataUrl.split(';base64,');
+  let base64Data = compressedDataUrl;
+  if (compressedDataUrl.includes('data:')) {
+    const parts = compressedDataUrl.split(';base64,');
     mimeType = parts[0].replace('data:', '');
     base64Data = parts[1];
   }
@@ -100,6 +101,27 @@ function getImageDimensions(dataUrl) {
     const img = new Image();
     img.onload = () => resolve({ width: img.width, height: img.height });
     img.onerror = () => resolve({ width: 800, height: 600 });
+    img.src = dataUrl;
+  });
+}
+
+function compressImage(dataUrl, maxSize = 1600) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        const scale = Math.min(maxSize / w, maxSize / h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
