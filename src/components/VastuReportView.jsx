@@ -30,36 +30,20 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   // Status interpretation based on score
   const getScoreStatus = (score) => {
     if (score >= 80) return { 
-      text: isHi ? 'अति उत्तम / शुभ संरेखण' : 'Excellent Alignment', 
+      text: isHi ? 'अति उत्तम' : 'Excellent', 
       color: 'text-emerald-800 bg-emerald-100 border-emerald-300' 
     };
     if (score >= 60) return { 
-      text: isHi ? 'मध्यम वास्तु ऊर्जा' : 'Moderate Alignment', 
+      text: isHi ? 'मध्यम' : 'Moderate', 
       color: 'text-amber-800 bg-amber-100 border-amber-300' 
     };
     return { 
-      text: isHi ? 'गंभीर वास्तु दोष उपस्थित' : 'Critical Doshas Present', 
+      text: isHi ? 'गंभीर दोष' : 'Critical Doshas', 
       color: 'text-red-800 bg-red-100 border-red-300' 
     };
   };
 
   const scoreStatus = getScoreStatus(overallScore);
-
-  // Instant PDF Report Generation
-  const handleDownloadPdf = () => {
-    if (!isReportUnlocked) {
-      setIsPaywallModalOpen(true);
-      return;
-    }
-    setIsDownloading(true);
-    try {
-      window.print();
-    } catch (err) {
-      console.error('Print Failed:', err);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   const handleUnlockClick = () => {
     setIsPaywallModalOpen(true);
@@ -96,203 +80,167 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   };
 
   return (
-    <div className={`space-y-8 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
+    <div className={`space-y-4 sm:space-y-6 max-w-4xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
       
       {/* ========================================================================= */}
-      {/* PART 1: FREE VASTU REPORT (FREE PREVIEW & MACRO SCORES)                   */}
+      {/* PART 1: ULTRA-COMPACT FREE OVERVIEW (TAKES < 35% MOBILE SCREEN)          */}
       {/* ========================================================================= */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800 font-mono">
-              {isHi ? 'भाग 1: मुफ्त वास्तु प्रारंभिक रिपोर्ट' : 'PART 1: FREE VASTU OVERVIEW REPORT'}
+      <div className="clean-card p-3 sm:p-5 bg-white border border-amber-300 shadow-md rounded-2xl sm:rounded-3xl space-y-2.5 sm:space-y-4">
+        
+        {/* Header Bar */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <h2 className="text-xs sm:text-base font-black text-slate-900 font-heading truncate">
+              {isHi ? 'वैदिक महावास्तु स्कोर रिपोर्ट' : 'Vedic Vastu Audit Report'}
+            </h2>
+            <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-md hidden sm:inline">
+              16-ZONES
             </span>
           </div>
-          <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-mono">
-            {isHi ? 'मुफ्त उपलब्ध' : 'FREE INCLUDED'}
-          </span>
+
+          <button
+            type="button"
+            onClick={onRetry}
+            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 transition-all cursor-pointer flex-shrink-0"
+          >
+            <RotateCcw className="w-3 h-3 text-slate-500" />
+            <span>{isHi ? 'नया स्कैन' : 'New Scan'}</span>
+          </button>
         </div>
 
-        {/* Free Macro Scores Summary Card */}
-        <div className="clean-card p-6 bg-white border border-amber-300 shadow-xl space-y-6 rounded-3xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-            <div>
-              <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wider block mb-1">
-                {isHi ? '16 महावास्तु वैदिक विश्लेषण' : '16-Zone MahaVastu Audit'}
-              </span>
-              <h2 className="text-xl font-black text-slate-900 font-heading">
-                {isHi ? 'वैदिक महावास्तु विश्लेषण रिपोर्ट' : 'Vedic Vastu Shastra Audit Report'}
-              </h2>
-              <p className="text-xs text-slate-500">
-                {isHi ? '16 महावास्तु दिशाओं का सूक्ष्म ज्यामितीय मूल्यांकन' : 'Calculated across 16 Directional Energy Zones & Pancha Tattva'}
-              </p>
+        {/* 3-Column Horizontal Grid (Fits in 1 row on ALL mobile screens) */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 text-center">
+          {/* Box 1: Prosperity Score */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'वास्तु स्कोर' : 'PROSPERITY'}
+            </span>
+            <div className="text-lg sm:text-3xl font-black text-slate-950 font-mono leading-none my-0.5">
+              {overallScore}<span className="text-[9px] sm:text-xs font-normal text-slate-400">/100</span>
             </div>
-
-            <button
-              type="button"
-              onClick={onRetry}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>{isHi ? 'नया विश्लेषण करें' : 'New Scan'}</span>
-            </button>
+            <span className={`text-[8px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full border ${scoreStatus.color} whitespace-nowrap`}>
+              {scoreStatus.text}
+            </span>
           </div>
 
-          {/* Big Score Gauge + Key Statistics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-            {/* Main Dial */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
-                {isHi ? 'लक्ष्मी-कुबेर वास्तु स्कोर' : 'Prosperity Score'}
-              </span>
-              <div className="text-4xl font-black text-slate-950 font-mono">
-                {overallScore}<span className="text-sm font-bold text-slate-400">/100</span>
-              </div>
-              <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border ${scoreStatus.color}`}>
-                {scoreStatus.text}
-              </span>
+          {/* Box 2: Critical Defects */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'गंभीर दोष' : 'DEFECTS'}
+            </span>
+            <div className="text-lg sm:text-3xl font-black text-red-600 font-mono leading-none my-0.5">
+              {doshasCount}
             </div>
-
-            {/* Stat 1: Defect Count */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
-                {isHi ? 'पहचाने गए गंभीर दोष' : 'Critical Defects'}
-              </span>
-              <div className="text-3xl font-black text-red-600 font-mono">
-                {doshasCount}
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium">
-                {isHi ? `${totalRooms} कमरों में से` : `out of ${totalRooms} rooms`}
-              </span>
-            </div>
-
-            {/* Stat 2: Favorable Count */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
-                {isHi ? 'शुभ व संतुलित दिशाएं' : 'Auspicious Alignments'}
-              </span>
-              <div className="text-3xl font-black text-emerald-600 font-mono">
-                {idealCount}
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium">
-                {isHi ? 'सकारात्मक ऊर्जा प्रवाह' : 'Optimal Energy Zones'}
-              </span>
-            </div>
+            <span className="text-[8px] sm:text-[10px] text-slate-500 font-medium whitespace-nowrap">
+              {isHi ? `${totalRooms} कमरों में` : `in ${totalRooms} rooms`}
+            </span>
           </div>
 
-          {/* Prosperity Index Matrix */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100">
-            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-              <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'धन प्रवाह (Cash Flow)' : 'Cash Flow'}</span>
-              <span className="text-xs font-black text-amber-700">
-                {summary.wealthScore || 92}% {isHi ? 'उत्तम' : 'Optimal'}
-              </span>
+          {/* Box 3: Auspicious Alignments */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-1.5 sm:p-3 flex flex-col justify-center items-center">
+            <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block font-mono">
+              {isHi ? 'शुभ दिशाएं' : 'AUSPICIOUS'}
+            </span>
+            <div className="text-lg sm:text-3xl font-black text-emerald-600 font-mono leading-none my-0.5">
+              {idealCount}
             </div>
-            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-              <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'स्वास्थ्य व नींद' : 'Health & Sleep'}</span>
-              <span className="text-xs font-black text-emerald-700">
-                {summary.healthScore || 85}% {isHi ? 'संतुलित' : 'Balanced'}
-              </span>
-            </div>
-            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-              <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'पारिवारिक सौहार्द' : 'Harmony'}</span>
-              <span className="text-xs font-black text-blue-700">
-                {summary.relationshipScore || 80}% {isHi ? 'शुभ' : 'Favorable'}
-              </span>
-            </div>
-            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-              <span className="text-[10px] text-slate-500 block font-mono">{isHi ? 'करियर व यश' : 'Career Growth'}</span>
-              <span className="text-xs font-black text-purple-700">
-                {summary.careerScore || 88}% {isHi ? 'प्रगतिशील' : 'Progressive'}
-              </span>
-            </div>
+            <span className="text-[8px] sm:text-[10px] text-slate-500 font-medium whitespace-nowrap">
+              {isHi ? 'संतुलित क्षेत्र' : 'Optimal Zones'}
+            </span>
           </div>
+        </div>
 
-          {/* Single Prominent Action Button: Download Full Certified PDF Report */}
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleUnlockClick}
-              disabled={isDownloading}
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-101 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <Download className="w-4 h-4 text-slate-950" />
-              <span>{isHi ? 'संपूर्ण प्रमाणित PDF रिपोर्ट डाउनलोड करें (₹899)' : 'Download Full Certified PDF Report (₹899)'}</span>
-            </button>
+        {/* 4-Pillar Compact Strip */}
+        <div className="grid grid-cols-4 gap-1 sm:gap-2 pt-1 border-t border-slate-100 text-center">
+          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'धन' : 'CASH'}</span>
+            <span className="text-[9px] sm:text-xs font-black text-amber-700 block">{summary.wealthScore || 92}%</span>
+          </div>
+          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'स्वास्थ्य' : 'HEALTH'}</span>
+            <span className="text-[9px] sm:text-xs font-black text-emerald-700 block">{summary.healthScore || 85}%</span>
+          </div>
+          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'शांति' : 'HARMONY'}</span>
+            <span className="text-[9px] sm:text-xs font-black text-blue-700 block">{summary.relationshipScore || 80}%</span>
+          </div>
+          <div className="bg-slate-50 p-1 sm:p-2 rounded-lg border border-slate-100">
+            <span className="text-[7px] sm:text-[9px] text-slate-400 block font-mono">{isHi ? 'करियर' : 'CAREER'}</span>
+            <span className="text-[9px] sm:text-xs font-black text-purple-700 block">{summary.careerScore || 88}%</span>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* PART 2: DETAILED REPORT & REMEDIES (BEHIND GLASSMORPHISM EFFECT)           */}
+      {/* PART 2: DETAILED REPORT & REMEDIES (VISIBLE IMMEDIATELY ON SCREEN)       */}
       {/* ========================================================================= */}
-      <div className="space-y-4 pt-2">
+      <div className="space-y-2 sm:space-y-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-amber-600" />
-            <span className="text-xs font-black uppercase tracking-wider text-slate-900 font-mono">
-              {isHi ? 'भाग 2: विस्तृत 16-दिशा महावास्तु विश्लेषण व बिना तोड़फोड़ उपाय' : 'PART 2: DETAILED 16-ZONE AUDIT & ZERO-DEMOLITION REMEDIES'}
+          <div className="flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-900 font-mono truncate">
+              {isHi ? 'भाग 2: विस्तृत 16-दिशा रिपोर्ट व उपाय' : 'PART 2: 16-ZONE AUDIT & REMEDIES'}
             </span>
           </div>
-          <span className="text-[10px] font-black bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full font-mono shadow-xs">
+          <span className="text-[9px] sm:text-[10px] font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-mono shadow-xs">
             {isReportUnlocked ? (isHi ? 'अनलॉक' : 'UNLOCKED') : (isHi ? 'प्रीमियम ₹899' : 'PREMIUM ₹899')}
           </span>
         </div>
 
         {/* Outer Container with Glassmorphism Effect */}
-        <div className="relative rounded-3xl border-2 border-amber-400/70 overflow-hidden shadow-2xl bg-white">
+        <div className="relative rounded-2xl sm:rounded-3xl border-2 border-amber-400/80 overflow-hidden shadow-xl bg-white">
           
-          {/* Glassmorphism Frosted Blur Overlay (Shown when Report is Locked) */}
+          {/* Glassmorphism Frosted Blur Overlay (Immediately Visible on Screen) */}
           {!isReportUnlocked && (
-            <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-fadeIn select-none">
-              <div className="bg-white/95 backdrop-blur-xl border-2 border-amber-400 p-6 sm:p-8 rounded-3xl max-w-lg w-full text-center shadow-2xl space-y-5 text-slate-900 animate-in zoom-in-95 duration-300">
+            <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn select-none">
+              <div className="bg-white/95 backdrop-blur-xl border-2 border-amber-400 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full text-center shadow-2xl space-y-3 sm:space-y-4 text-slate-900 animate-in zoom-in-95 duration-300">
                 
                 {/* Glowing Lock Badge */}
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center mx-auto shadow-lg ring-4 ring-amber-400/30">
-                  <Lock className="w-7 h-7" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center mx-auto shadow-md ring-2 ring-amber-400/30">
+                  <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
 
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full inline-block">
-                    {isHi ? '🔒 विस्तृत रिपोर्ट व उपाय लॉक हैं' : '🔒 FULL DETAILED REPORT & REMEDIES LOCKED'}
+                <div className="space-y-1">
+                  <span className="text-[9px] font-mono font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2 py-0.5 rounded-full inline-block">
+                    {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ उपाय बंद हैं' : '🔒 FULL REMEDY BLUEPRINT LOCKED'}
                   </span>
-                  <h3 className="text-lg sm:text-xl font-black text-slate-950 font-heading">
-                    {isHi ? 'कमरेवार विस्तृत वैदिक उपाय व समाधान अनलॉक करें' : 'Unlock Room-by-Room Vedic Remedies & Solutions'}
+                  <h3 className="text-sm sm:text-base font-black text-slate-950 font-heading">
+                    {isHi ? 'कमरेवार सटीक वैदिक उपाय अनलॉक करें' : 'Unlock Room-by-Room Vedic Remedies'}
                   </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed font-medium">
                     {isHi 
-                      ? 'अपने घर के नक्शे के आधार पर सटीक 16-दिशा कोण सुधार, पंचतत्व रंगीन पट्टियां, धातु रॉड्स की सही दिशा व लंबाई, और धनवर्धक यंत्रों की संपूर्ण प्रमाणित गाइड प्राप्त करें।'
-                      : 'Unlock precision elemental color spectrum tape boundaries, sacred brass/copper wire gauge lengths, and consecrated pyramid energizer placements designed specifically for your floor plan.'}
+                      ? 'अपने घर के नक्शे के 16 दिशाओं के रंगीन टेप, धातु तार और अचूक उपाय तुरंत प्राप्त करें।'
+                      : 'Unlock precision elemental color tapes, brass/copper wire rods, and consecrated remedies.'}
                   </p>
                 </div>
 
-                {/* Micro Benefits Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pt-1">
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 text-xs font-bold text-slate-800">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span>{isHi ? '100% बिना तोड़फोड़ उपाय' : '100% Zero Wall Breaking'}</span>
+                {/* Micro 4-Bullet Grid */}
+                <div className="grid grid-cols-2 gap-1.5 text-left pt-0.5">
+                  <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-800">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">{isHi ? 'बिना तोड़फोड़' : 'Zero Demolition'}</span>
                   </div>
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 text-xs font-bold text-slate-800">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span>{isHi ? '16 दिशाओं का सूक्ष्म मैप' : '16-Zone Micro Map'}</span>
+                  <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-800">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">{isHi ? '16 दिशा मैप' : '16-Zone Map'}</span>
                   </div>
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 text-xs font-bold text-slate-800">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span>{isHi ? 'आचार्य सत्यापित रिपोर्ट' : 'Acharya Verified PDF'}</span>
+                  <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-800">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">{isHi ? 'आचार्य रिपोर्ट' : 'Acharya PDF'}</span>
                   </div>
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 text-xs font-bold text-slate-800">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span>{isHi ? 'आजीवन सुख-समृद्धि सुरक्षा' : 'Lifetime Wealth Guard'}</span>
+                  <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-800">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">{isHi ? 'धन सुरक्षा' : 'Wealth Guard'}</span>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleUnlockClick}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl hover:scale-102 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <Lock className="w-4 h-4 text-slate-950" />
+                  <Lock className="w-3.5 h-3.5 text-slate-950" />
                   <span>{isHi ? 'विस्तृत रिपोर्ट अनलॉक करें (₹899) →' : 'Unlock Detailed Report (₹899) →'}</span>
                 </button>
               </div>
@@ -300,107 +248,107 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
           )}
 
           {/* Underneath Content (Blurred when Locked, Crystal-Clear when Unlocked) */}
-          <div className={`p-6 space-y-6 ${!isReportUnlocked ? 'filter blur-[5px] pointer-events-none select-none opacity-60' : ''}`}>
+          <div className={`p-4 sm:p-6 space-y-4 sm:space-y-6 ${!isReportUnlocked ? 'filter blur-[4px] pointer-events-none select-none opacity-50' : ''}`}>
             
-            <div className="flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 p-3.5 rounded-2xl">
-              <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 p-3 rounded-xl">
+              <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <div>
-                <p className="font-extrabold text-xs">
+                <p className="font-extrabold text-[11px] sm:text-xs">
                   {isHi 
-                    ? 'वरिष्ठ वास्तु विशेषज्ञ द्वारा विस्तृत रिपोर्ट कुछ ही घंटों में भेजी जाएगी।' 
-                    : 'A detailed report will be provided by Vastu expert review in a few hours.'}
+                    ? 'वरिष्ठ वास्तु विशेषज्ञ द्वारा विस्तृत रिपोर्ट तैयार की गई है।' 
+                    : 'A detailed report is verified by Senior Vastu Acharya.'}
                 </p>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 leading-relaxed">
                   {isHi
-                    ? 'आपका नक्शा और 16 दिशाओं का स्कैन हमारे प्रमाणित वास्तु आचार्य को भेज दिया गया है। अनुकूलित रिपोर्ट और बिना तोड़फोड़ का उपाय मैप सीधे आपके WhatsApp पर मिलेगा!'
-                    : 'Your floor plan layout and 16-zone directional scan have been submitted to our Senior Certified Vastu Acharya. A customized, microscopic report and non-demolition remedies map will be delivered directly to your mobile / WhatsApp!'}
+                    ? '16 दिशाओं का स्कैन और बिना तोड़फोड़ का उपाय मैप नीचे उपलब्ध है।'
+                    : '16-Zone directional scan and non-demolition remedies map are detailed below.'}
                 </p>
               </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 border-b border-slate-200 pb-2">
               <button
                 type="button"
                 onClick={() => setActiveTab('rooms')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer ${
+                  activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room Audit (${evaluatedRooms.length})`}
+                {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room (${evaluatedRooms.length})`}
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('remedies')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer ${
+                  activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {isHi ? 'बिना तोड़फोड़ वैदिक उपाय' : 'Zero-Demolition Remedies'}
+                {isHi ? 'बिना तोड़फोड़ उपाय' : 'Zero-Demolition'}
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('yantras')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer ${
+                  activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {isHi ? 'वैदिक यंत्र व दैनिक नियम' : 'Vedic Yantras & Rituals'}
+                {isHi ? 'वैदिक यंत्र' : 'Vedic Yantras'}
               </button>
             </div>
 
             {/* TAB 1: Room-by-Room Microscopic Audit */}
             {activeTab === 'rooms' && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {evaluatedRooms.length === 0 ? (
-                  <div className="clean-card p-6 bg-white border border-slate-200 text-center space-y-2">
-                    <Layers className="w-7 h-7 text-slate-400 mx-auto" />
+                  <div className="clean-card p-4 bg-white border border-slate-200 text-center space-y-1">
+                    <Layers className="w-5 h-5 text-slate-400 mx-auto" />
                     <h4 className="font-extrabold text-xs text-slate-800">
                       {isHi ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
                     </h4>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-2.5">
                     {evaluatedRooms.map((room, idx) => (
                       <div
                         key={room.id || idx}
-                        className="clean-card p-4 bg-white border border-slate-200 space-y-2 hover:border-amber-400 transition-all"
+                        className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5 hover:border-amber-400 transition-all"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
-                            <h4 className="font-extrabold text-sm text-slate-900">{room.name}</h4>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
+                            <h4 className="font-extrabold text-xs sm:text-sm text-slate-900">{room.name}</h4>
                             {room.zone && (
-                              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full font-mono border border-amber-200">
-                                {isHi ? `दिशा: ${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `Zone: ${room.zone.id} (${room.zone.name})`}
+                              <span className="text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded-full font-mono border border-amber-200">
+                                {isHi ? `${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `${room.zone.id}`}
                               </span>
                             )}
                           </div>
 
-                          <span className={`text-xs font-black px-2.5 py-1 rounded-full ${
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                             room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
                           }`}>
                             {room.rating === 'ideal' || room.rating === 'favorable' 
-                              ? (isHi ? '✅ शुभ संरेखण' : '✅ Auspicious Alignment') 
-                              : (isHi ? '⚠️ वास्तु दोष उपस्थित' : '⚠️ Vastu Defect Found')}
+                              ? (isHi ? '✅ शुभ' : '✅ Auspicious') 
+                              : (isHi ? '⚠️ दोष' : '⚠️ Defect')}
                           </span>
                         </div>
 
-                        <p className="text-xs text-slate-600 leading-relaxed">
+                        <p className="text-[11px] text-slate-600 leading-relaxed">
                           {room.description || 'Room zone evaluated.'}
                         </p>
 
                         {room.remedy && (
-                          <div className="bg-amber-50/70 p-2.5 rounded-xl border border-amber-200 text-xs text-amber-900 font-medium">
-                            <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy Solution:'}</strong> {room.remedy}
+                          <div className="bg-amber-50/70 p-2 rounded-lg border border-amber-200 text-[11px] text-amber-900 font-medium">
+                            <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy:'}</strong> {room.remedy}
                           </div>
                         )}
 
                         {room.zone?.lord && (
-                          <div className="text-[11px] text-slate-500 font-mono pt-1 flex items-center gap-2 border-t border-slate-100">
-                            <span className="font-bold text-slate-700">{isHi ? 'दिशा के स्वामी देवता:' : 'Ashtadikpalaka Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
+                          <div className="text-[10px] text-slate-500 font-mono pt-1 flex items-center gap-1.5 border-t border-slate-100">
+                            <span className="font-bold text-slate-700">{isHi ? 'देवता:' : 'Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
                           </div>
                         )}
                       </div>
@@ -412,25 +360,25 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
             {/* TAB 2: Zero Demolition Remedies */}
             {activeTab === 'remedies' && (
-              <div className="space-y-3">
-                <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-1">
+              <div className="space-y-2.5">
+                <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-1">
                   <h4 className="font-black text-xs text-amber-950 font-heading">
                     {isHi ? 'बिना तोड़फोड़ 100% वैदिक वास्तु समाधान' : '100% Non-Demolition Elemental Balance'}
                   </h4>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                  <p className="text-[10px] text-slate-600 leading-relaxed">
                     {isHi 
-                      ? 'महावास्तु सिद्धांतों के अनुसार, दीवारों या दरवाजों को तोड़े बिना केवल तांबे की पट्टी, पीतल के तार व पंचतत्व रंगों द्वारा दिशा दोषों को शांत किया जाता है।' 
-                      : 'According to MahaVastu, elemental defects can be fully neutralized using elemental color tapes, brass/copper rods, and pyramid energy balancers without breaking walls.'}
+                      ? 'महावास्तु सिद्धांतों के अनुसार, दीवारों को तोड़े बिना केवल तांबे/पीतल के तार व पंचतत्व रंगों द्वारा दोष शांत किए जाते हैं।' 
+                      : 'According to MahaVastu, elemental defects are neutralized using elemental color tapes and sacred rods without breaking walls.'}
                   </p>
                 </div>
 
                 {evaluatedRooms.filter(r => r.remedy).map((r, idx) => (
-                  <div key={idx} className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                  <div key={idx} className="clean-card p-3 bg-white border border-slate-200 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-xs text-slate-900">{r.name} ({r.zone?.id})</span>
-                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-mono">{isHi ? 'वैदिक सुधार' : 'Vedic Remedy'}</span>
+                      <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded-md font-mono">{isHi ? 'सुधार' : 'Remedy'}</span>
                     </div>
-                    <p className="text-xs text-slate-700 leading-relaxed">{r.remedy}</p>
+                    <p className="text-[11px] text-slate-700 leading-relaxed">{r.remedy}</p>
                   </div>
                 ))}
               </div>
@@ -438,24 +386,24 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
             {/* TAB 3: Vedic Yantras & Rituals */}
             {activeTab === 'yantras' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+              <div className="space-y-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="clean-card p-3 bg-white border border-slate-200 space-y-1">
                     <span className="font-black text-xs text-slate-900 block">{isHi ? 'श्री यंत्र (Shree Yantra)' : 'Shree Yantra'}</span>
-                    <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'ईशान कोण (North-East)' : 'North-East (Ishanya)'}</span>
-                    <p className="text-[11px] text-slate-600">{isHi ? 'मां लक्ष्मी की कृपा, मानसिक शांति व घर में सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi, divine peace & mental clarity.'}</p>
+                    <span className="text-[9px] font-mono text-amber-700 block">{isHi ? 'ईशान कोण' : 'North-East'}</span>
+                    <p className="text-[10px] text-slate-600">{isHi ? 'मां लक्ष्मी की कृपा, मानसिक शांति व सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi & mental clarity.'}</p>
                   </div>
 
-                  <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                  <div className="clean-card p-3 bg-white border border-slate-200 space-y-1">
                     <span className="font-black text-xs text-slate-900 block">{isHi ? 'कुबेर यंत्र (Kuber Yantra)' : 'Kuber Yantra'}</span>
-                    <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'उत्तर दिशा (North Wall)' : 'North Wall'}</span>
-                    <p className="text-[11px] text-slate-600">{isHi ? 'निरंतर धन प्रवाह, व्यापार में लाभ और नई नौकरी के अवसर बढ़ाता है।' : 'Enhances continuous cash flow, career growth & business wealth.'}</p>
+                    <span className="text-[9px] font-mono text-amber-700 block">{isHi ? 'उत्तर दिशा' : 'North Wall'}</span>
+                    <p className="text-[10px] text-slate-600">{isHi ? 'निरंतर धन प्रवाह व नए अवसर बढ़ाता है।' : 'Enhances continuous cash flow & business growth.'}</p>
                   </div>
 
-                  <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                  <div className="clean-card p-3 bg-white border border-slate-200 space-y-1">
                     <span className="font-black text-xs text-slate-900 block">{isHi ? 'पीतल स्वास्तिक (Brass Swastika)' : 'Brass Swastika'}</span>
-                    <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'मुख्य प्रवेश द्वार' : 'Main Entrance Door'}</span>
-                    <p className="text-[11px] text-slate-600">{isHi ? 'नजर दोष और नकारात्मक ऊर्जा को घर में प्रवेश करने से रोकता है।' : 'Blocks evil eye (Nazar), negativity & financial obstacles.'}</p>
+                    <span className="text-[9px] font-mono text-amber-700 block">{isHi ? 'मुख्य द्वार' : 'Main Entrance Door'}</span>
+                    <p className="text-[10px] text-slate-600">{isHi ? 'नजर दोष और नकारात्मक ऊर्जा को रोकता है।' : 'Blocks evil eye (Nazar) & negativity.'}</p>
                   </div>
                 </div>
               </div>
