@@ -2,7 +2,7 @@ import { ROOM_TYPES } from './vastuEngine';
 
 /**
  * HIGH-PRECISION FLOOR PLAN SCANNER
- * Strictly uses OpenRouter Qwen3 VL 32B Vision AI (via /api/scan-floor-plan serverless endpoint)
+ * Uses OpenRouter Vision AI (GPT-4o / Gemini 2.5 Flash) via /api/scan-floor-plan
  */
 export async function scanFloorPlanWithGeminiVision(dataUrl) {
   // Get image dimensions for coordinate mapping
@@ -20,7 +20,7 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
     drawH = canvasH; drawW = canvasH * imgAspect; offsetX = (canvasW - drawW) / 2; offsetY = 0;
   }
 
-  console.log('[Scanner] 🚀 Calling OpenRouter Qwen 2.5 VL 72B Vision AI exclusively...');
+  console.log('[Scanner] 🚀 Calling OpenRouter Vision AI (GPT-4o / Gemini 2.5)...');
 
   // Compress and resize image to prevent 4.5MB Serverless Function limits
   const compressedDataUrl = await compressImage(dataUrl, 1600);
@@ -33,7 +33,7 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout for AI
+  const timeout = setTimeout(() => controller.abort(), 60000);
 
   try {
     const res = await fetch('/api/scan-floor-plan', {
@@ -56,8 +56,16 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
         }
 
         if (Array.isArray(parsedRooms) && parsedRooms.length > 0) {
-          console.log(`[Scanner] ✅ Qwen3 VL 32B detected ${parsedRooms.length} rooms! Model: ${data.model}`);
-          return parsedRooms.map((r, i) => mapRoomToCanvas(r, i, offsetX, offsetY, drawW, drawH, 'ai'));
+          const modelDisplayName = (data.model || '').includes('gpt-4o')
+            ? 'OpenAI GPT-4o Vision'
+            : (data.model || '').includes('gemini')
+            ? 'Gemini 2.5 Flash Vision'
+            : 'AI Vision';
+
+          console.log(`[Scanner] ✅ ${modelDisplayName} detected ${parsedRooms.length} rooms!`);
+          const mapped = parsedRooms.map((r, i) => mapRoomToCanvas(r, i, offsetX, offsetY, drawW, drawH, 'ai'));
+          mapped.modelName = modelDisplayName;
+          return mapped;
         } else {
           throw new Error("AI returned empty or invalid room array.");
         }
@@ -71,8 +79,7 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
   } catch (err) {
     clearTimeout(timeout);
     console.error('[Scanner] OpenRouter API call failed:', err.message);
-    // Rethrow to let the UI handle the error state (e.g. show manual placement)
-    throw new Error("Failed to scan floor plan with Qwen AI: " + err.message);
+    throw new Error("Failed to scan floor plan with Vision AI: " + err.message);
   }
 }
 

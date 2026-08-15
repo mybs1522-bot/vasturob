@@ -101,7 +101,7 @@ export default function App() {
           setPlacedRooms(detected);
           setScanNotice({
             type: 'success',
-            message: `✨ Scanned via Qwen 2.5 72B Vision AI (${detected.length} rooms placed)`
+            message: `✨ Scanned via ${detected.modelName || 'Vision AI'} (${detected.length} rooms placed)`
           });
           return;
         }

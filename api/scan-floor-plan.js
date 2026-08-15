@@ -23,40 +23,47 @@ export default async function handler(req, res) {
 
     const dataUrl = `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`;
 
-    const promptText = `You are a high-precision architectural vision AI scanner.
-Examine this floor plan blueprint image meticulously.
+    const promptText = `You are a world-class architectural blueprint OCR vision engine.
+Carefully examine this floor plan diagram and identify the actual room spaces.
 
-Read EVERY printed text label inside room boundaries:
-- KITCHEN / KIT / COOKING -> typeId: "kitchen", name: "KITCHEN"
-- MASTER BEDROOM / M.BED / BEDROOM 1 -> typeId: "master_bedroom", name: "MASTER BEDROOM"
-- BEDROOM 2 / BEDROOM 3 / KIDS BED / GUEST -> typeId: "kids_bedroom", name: "BEDROOM"
-- LIVING / HALL / DRAWING / FAMILY ROOM -> typeId: "living_room", name: "LIVING ROOM"
-- DINING / EATING -> typeId: "dining", name: "DINING ROOM"
-- TOILET / BATH / WASHROOM / WC / POWDER -> typeId: "toilet", name: "WASHROOM"
-- MAIN ENTRANCE / ENTRY / FOYER / PORCH -> typeId: "entrance", name: "MAIN ENTRANCE"
-- PUJA / PRAYER / TEMPLE -> typeId: "puja_room", name: "PUJA ROOM"
-- STORE / UTILITY -> typeId: "store_room", name: "STORE ROOM"
-- BALCONY / TERRACE -> typeId: "balcony", name: "BALCONY"
-- STAIRS / STAIRCASE -> typeId: "staircase", name: "STAIRCASE"
+Find EVERY distinct room label printed on this plan (e.g., "BEDROOM 2", "BEDROOM 3", "M. BEDROOM / MASTER BEDROOM", "KITCHEN", "DINING", "LIVING / GREAT ROOM / FAMILY ROOM", "BATH / M. BATH / WASHROOM", "ENTRY / FRONT PORCH / FOYER", "PUJA / MANDIR", "BALCONY / DECK", "STAIRS").
 
-For EVERY room label found, estimate its EXACT center location on a 0-100 percentage grid:
-- xPct: horizontal center of the room label (0 = extreme left, 100 = extreme right)
-- yPct: vertical center of the room label (0 = extreme top, 100 = extreme bottom)
+For EACH detected room:
+1. Map to one of these standard vastu typeId values:
+   - "kitchen" (Kitchen, Pantry, Cooking)
+   - "master_bedroom" (Master Bedroom, M. Bedroom, Bed 1)
+   - "kids_bedroom" (Bedroom 2, Bedroom 3, Guest Bedroom, Bed)
+   - "living_room" (Living Room, Family Room, Great Room, Hall, Drawing Room)
+   - "dining" (Dining Room, Dining Area)
+   - "toilet" (Washroom, Bathroom, Bath, Powder Room, Toilet, WC, M. Bath, Bath 2)
+   - "entrance" (Main Door, Entry, Entrance, Foyer, Front Porch)
+   - "puja_room" (Puja, Mandir, Prayer Room, Temple)
+   - "balcony" (Balcony, Terrace, Deck, Porch)
+   - "staircase" (Stairs, Staircase)
+   - "store_room" (Store Room, Utility)
 
-Return ONLY a valid JSON array of objects. Do not include markdown code fences or explanation text.
+2. Give its precise center coordinate as percentage (0 to 100) of the entire image width & height:
+   - "xPct": horizontal center of the room label (0 = far left, 100 = far right)
+   - "yPct": vertical center of the room label (0 = top edge, 100 = bottom edge)
 
-Example output:
+CRITICAL RULES:
+- Read ONLY real room labels printed on this image. Do not invent or guess rooms that are not written on the plan.
+- Avoid duplicate entries for the same room.
+- Output ONLY a valid JSON array of objects with keys: "typeId", "name", "xPct", "yPct".
+- No markdown explanation, no surrounding text.
+
+Example:
 [
-  {"typeId":"kitchen","name":"KITCHEN","xPct":72,"yPct":28},
-  {"typeId":"master_bedroom","name":"MASTER BEDROOM","xPct":22,"yPct":78},
-  {"typeId":"living_room","name":"LIVING ROOM","xPct":45,"yPct":50}
+  {"typeId":"master_bedroom","name":"MASTER BEDROOM","xPct":25,"yPct":35},
+  {"typeId":"kitchen","name":"KITCHEN","xPct":75,"yPct":35},
+  {"typeId":"living_room","name":"LIVING ROOM","xPct":50,"yPct":55}
 ]`;
 
-    // High-accuracy vision models on OpenRouter (Verified working)
+    // Industry-leading Vision Models on OpenRouter
     const models = [
-      'qwen/qwen2.5-vl-72b-instruct',
+      'openai/gpt-4o',
       'google/gemini-2.5-flash',
-      'openai/gpt-4o-mini'
+      'qwen/qwen2.5-vl-72b-instruct'
     ];
 
     let lastError = '';
@@ -80,7 +87,7 @@ Example output:
                 { type: 'text', text: promptText },
               ],
             }],
-            temperature: 0.1,
+            temperature: 0.0,
             max_tokens: 2048,
           }),
         });
@@ -106,8 +113,25 @@ Example output:
             }
 
             if (Array.isArray(parsedRooms) && parsedRooms.length > 0) {
-              console.log(`[OpenRouter Vision] ✅ Successfully scanned ${parsedRooms.length} room boxes with ${model}`);
-              return res.status(200).json({ success: true, text: JSON.stringify(parsedRooms), model });
+              // Deduplicate rooms that are too close (within 6% distance) or have duplicate names in the same area
+              const uniqueRooms = [];
+              for (const r of parsedRooms) {
+                if (!r.xPct || !r.yPct || !r.typeId) continue;
+                const isDup = uniqueRooms.some(existing => {
+                  const dx = existing.xPct - r.xPct;
+                  const dy = existing.yPct - r.yPct;
+                  const dist = Math.sqrt(dx * dx + dy * dy);
+                  return dist < 7;
+                });
+                if (!isDup) {
+                  uniqueRooms.push(r);
+                }
+              }
+
+              if (uniqueRooms.length > 0) {
+                console.log(`[OpenRouter Vision] ✅ Successfully scanned ${uniqueRooms.length} distinct rooms with ${model}`);
+                return res.status(200).json({ success: true, text: JSON.stringify(uniqueRooms), model });
+              }
             }
           }
         } else {
