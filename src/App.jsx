@@ -96,8 +96,7 @@ export default function App() {
       });
 
       try {
-        const keyToUse = geminiApiKey || 'AIzaSyBl4SJsKLSSFSkgoLgp_x_JqZWEHX3hwr0';
-        const detected = await scanFloorPlanWithGeminiVision(dataUrl, keyToUse);
+        const detected = await scanFloorPlanWithGeminiVision(dataUrl);
         if (detected && detected.length > 0) {
           setPlacedRooms(detected);
           setScanNotice({
