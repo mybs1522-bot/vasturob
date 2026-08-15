@@ -200,15 +200,17 @@ export default function App() {
     return evaluateVastu(placedRooms, northAngle, centerPos.x, centerPos.y);
   }, [placedRooms, northAngle, centerPos]);
 
+  const cleanPath = (currentPath || '/').split('?')[0].replace(/\/+$/, '') || '/';
+
   // If path is '/admin', render the Admin Panel!
-  if (currentPath === '/admin') {
+  if (cleanPath === '/admin') {
     return (
       <AdminPanel onBackToApp={() => navigateTo('/')} />
     );
   }
 
   // If path is '/' (or not '/start'), render the Vastu Landing Page!
-  if (currentPath !== '/start') {
+  if (cleanPath !== '/start') {
     return (
       <>
         <LandingPage

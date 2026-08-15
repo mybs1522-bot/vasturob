@@ -1,13 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const rawUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = Boolean(
+  rawUrl &&
+  rawKey &&
+  rawUrl.startsWith('http')
+);
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+let clientInstance = null;
+if (isSupabaseConfigured) {
+  try {
+    clientInstance = createClient(rawUrl, rawKey);
+  } catch (err) {
+    console.warn('Supabase client failed to initialize safely:', err);
+    clientInstance = null;
+  }
+}
+
+export const supabase = clientInstance;
 
 // Local Storage Fallback Key Definitions
 const LOCAL_LEADS_KEY = 'vastuscope_leads';
