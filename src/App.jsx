@@ -9,8 +9,7 @@ import VastuExpertModal from './components/VastuExpertModal';
 import LeadCaptureModal from './components/LeadCaptureModal';
 import AdminPanel from './components/AdminPanel';
 import LanguageSelectorModal, { SmoothLanguageLoader } from './components/LanguageSelectorModal';
-import { useLanguage } from './lib/i18n';
-import { saveLead } from './lib/supabase';
+import { saveLead, saveVastuReport } from './lib/supabase';
 import { sendReportConfirmationEmail } from './lib/emailService';
 import { convertPdfFileToDataUrl } from './utils/pdfHelper';
 import { evaluateVastu } from './utils/vastuEngine';
@@ -160,14 +159,39 @@ export default function App() {
     } catch (e) {
       console.error('Could not save lead info to localStorage:', e);
     }
+
+    const currentScore = vastuReport?.overallScore || 52;
+    const currentDoshas = vastuReport?.doshasCount || 4;
+    const currentIdeal = vastuReport?.idealCount || 1;
+
+    // 1. Save Lead Record to Supabase
     saveLead({ 
       full_name: leadInfo.name, 
       phone: leadInfo.phone, 
       email: leadInfo.email, 
-      vastu_score: vastuReport?.overallScore || 88 
-    });
+      vastu_score: currentScore,
+      status: 'new'
+    }).catch(err => console.error('saveLead error:', err));
+
+    // 2. Save Complete Floor Plan, Room Placements & Vastu Report to Supabase
+    saveVastuReport({
+      user_name: leadInfo.name,
+      user_phone: leadInfo.phone,
+      user_email: leadInfo.email,
+      overall_score: currentScore,
+      placed_rooms: placedRooms,
+      plan_image: imageUrl || '',
+      svg_content: svgContent || '',
+      north_angle: northAngle,
+      property_type: leadInfo.propertyType || 'Residential',
+      doshas_count: currentDoshas,
+      ideal_count: currentIdeal,
+      summary: vastuReport?.summary || {},
+      report_data: vastuReport
+    }).catch(err => console.error('saveVastuReport error:', err));
+
     if (leadInfo.email) {
-      sendReportConfirmationEmail({ toEmail: leadInfo.email, userName: leadInfo.name });
+      sendReportConfirmationEmail({ toEmail: leadInfo.email, userName: leadInfo.name }).catch(() => {});
     }
     setIsLeadModalOpen(false);
     setWizardStep(4);

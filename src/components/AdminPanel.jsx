@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, MessageSquare, FileText, Database, ShieldCheck, 
   Search, Download, RefreshCw, Lock, CheckCircle2, AlertTriangle, 
-  IndianRupee, ArrowLeft, Key, ExternalLink, Sparkles, Filter 
+  IndianRupee, ArrowLeft, Key, ExternalLink, Sparkles, Filter,
+  Eye, X, PhoneCall, Compass, Layers, Check
 } from 'lucide-react';
 import { 
   getLeads, saveLead, getConsultations, updateConsultationStatus, 
@@ -14,12 +15,13 @@ export default function AdminPanel({ onBackToApp }) {
   const [passcode, setPasscode] = useState('');
   const [passcodeError, setPasscodeError] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('leads'); // 'leads' | 'consultations' | 'reports' | 'config'
+  const [activeTab, setActiveTab] = useState('reports'); // 'reports' | 'leads' | 'consultations' | 'config'
   const [leads, setLeads] = useState([]);
   const [consultations, setConsultations] = useState([]);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedReportForModal, setSelectedReportForModal] = useState(null);
 
   // Authentication Lock (Passcode: vastu2026)
   const handleLogin = (e) => {
@@ -57,46 +59,33 @@ export default function AdminPanel({ onBackToApp }) {
     }
   }, [isAuthenticated]);
 
-  // Update Consultation Chat Status (Pending -> Contacted -> Resolved)
+  // Update Consultation Chat Status
   const handleUpdateStatus = async (id, newStatus) => {
     await updateConsultationStatus(id, newStatus);
     loadData();
   };
 
-  // Export Leads to CSV
-  const exportLeadsToCSV = () => {
-    if (!leads.length) return;
-    const headers = ['ID', 'Full Name', 'Phone', 'Email', 'Vastu Score', 'Status', 'Created At'];
-    const rows = leads.map(l => [
-      l.id,
-      `"${l.full_name || ''}"`,
-      `"${l.phone || ''}"`,
-      `"${l.email || ''}"`,
-      l.vastu_score || 88,
-      l.status || 'new',
-      l.created_at || ''
-    ]);
-    
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `vastuscope_leads_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Direct WhatsApp Client Launcher
+  const handleWhatsAppUser = (phone, name) => {
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    const msg = encodeURIComponent(`Namaste ${name || ''}, this is VastuScope Senior Acharya regarding your submitted floor plan and Vastu report.`);
+    window.open(`https://wa.me/${formattedPhone}?text=${msg}`, '_blank');
   };
 
-  // Filtered Leads based on search query
+  // Filtered Lists based on search query
+  const filteredReports = reports.filter(r => 
+    (r.user_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (r.user_phone || '').includes(searchQuery) ||
+    (r.user_email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (r.report_id || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const filteredLeads = leads.filter(l => 
     (l.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (l.phone || '').includes(searchQuery) ||
     (l.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Calculate Metrics
-  const totalRevenue = (consultations.length * 999) + (reports.length * 899);
-  const pendingChats = consultations.filter(c => c.chat_status === 'pending').length;
 
   // --- PASSCODE GATE LOCK SCREEN ---
   if (!isAuthenticated) {
@@ -108,7 +97,7 @@ export default function AdminPanel({ onBackToApp }) {
               <img src="/vastu_logo.jpg" className="w-full h-full object-cover" alt="VastuScope Logo" />
             </div>
             <h2 className="text-2xl font-black text-white font-heading">VastuScope Admin Portal</h2>
-            <p className="text-xs text-amber-300/80 font-mono">Protected Supabase Database Access</p>
+            <p className="text-xs text-amber-300/80 font-mono">Live Supabase Database & Floor Plans</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -150,324 +139,275 @@ export default function AdminPanel({ onBackToApp }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans selection:bg-amber-400 selection:text-slate-950">
-      {/* Top Admin Header */}
-      <header className="bg-slate-900 border-b border-slate-800 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950">
+      
+      {/* Top Admin Navbar */}
+      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl border border-amber-400/50 overflow-hidden shadow-md flex-shrink-0">
-            <img src="/vastu_logo.jpg" className="w-full h-full object-cover" alt="VastuScope Logo" />
+          <div className="w-9 h-9 rounded-xl border border-amber-400/60 overflow-hidden shadow">
+            <img src="/vastu_logo.jpg" className="w-full h-full object-cover" alt="Logo" />
           </div>
           <div>
-            <h1 className="text-sm sm:text-lg font-black text-white font-heading tracking-wider uppercase flex items-center gap-2">
-              VASTUSCOPE ADMIN PANEL
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-extrabold ${isSupabaseConfigured ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}`}>
-                {isSupabaseConfigured ? '🟢 SUPABASE LIVE' : '🟡 LOCAL SYNC ACTIVE'}
-              </span>
+            <h1 className="text-sm font-black text-white font-heading">
+              VastuScope <span className="text-amber-400">Admin CRM</span>
             </h1>
-            <p className="text-[10px] text-slate-400 font-mono">Realtime Database Management Engine</p>
+            <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Supabase Cloud Connected
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={loadData}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
-            title="Refresh Data"
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono font-bold text-amber-300 border border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
 
           <button
             type="button"
             onClick={onBackToApp}
-            className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/30 text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-sm"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Exit Admin
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Go to App</span>
           </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-8 space-y-6">
         
-        {/* STATS METRIC SUMMARY CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider">Total Leads</span>
-              <Users className="w-5 h-5 text-amber-400" />
-            </div>
-            <p className="text-3xl font-black text-white font-mono">{leads.length}</p>
-            <span className="text-[10px] text-emerald-400 font-mono font-bold">100% Captured Submissions</span>
+        {/* Metric Cards Banner */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-1">
+            <span className="text-[10px] text-slate-400 font-mono uppercase block">Submitted Plans</span>
+            <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">{reports.length}</div>
+            <span className="text-[10px] text-emerald-400 font-mono">100% Synced Online</span>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider">Est. Revenue</span>
-              <IndianRupee className="w-5 h-5 text-emerald-400 font-bold" />
-            </div>
-            <p className="text-3xl font-black text-emerald-400 font-mono">₹{totalRevenue.toLocaleString('en-IN')}</p>
-            <span className="text-[10px] text-slate-400 font-mono">Consultations + Report Unlocks</span>
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-1">
+            <span className="text-[10px] text-slate-400 font-mono uppercase block">Total Leads</span>
+            <div className="text-2xl sm:text-3xl font-black text-white font-mono">{leads.length}</div>
+            <span className="text-[10px] text-slate-400 font-mono">Prospects Captured</span>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider">Pending Chats</span>
-              <MessageSquare className="w-5 h-5 text-amber-400" />
-            </div>
-            <p className="text-3xl font-black text-amber-400 font-mono">{pendingChats}</p>
-            <span className="text-[10px] text-amber-300/80 font-mono">WhatsApp Action Required</span>
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-1">
+            <span className="text-[10px] text-slate-400 font-mono uppercase block">Consultations</span>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">{consultations.length}</div>
+            <span className="text-[10px] text-emerald-400 font-mono">₹999 WhatsApp Bookings</span>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider">Reports Generated</span>
-              <FileText className="w-5 h-5 text-yellow-400" />
-            </div>
-            <p className="text-3xl font-black text-yellow-400 font-mono">{reports.length}</p>
-            <span className="text-[10px] text-slate-400 font-mono">16-Zone Audits Saved</span>
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-1">
+            <span className="text-[10px] text-slate-400 font-mono uppercase block">Database Status</span>
+            <div className="text-lg font-black text-emerald-400 font-mono mt-1">ONLINE ✅</div>
+            <span className="text-[10px] text-slate-400 font-mono">auetvxiigqoeiijdtpbb</span>
           </div>
         </div>
 
-        {/* NAVIGATION TABS */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div className="flex items-center gap-2 overflow-x-auto">
+        {/* Tab Selection & Search */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <button
+              type="button"
+              onClick={() => setActiveTab('reports')}
+              className={`px-4 py-2 rounded-xl text-xs font-black font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'reports' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Floor Plans & Reports ({reports.length})</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setActiveTab('leads')}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeTab === 'leads' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white'
+              className={`px-4 py-2 rounded-xl text-xs font-black font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'leads' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
               }`}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-3.5 h-3.5" />
               <span>Leads ({leads.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('consultations')}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeTab === 'consultations' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white'
+              className={`px-4 py-2 rounded-xl text-xs font-black font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'consultations' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
               }`}
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Expert Chats ({consultations.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('reports')}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeTab === 'reports' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Vastu Reports ({reports.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('config')}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                activeTab === 'config' ? 'bg-amber-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white'
-              }`}
-            >
-              <Database className="w-4 h-4" />
-              <span>Supabase Setup</span>
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Consultations ({consultations.length})</span>
             </button>
           </div>
 
-          {activeTab === 'leads' && (
-            <button
-              type="button"
-              onClick={exportLeadsToCSV}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/40 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer hidden sm:flex"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
-            </button>
-          )}
+          <div className="relative max-w-xs w-full">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by name, phone, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
         </div>
 
-        {/* TAB 1: LEADS MANAGEMENT */}
-        {activeTab === 'leads' && (
-          <div className="space-y-4">
-            {/* Search Input Bar */}
-            <div className="relative max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                placeholder="Search leads by name, phone, or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
-              />
-            </div>
-
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
-                    <tr>
-                      <th className="py-3 px-4">Full Name</th>
-                      <th className="py-3 px-4">Phone Number</th>
-                      <th className="py-3 px-4">Email Address</th>
-                      <th className="py-3 px-4 text-center">Score</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-sans">
-                    {filteredLeads.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="py-8 text-center text-slate-500 text-xs font-mono">
-                          No lead submissions found matching your search.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredLeads.map((lead) => (
-                        <tr key={lead.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3 px-4 font-bold text-white">{lead.full_name}</td>
-                          <td className="py-3 px-4 text-amber-300 font-mono">{lead.phone}</td>
-                          <td className="py-3 px-4 text-slate-300">{lead.email || '—'}</td>
-                          <td className="py-3 px-4 text-center">
-                            <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold font-mono">
-                              {lead.vastu_score || 88}/100
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase ${
-                              lead.status === 'converted' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
-                              lead.status === 'contacted' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' :
-                              'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                            }`}>
-                              {lead.status || 'new'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">
-                            {new Date(lead.created_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: EXPERT CONSULTATIONS (₹999 WhatsApp Chats) */}
-        {activeTab === 'consultations' && (
-          <div className="space-y-4">
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
-                    <tr>
-                      <th className="py-3 px-4">Customer Name</th>
-                      <th className="py-3 px-4">WhatsApp Phone</th>
-                      <th className="py-3 px-4">Fee Paid</th>
-                      <th className="py-3 px-4">Payment</th>
-                      <th className="py-3 px-4">Chat Status</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-sans">
-                    {consultations.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="py-8 text-center text-slate-500 text-xs font-mono">
-                          No expert consultations recorded yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      consultations.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3 px-4 font-bold text-white">{item.customer_name}</td>
-                          <td className="py-3 px-4 text-emerald-400 font-mono font-bold">{item.whatsapp_phone}</td>
-                          <td className="py-3 px-4 text-amber-400 font-bold font-mono">₹{item.amount_paid || 999}</td>
-                          <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono border border-emerald-500/40">
-                              ✅ Verified
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase ${
-                              item.chat_status === 'resolved' ? 'bg-slate-800 text-slate-400' :
-                              item.chat_status === 'contacted' ? 'bg-blue-500/20 text-blue-300' :
-                              'bg-amber-400 text-slate-950 font-black'
-                            }`}>
-                              {item.chat_status || 'pending'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right space-x-2">
-                            {item.chat_status !== 'contacted' && item.chat_status !== 'resolved' && (
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateStatus(item.id, 'contacted')}
-                                className="px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-[10px] font-mono font-bold border border-blue-500/40 transition-all cursor-pointer"
-                              >
-                                Mark Contacted
-                              </button>
-                            )}
-
-                            {item.chat_status !== 'resolved' && (
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateStatus(item.id, 'resolved')}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-mono font-bold border border-emerald-500/40 transition-all cursor-pointer"
-                              >
-                                Mark Resolved
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: VASTU REPORTS DATABASE */}
+        {/* TAB 1: FLOOR PLANS & VASTU REPORTS DATABASE */}
         {activeTab === 'reports' && (
           <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
                   <tr>
-                    <th className="py-3 px-4">Report ID</th>
-                    <th className="py-3 px-4">User Name</th>
-                    <th className="py-3 px-4 text-center">Score</th>
-                    <th className="py-3 px-4 text-center">Placed Rooms</th>
-                    <th className="py-3 px-4 text-right">Date</th>
+                    <th className="py-3.5 px-4">Plan Blueprint</th>
+                    <th className="py-3.5 px-4">User Details</th>
+                    <th className="py-3.5 px-4">Phone / WhatsApp</th>
+                    <th className="py-3.5 px-4 text-center">Score</th>
+                    <th className="py-3.5 px-4 text-center">Rooms Placed</th>
+                    <th className="py-3.5 px-4 text-center">Date</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-sans">
-                  {reports.length === 0 ? (
+                  {filteredReports.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="py-8 text-center text-slate-500 text-xs font-mono">
-                        No saved Vastu reports in database.
+                      <td colSpan="7" className="py-12 text-center text-slate-500 text-xs font-mono">
+                        No saved Vastu reports or plans found in database.
                       </td>
                     </tr>
                   ) : (
-                    reports.map((rep) => (
-                      <tr key={rep.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-4 font-bold text-amber-400 font-mono">{rep.report_id}</td>
-                        <td className="py-3 px-4 font-bold text-white">{rep.user_name || 'Anonymous'}</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black font-mono">
-                            {rep.overall_score || 88}/100
+                    filteredReports.map((rep) => {
+                      const zoneInfo = Array.isArray(rep.evaluated_zones) && rep.evaluated_zones[0] ? rep.evaluated_zones[0] : {};
+                      const hasPlan = Boolean(zoneInfo.plan_image || zoneInfo.svg_content);
+                      return (
+                        <tr key={rep.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="py-3.5 px-4">
+                            {hasPlan ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedReportForModal(rep)}
+                                className="w-14 h-10 rounded-lg border border-amber-400/50 bg-slate-950 overflow-hidden flex items-center justify-center hover:scale-105 transition-all cursor-pointer relative group"
+                                title="Click to view submitted floor plan blueprint"
+                              >
+                                {zoneInfo.plan_image ? (
+                                  <img src={zoneInfo.plan_image} className="w-full h-full object-cover" alt="Floor Plan" />
+                                ) : (
+                                  <Compass className="w-5 h-5 text-amber-400" />
+                                )}
+                                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <Eye className="w-4 h-4 text-white" />
+                                </div>
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-slate-500 font-mono">No Image</span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-white text-sm">{rep.user_name || 'Anonymous'}</div>
+                            <div className="text-[11px] text-slate-400">{rep.user_email || 'No email'}</div>
+                            <span className="text-[9px] font-mono text-amber-400 bg-amber-400/10 px-1.5 py-0.2 rounded">
+                              {zoneInfo.property_type || 'Residential'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono font-bold text-emerald-400">{rep.user_phone || 'N/A'}</div>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black font-mono text-xs">
+                              {rep.overall_score || 52}/100
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center text-slate-300 font-mono text-xs">
+                            {Array.isArray(rep.placed_rooms) ? rep.placed_rooms.length : 0} Rooms
+                          </td>
+                          <td className="py-3.5 px-4 text-center text-slate-400 font-mono text-xs">
+                            {new Date(rep.created_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="py-3.5 px-4 text-right space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedReportForModal(rep)}
+                              className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-yellow-300 text-slate-950 text-xs font-black font-mono transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View Plan</span>
+                            </button>
+                            {rep.user_phone && (
+                              <button
+                                type="button"
+                                onClick={() => handleWhatsAppUser(rep.user_phone, rep.user_name)}
+                                className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black font-mono transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: LEADS LIST */}
+        {activeTab === 'leads' && (
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="py-3.5 px-4">Full Name</th>
+                    <th className="py-3.5 px-4">Phone Number</th>
+                    <th className="py-3.5 px-4">Email</th>
+                    <th className="py-3.5 px-4 text-center">Score</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-sans">
+                  {filteredLeads.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="py-12 text-center text-slate-500 text-xs font-mono">
+                        No leads found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredLeads.map((l) => (
+                      <tr key={l.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-white">{l.full_name || 'Anonymous'}</td>
+                        <td className="py-3.5 px-4 text-emerald-400 font-mono font-bold">{l.phone || 'N/A'}</td>
+                        <td className="py-3.5 px-4 text-slate-400">{l.email || 'N/A'}</td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-bold font-mono">
+                            {l.vastu_score || 52}/100
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-300 font-mono">
-                          {Array.isArray(rep.placed_rooms) ? rep.placed_rooms.length : 0} Rooms
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px]">
+                            {l.status || 'new'}
+                          </span>
                         </td>
-                        <td className="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">
-                          {new Date(rep.created_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                        <td className="py-3.5 px-4 text-right">
+                          {l.phone && (
+                            <button
+                              type="button"
+                              onClick={() => handleWhatsAppUser(l.phone, l.full_name)}
+                              className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black font-mono transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>WhatsApp</span>
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -478,39 +418,160 @@ export default function AdminPanel({ onBackToApp }) {
           </div>
         )}
 
-        {/* TAB 4: SUPABASE CONFIG & SQL SCRIPT VIEWER */}
-        {activeTab === 'config' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-            <div className="space-y-2">
-              <span className={`text-[10px] font-mono font-bold px-3 py-1 rounded-full border ${isSupabaseConfigured ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'}`}>
-                {isSupabaseConfigured ? '✅ Supabase Credentials Connected' : '⚠️ Local Fallback Active (Missing .env Keys)'}
-              </span>
-              <h3 className="text-xl font-black text-white font-heading">Supabase Database Integration Guide</h3>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
-                To connect your fresh Supabase project, create a <code className="text-amber-300 bg-slate-950 px-1.5 py-0.5 rounded font-mono">.env</code> file in your repository root with the following environment variables:
-              </p>
-            </div>
-
-            {/* .env Code Block */}
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-amber-300 space-y-1 relative">
-              <p className="text-slate-500"># .env (Vite Environment Configuration)</p>
-              <p>VITE_SUPABASE_URL=https://your-project-id.supabase.co</p>
-              <p>VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</p>
-            </div>
-
-            {/* SQL Table Creation Instructions */}
-            <div className="space-y-3 pt-4 border-t border-slate-800">
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                One-Click SQL Schema Setup Script
-              </h4>
-              <p className="text-xs text-slate-400">
-                Copy and run the contents of <code className="text-amber-300 bg-slate-950 px-1.5 py-0.5 rounded font-mono">supabase_schema.sql</code> inside your Supabase Dashboard SQL Editor to automatically create all required tables (<code className="text-slate-200">leads</code>, <code className="text-slate-200">vastu_reports</code>, <code className="text-slate-200">expert_consultations</code>).
-              </p>
+        {/* TAB 3: CONSULTATIONS LIST */}
+        {activeTab === 'consultations' && (
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="py-3.5 px-4">Client Name</th>
+                    <th className="py-3.5 px-4">WhatsApp Phone</th>
+                    <th className="py-3.5 px-4">Amount</th>
+                    <th className="py-3.5 px-4">Chat Status</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-sans">
+                  {consultations.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="py-12 text-center text-slate-500 text-xs font-mono">
+                        No expert consultations recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    consultations.map((c) => (
+                      <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-white">{c.customer_name}</td>
+                        <td className="py-3.5 px-4 text-emerald-400 font-mono font-bold">{c.whatsapp_phone}</td>
+                        <td className="py-3.5 px-4 text-amber-400 font-bold font-mono">₹{c.amount_paid || 999}</td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black font-mono text-[10px]">
+                            {c.chat_status || 'pending'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleWhatsAppUser(c.whatsapp_phone, c.customer_name)}
+                            className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black font-mono transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Chat Client</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
       </main>
+
+      {/* ========================================================================= */}
+      {/* FULL-SCREEN MODAL: VIEW SUBMITTED FLOOR PLAN BLUEPRINT & ROOMS            */}
+      {/* ========================================================================= */}
+      {selectedReportForModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border-2 border-amber-400/70 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-4 sm:p-6 space-y-5 text-white">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Compass className="w-6 h-6 text-amber-400" />
+                <div>
+                  <h3 className="text-base sm:text-lg font-black font-heading">
+                    Submitted Floor Plan Blueprint
+                  </h3>
+                  <span className="text-xs text-amber-300 font-mono">
+                    User: {selectedReportForModal.user_name} • Phone: {selectedReportForModal.user_phone}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedReportForModal(null)}
+                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Main Visual Floor Plan Viewer */}
+            <div className="space-y-3">
+              {(() => {
+                const zoneData = Array.isArray(selectedReportForModal.evaluated_zones) && selectedReportForModal.evaluated_zones[0] ? selectedReportForModal.evaluated_zones[0] : {};
+                const planImg = zoneData.plan_image;
+                const svgCode = zoneData.svg_content;
+                const placedRooms = selectedReportForModal.placed_rooms || [];
+
+                return (
+                  <>
+                    <div className="w-full bg-slate-950 rounded-2xl border border-slate-800 p-3 flex items-center justify-center min-h-[260px] relative overflow-hidden shadow-inner">
+                      {planImg ? (
+                        <img src={planImg} className="max-h-[380px] w-auto object-contain rounded-xl shadow" alt="User Floor Plan" />
+                      ) : svgCode ? (
+                        <div dangerouslySetInnerHTML={{ __html: svgCode }} className="w-full h-full flex items-center justify-center text-white" />
+                      ) : (
+                        <div className="text-center space-y-2 text-slate-500 py-8">
+                          <Layers className="w-8 h-8 mx-auto text-slate-600" />
+                          <p className="text-xs font-mono">No raw image file stored; room boxes are saved below.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Placed Rooms Breakdown */}
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-black font-mono uppercase text-amber-400 flex items-center gap-1.5">
+                        <Layers className="w-4 h-4" /> Placed Room Boxes ({placedRooms.length}) & Vastu Score ({selectedReportForModal.overall_score || 52}/100)
+                      </h4>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                        {placedRooms.map((r, i) => (
+                          <div key={i} className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                            <div className="flex items-center justify-between font-bold">
+                              <span className="text-white">{r.name || `Room ${i + 1}`}</span>
+                              <span className="text-[10px] font-mono text-amber-400 bg-amber-400/10 px-1.5 py-0.2 rounded">
+                                Zone: {r.zone?.id || 'SW'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 leading-tight">
+                              {r.description || 'Calculated directional zone.'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+
+            {/* Footer Action Buttons */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => handleWhatsAppUser(selectedReportForModal.user_phone, selectedReportForModal.user_name)}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Contact Client on WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedReportForModal(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-bold transition-all cursor-pointer"
+              >
+                Close Viewer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

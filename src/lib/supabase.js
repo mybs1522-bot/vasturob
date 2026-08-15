@@ -82,7 +82,7 @@ export async function saveLead(lead) {
     full_name: lead.full_name || lead.name || lead.fullName || 'Anonymous',
     phone: lead.phone || '',
     email: lead.email || '',
-    vastu_score: Number(lead.vastu_score || lead.score || 88),
+    vastu_score: Number(lead.vastu_score || lead.score || 52),
     status: lead.status || 'new',
   };
 
@@ -137,7 +137,6 @@ export async function getLeads() {
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        // Sync any unpushed local leads to Supabase in background
         const cloudPhones = new Set(data.map(d => String(d.phone).trim()));
         const unpushed = localLeads.filter(l => l.phone && !cloudPhones.has(String(l.phone).trim()));
         for (const up of unpushed) {
@@ -207,12 +206,12 @@ export async function saveConsultation(consultation) {
     }
   }
 
-  // 2. Also register as a Lead automatically!
+  // 2. Also register as a Lead automatically
   saveLead({
     full_name: consultationPayload.customer_name,
     phone: consultationPayload.whatsapp_phone,
     email: '',
-    vastu_score: 99,
+    vastu_score: 52,
     status: 'converted'
   }).catch(() => {});
 
@@ -263,7 +262,7 @@ export async function updateConsultationStatus(id, chat_status) {
 }
 
 // ----------------------------------------------------
-// 3. VASTU REPORTS SERVICE
+// 3. VASTU REPORTS SERVICE (Saves Floor Plans & Rooms)
 // ----------------------------------------------------
 export async function saveVastuReport(report) {
   const reportPayload = {
@@ -271,8 +270,21 @@ export async function saveVastuReport(report) {
     user_name: report.user_name || report.name || 'Anonymous',
     user_phone: report.user_phone || report.phone || '',
     user_email: report.user_email || report.email || '',
-    overall_score: Number(report.overall_score || report.score || 88),
-    placed_rooms: report.placed_rooms || [],
+    overall_score: Number(report.overall_score || report.score || 52),
+    placed_rooms: Array.isArray(report.placed_rooms) ? report.placed_rooms : (report.placedRooms || []),
+    evaluated_zones: [
+      {
+        plan_image: report.plan_image || report.imageUrl || '',
+        svg_content: report.svg_content || report.svgContent || '',
+        north_angle: Number(report.north_angle ?? report.northAngle ?? 0),
+        property_type: report.property_type || report.propertyType || 'Residential',
+        doshas_count: Number(report.doshas_count ?? report.doshasCount ?? 0),
+        ideal_count: Number(report.ideal_count ?? report.idealCount ?? 0),
+        summary: report.summary || {},
+        report_data: report.report_data || null,
+      }
+    ],
+    is_paid: Boolean(report.is_paid || false),
   };
 
   if (report.id && isValidUUID(report.id)) {
@@ -291,7 +303,9 @@ export async function saveVastuReport(report) {
 
       if (!error && data) {
         savedRecord = data;
-        console.log('[Supabase] ✅ Vastu Report synced to cloud database:', savedRecord.id);
+        console.log('[Supabase] ✅ Vastu Report & Floor Plan saved to cloud database:', savedRecord.id);
+      } else if (error) {
+        console.warn('[Supabase] saveVastuReport insert error:', error.message);
       }
     } catch (e) {
       console.warn('[Supabase] saveVastuReport error:', e.message);
@@ -299,7 +313,7 @@ export async function saveVastuReport(report) {
   }
 
   const current = getLocalData(LOCAL_REPORTS_KEY, []);
-  setLocalData(LOCAL_REPORTS_KEY, [savedRecord, ...current.filter(r => r.report_id !== savedRecord.report_id)]);
+  setLocalData(LOCAL_REPORTS_KEY, [savedRecord, ...current.filter(r => r.report_id !== savedRecord.report_id && r.id !== savedRecord.id)]);
 
   return savedRecord;
 }
