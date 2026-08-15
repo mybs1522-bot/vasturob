@@ -506,75 +506,45 @@ export default function FloorPlanCanvas({
               </div>
             </div>
 
-            {/* Placed Room Boxes: BIGGER & BOLDER TEXT FOR MOBILE DEVICES */}
-            {isCustomGridMode ? (
-              placedRooms.map((room) => {
-                const boxWidth = room.typeId === 'living_room' ? 150 : 130;
-                const boxHeight = room.typeId === 'living_room' ? 95 : 80;
-
-                return (
-                  <div
-                    key={room.id}
-                    onMouseDown={(e) => handleStartDragPin(e, room.id)}
-                    onTouchStart={(e) => handleStartDragPin(e, room.id)}
-                    className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing group shadow-lg hover:shadow-xl transition-shadow"
-                    style={{
-                      left: `${room.x}px`,
-                      top: `${room.y}px`,
-                      width: `${boxWidth}px`,
-                      height: `${boxHeight}px`,
-                    }}
-                  >
-                    <div
-                      className="w-full h-full rounded-2xl border-3 bg-white p-2.5 flex flex-col justify-between select-none relative shadow-sm"
-                      style={{
-                        borderColor: '#0f172a',
-                      }}
-                    >
-                      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                        <div className="flex items-center gap-1.5 truncate">
-                          {getRoomIcon(room.typeId, "w-4 h-4 flex-shrink-0")}
-                          {/* BIGGER, BOLDER ROOM TEXT FOR EASY READING ON PHONE */}
-                          <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight truncate">
-                            {room.name}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPlacedRooms((prev) => prev.filter((r) => r.id !== room.id));
-                          }}
-                          className="text-slate-400 hover:text-red-600 font-extrabold text-sm px-1"
-                          title="Delete box"
-                        >
-                          &times;
-                        </button>
-                      </div>
-
-                      <div className="text-[10px] font-bold text-slate-500 text-center font-mono uppercase tracking-wider">
-                        Drag Box
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              placedRooms.map((room) => (
+            {/* Placed Room Badges: Sleek, compact, non-blocking room markers */}
+            {placedRooms.map((room) => {
+              return (
                 <div
                   key={room.id}
                   onMouseDown={(e) => handleStartDragPin(e, room.id)}
                   onTouchStart={(e) => handleStartDragPin(e, room.id)}
-                  className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing"
-                  style={{ left: `${room.x}px`, top: `${room.y}px` }}
+                  className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing group select-none"
+                  style={{
+                    left: `${room.x}px`,
+                    top: `${room.y}px`,
+                  }}
                 >
-                  <div className="px-2.5 py-1 rounded-full border-2 text-xs font-black shadow-md bg-white/95 backdrop-blur-xs flex items-center gap-1.5 border-slate-900 text-slate-900">
-                    {getRoomIcon(room.typeId, "w-3.5 h-3.5")}
-                    <span className="whitespace-nowrap">{room.name}</span>
+                  <div className="flex flex-col items-center">
+                    {/* Compact Sleek Room Pill Badge */}
+                    <div className="px-3 py-1.5 rounded-full bg-slate-950/95 text-white border-2 border-amber-400/90 shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
+                      {getRoomIcon(room.typeId, "w-3.5 h-3.5 flex-shrink-0 text-amber-400")}
+                      <span className="text-[11px] sm:text-xs font-black tracking-tight text-white">
+                        {room.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlacedRooms((prev) => prev.filter((r) => r.id !== room.id));
+                        }}
+                        className="w-4 h-4 rounded-full bg-slate-800 hover:bg-red-600 text-white font-black text-[10px] flex items-center justify-center transition-colors ml-0.5 cursor-pointer"
+                        title="Delete room"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* Anchor Target Pin Dot */}
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-slate-950 shadow-xs -mt-1" />
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         </div>
       </div>

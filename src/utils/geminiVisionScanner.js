@@ -2,7 +2,7 @@ import { createWorker } from 'tesseract.js';
 import { ROOM_TYPES } from './vastuEngine';
 
 /**
- * Pre-process floor plan image with contrast enhancement & grayscale binarization.
+ * Pre-process floor plan image with contrast enhancement & binarization.
  * Sharpens architectural text labels ("KITCHEN", "BEDROOM", "TOILET") and strips background noise.
  */
 function preprocessImageForOCR(dataUrl) {
@@ -29,15 +29,14 @@ function preprocessImageForOCR(dataUrl) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
 
-      // Contrast Enhancement & Grayscale Binarization
       try {
         const imgData = ctx.getImageData(0, 0, w, h);
         const data = imgData.data;
 
         for (let i = 0; i < data.length; i += 4) {
           const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          // Binarize text pixels: dark pixels become pure black, light pixels pure white
-          const binarized = gray < 130 ? 0 : 255;
+          // High-contrast binarization: dark text becomes solid black, background pure white
+          const binarized = gray < 135 ? 0 : 255;
           data[i] = binarized;
           data[i + 1] = binarized;
           data[i + 2] = binarized;
@@ -46,48 +45,55 @@ function preprocessImageForOCR(dataUrl) {
         ctx.putImageData(imgData, 0, 0);
         resolve({
           processedUrl: canvas.toDataURL('image/png'),
-          width: w,
-          height: h,
+          origWidth: img.width,
+          origHeight: img.height,
         });
       } catch (e) {
-        resolve({ processedUrl: dataUrl, width: img.width, height: img.height });
+        resolve({ processedUrl: dataUrl, origWidth: img.width, origHeight: img.height });
       }
     };
-    img.onerror = () => resolve({ processedUrl: dataUrl, width: 800, height: 600 });
+    img.onerror = () => resolve({ processedUrl: dataUrl, origWidth: 800, origHeight: 600 });
     img.src = dataUrl;
   });
 }
 
 /**
- * High-Precision Client-Side OCR Floor Plan Scanner (Enhanced Tesseract.js Engine)
- * Runs 100% locally inside the browser. Reads exact text coordinates (x0, y0, x1, y1)
- * directly from the high-contrast pre-processed floor plan image!
+ * High-Precision Client-Side OCR Floor Plan Scanner with Object-Contain Geometry Alignment
  */
 export async function scanFloorPlanWithGeminiVision(dataUrl) {
-  console.log('[Tesseract OCR] Preprocessing floor plan for high-contrast OCR...');
-
-  const fallbackRooms = [
-    { typeId: 'kitchen', name: 'KITCHEN', x: 520, y: 220 },
-    { typeId: 'master_bedroom', name: 'MASTER BEDROOM', x: 200, y: 450 },
-    { typeId: 'living_room', name: 'LIVING ROOM', x: 380, y: 300 },
-    { typeId: 'entrance', name: 'MAIN ENTRANCE', x: 620, y: 480 },
-  ];
+  console.log('[Tesseract OCR] Preprocessing floor plan for high-precision OCR...');
 
   let worker = null;
   try {
-    // 1. High-contrast binarization preprocessing
-    const { processedUrl, width: imgW, height: imgH } = await preprocessImageForOCR(dataUrl);
+    const { processedUrl, origWidth: imgW, origHeight: imgH } = await preprocessImageForOCR(dataUrl);
 
-    // 2. Initialize Tesseract WebAssembly OCR worker
+    // Calculate object-contain bounding box inside 800x600 canvas frame
+    const canvasW = 800;
+    const canvasH = 600;
+    const imgAspect = imgW / imgH;
+    const canvasAspect = canvasW / canvasH;
+
+    let drawW, drawH, offsetX, offsetY;
+    if (imgAspect > canvasAspect) {
+      drawW = canvasW;
+      drawH = canvasW / imgAspect;
+      offsetX = 0;
+      offsetY = (canvasH - drawH) / 2;
+    } else {
+      drawH = canvasH;
+      drawW = canvasH * imgAspect;
+      offsetX = (canvasW - drawW) / 2;
+      offsetY = 0;
+    }
+
     worker = await createWorker('eng');
     const { data } = await worker.recognize(processedUrl);
     await worker.terminate();
     worker = null;
 
-    console.log('[Tesseract OCR] Recognized full text:\n', data.text);
+    console.log('[Tesseract OCR] Recognized raw text:\n', data.text);
 
     const detectedRooms = [];
-    // Collect both lines and individual words for comprehensive matching
     const itemsToScan = [];
 
     if (Array.isArray(data.lines)) {
@@ -106,14 +112,14 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
       }
     }
 
-    // Keyword dictionary mapping printed text to room type IDs
+    // Comprehensive architectural keyword map
     const keywordMap = [
       { keywords: ['KITCHEN', 'KIT', 'COOKING', 'PANTRY'], typeId: 'kitchen', name: 'KITCHEN' },
-      { keywords: ['MASTER', 'M.BED', 'BEDROOM 1', 'M.BEDROOM', 'MBED'], typeId: 'master_bedroom', name: 'MASTER BEDROOM' },
-      { keywords: ['BEDROOM', 'BED', 'BEDROOM 2', 'BEDROOM 3', 'KIDS BED', 'GUEST'], typeId: 'kids_bedroom', name: 'BEDROOM' },
-      { keywords: ['LIVING', 'HALL', 'DRAWING', 'SITTING', 'FAMILY'], typeId: 'living_room', name: 'LIVING ROOM' },
+      { keywords: ['MASTER', 'M.BED', 'BEDROOM 1', 'M.BEDROOM', 'MBED', 'BEDROOM #1'], typeId: 'master_bedroom', name: 'MASTER BEDROOM' },
+      { keywords: ['BEDROOM', 'BED', 'BEDROOM 2', 'BEDROOM 3', 'BEDROOM #2', 'BEDROOM #3', 'KIDS BED', 'GUEST'], typeId: 'kids_bedroom', name: 'BEDROOM' },
+      { keywords: ['LIVING', 'HALL', 'DRAWING', 'SITTING', 'FAMILY ROOM', 'FAMILY'], typeId: 'living_room', name: 'LIVING ROOM' },
       { keywords: ['DINING', 'EATING'], typeId: 'dining', name: 'DINING ROOM' },
-      { keywords: ['TOILET', 'BATH', 'WASHROOM', 'WC', 'POWDER', 'BATHROOM'], typeId: 'toilet', name: 'TOILET' },
+      { keywords: ['TOILET', 'BATH', 'WASHROOM', 'WC', 'POWDER', 'BATHROOM', 'CLOSET'], typeId: 'toilet', name: 'WASHROOM' },
       { keywords: ['ENTRANCE', 'ENTRY', 'FOYER', 'PORCH', 'MAIN DOOR', 'VERANDAH'], typeId: 'entrance', name: 'MAIN ENTRANCE' },
       { keywords: ['PUJA', 'POOJA', 'PRAYER', 'TEMPLE'], typeId: 'puja_room', name: 'PUJA ROOM' },
       { keywords: ['STORE', 'UTILITY'], typeId: 'store_room', name: 'STORE ROOM' },
@@ -123,22 +129,27 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
 
     for (const item of itemsToScan) {
       const cleanText = (item.text || '').toUpperCase().replace(/[^A-Z0-9\s]/g, ' ').trim();
-      if (!cleanText || cleanText.length < 2) continue;
+      // Ignore general headers like "FLOOR PLAN"
+      if (!cleanText || cleanText.includes('FLOOR PLAN') || cleanText.length < 2) continue;
 
       for (const entry of keywordMap) {
         const matches = entry.keywords.some((kw) => cleanText.includes(kw));
         if (matches && item.bbox) {
-          // Calculate exact center pixel coordinates on the 800x600 canvas
-          const centerX = ((item.bbox.x0 + item.bbox.x1) / 2 / imgW) * 800;
-          const centerY = ((item.bbox.y0 + item.bbox.y1) / 2 / imgH) * 600;
+          // Precise canvas coordinate calculation incorporating object-contain letterbox offset
+          const itemCenterX = (item.bbox.x0 + item.bbox.x1) / 2;
+          const itemCenterY = (item.bbox.y0 + item.bbox.y1) / 2;
+
+          // OCR bbox coordinates are relative to original image size
+          const canvasX = offsetX + (itemCenterX / imgW) * drawW;
+          const canvasY = offsetY + (itemCenterY / imgH) * drawH;
 
           // Clamp to canvas boundaries
-          const clampedX = Math.min(Math.max(60, Math.round(centerX)), 740);
-          const clampedY = Math.min(Math.max(60, Math.round(centerY)), 540);
+          const clampedX = Math.min(Math.max(60, Math.round(canvasX)), 740);
+          const clampedY = Math.min(Math.max(60, Math.round(canvasY)), 540);
 
           // Prevent duplicate boxes at almost identical coordinates
           const isDuplicate = detectedRooms.some(
-            (r) => Math.abs(r.x - clampedX) < 45 && Math.abs(r.y - clampedY) < 45
+            (r) => Math.abs(r.x - clampedX) < 50 && Math.abs(r.y - clampedY) < 50
           );
 
           if (!isDuplicate) {
@@ -158,7 +169,7 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
       }
     }
 
-    console.log(`[Tesseract OCR] Detected ${detectedRooms.length} room boxes from OCR text.`);
+    console.log(`[Tesseract OCR] Detected ${detectedRooms.length} room boxes at precise text coordinates.`);
 
     if (detectedRooms.length > 0) {
       return detectedRooms;
@@ -170,8 +181,15 @@ export async function scanFloorPlanWithGeminiVision(dataUrl) {
     }
   }
 
-  // Fallback to default starter rooms if image layout has no printed text labels
-  console.log('[Tesseract OCR] Using default starter room placement.');
+  // Fallback layout spaced neatly inside canvas frame
+  console.log('[Tesseract OCR] Using neat default starter room placement.');
+  const fallbackRooms = [
+    { typeId: 'kitchen', name: 'KITCHEN', x: 620, y: 220 },
+    { typeId: 'master_bedroom', name: 'MASTER BEDROOM', x: 220, y: 220 },
+    { typeId: 'living_room', name: 'LIVING ROOM', x: 320, y: 440 },
+    { typeId: 'entrance', name: 'MAIN ENTRANCE', x: 600, y: 480 },
+  ];
+
   return fallbackRooms.map((r, i) => {
     const matchedType = ROOM_TYPES.find((t) => t.id === r.typeId) || ROOM_TYPES[0];
     return {
