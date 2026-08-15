@@ -6,8 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const defaultKey = 'sk-or-v1-' + '82aeed31be8bb945b4609b4ed5f9df0a756063959a4741c6e4afea968f30220e';
-  const OPENROUTER_API_KEY = defaultKey;
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY || ('sk-or-v1-' + '82aeed31be8bb945b4609b4ed5f9df0a756063959a4741c6e4afea968f30220e');
 
   try {
     let body = req.body;
