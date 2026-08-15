@@ -82,7 +82,7 @@ export default function App() {
         setPlacedRooms(detected);
         setScanNotice({
           type: 'success',
-          message: '✨ Plan processed'
+          message: 'Plan Scanned'
         });
         return;
       }
@@ -92,7 +92,7 @@ export default function App() {
     if (dataUrl) {
       setScanNotice({
         type: 'scanning',
-        message: 'Scanning your floor plan...'
+        message: 'Scanning Your Plan...'
       });
 
       try {
@@ -101,7 +101,7 @@ export default function App() {
           setPlacedRooms(detected);
           setScanNotice({
             type: 'success',
-            message: `✨ Scanned via ${detected.modelName || 'Vision AI'} (${detected.length} rooms placed)`
+            message: 'Plan Scanned'
           });
           return;
         }
