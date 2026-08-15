@@ -11,7 +11,6 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   const { lang, t } = useLanguage();
   const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'remedies' | 'yantras'
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isReportUnlocked, setIsReportUnlocked] = useState(false);
   const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(false);
   const [userName, setUserName] = useState(userData?.name || '');
   const [userPhone, setUserPhone] = useState(userData?.phone || '');
@@ -56,18 +55,22 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
   };
 
   // Instant PDF Report Generation
-  const handleDownloadPdf = async () => {
-    if (!isReportUnlocked) {
-      setIsPaywallModalOpen(true);
+  const handleDownloadPdf = () => {
+    setIsPaywallModalOpen(true);
+  };
+
+  const handleConfirmUnlock = async () => {
+    if (!userName.trim() || !userPhone.trim()) {
+      alert(isHi ? 'कृपया नाम और WhatsApp नंबर दर्ज करें' : 'Please enter your Name and WhatsApp number.');
       return;
     }
-
+    setIsPaywallModalOpen(false);
     setIsDownloading(true);
     try {
       window.print();
       await saveVastuReport({
-        user_name: userData?.name || 'Homeowner',
-        user_phone: userData?.phone || '',
+        user_name: userName,
+        user_phone: userPhone,
         user_email: userData?.email || '',
         property_type: userData?.propertyType || 'Residential',
         overall_score: overallScore,
@@ -79,20 +82,6 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
     } finally {
       setIsDownloading(false);
     }
-  };
-
-  const handleUnlockClick = () => {
-    setIsPaywallModalOpen(true);
-  };
-
-  const handleConfirmUnlock = () => {
-    if (!userName.trim() || !userPhone.trim()) {
-      alert(isHi ? 'कृपया नाम और WhatsApp नंबर दर्ज करें' : 'Please enter your Name and WhatsApp number.');
-      return;
-    }
-    setIsReportUnlocked(true);
-    setIsPaywallModalOpen(false);
-    alert(isHi ? '✅ आपकी संपूर्ण वास्तु रिपोर्ट और वैदिक उपाय अनलॉक हो गए हैं!' : '✅ Your Certified Vastu Report & Remedies have been unlocked!');
   };
 
   const handleCloseModal = () => {
@@ -225,217 +214,167 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
         </div>
       </div>
 
-      {/* 2. UNLOCKED VS LOCKED VIEW */}
-      {!isReportUnlocked ? (
-        /* LOCKED PAYWALL TEASER CARD (Remedies are locked) */
-        <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border-2 border-amber-400 shadow-2xl space-y-6 text-center relative overflow-hidden">
-          <div className="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto shadow-xl">
-            <Lock className="w-7 h-7" />
-          </div>
-
-          <div className="space-y-2 max-w-xl mx-auto">
-            <span className="text-[10px] font-mono font-black text-amber-300 uppercase tracking-widest bg-amber-950/80 border border-amber-400/40 px-3 py-1 rounded-full inline-block">
-              {isHi ? '🔒 संपूर्ण बिना तोड़फोड़ वैदिक उपाय सुरक्षित हैं' : '🔒 FULL NON-DEMOLITION REMEDY BLUEPRINT LOCKED'}
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-white font-heading">
-              {isHi ? 'अपने घर के गंभीर दोषों के अचूक वैदिक उपाय तुरंत अनलॉक करें' : 'Unlock Your Home\'s 100% Non-Demolition Elemental Remedies'}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+      {/* 2. REPORT DETAILS & TABS VIEW */}
+      <div className="clean-card p-6 bg-white border border-slate-200 shadow-md space-y-6 rounded-3xl">
+        <div className="flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 p-3.5 rounded-2xl">
+          <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0" />
+          <div>
+            <p className="font-extrabold text-xs">
+              {isHi 
+                ? 'वरिष्ठ वास्तु विशेषज्ञ द्वारा विस्तृत रिपोर्ट कुछ ही घंटों में भेजी जाएगी।' 
+                : 'A detailed report will be provided by Vastu expert review in a few hours.'}
+            </p>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
               {isHi
-                ? 'वरिष्ठ वास्तु आचार्य द्वारा प्रमाणित 16-दिशा सुधार मैप, पंचतत्व रंगीन पट्टियां, धातु रॉड्स की सही दिशा व लंबाई, और धनवर्धक यंत्रों की संपूर्ण गाइड प्राप्त करें।'
-                : 'Unlock precise metal wire gauge placements (brass/copper), elemental color spectrum boundaries, and consecrated pyramid energizers designed specifically for your floor plan.'}
+                ? 'आपका नक्शा और 16 दिशाओं का स्कैन हमारे प्रमाणित वास्तु आचार्य को भेज दिया गया है। अनुकूलित रिपोर्ट और बिना तोड़फोड़ का उपाय मैप सीधे आपके WhatsApp पर मिलेगा!'
+                : 'Your floor plan layout and 16-zone directional scan have been submitted to our Senior Certified Vastu Acharya. A customized, microscopic report and non-demolition remedies map will be delivered directly to your mobile / WhatsApp!'}
             </p>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
-            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-amber-400 block">{isHi ? '1. बिना तोड़फोड़ उपाय' : '1. Zero Wall Breaking'}</span>
-              <p className="text-[11px] text-slate-400">{isHi ? 'रंगीन पट्टियों व तारों से तुरंत सुधार' : '100% color tape & wire corrections'}</p>
-            </div>
-            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-amber-400 block">{isHi ? '2. 16-दिशा विस्तृत मैप' : '2. 16-Zone Precision'}</span>
-              <p className="text-[11px] text-slate-400">{isHi ? 'प्रत्येक कमरे का सूक्ष्म कोण सुधार' : 'Room-by-room angular degree remedies'}</p>
-            </div>
-            <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-amber-400 block">{isHi ? '3. आचार्य सत्यापन' : '3. Acharya Verified'}</span>
-              <p className="text-[11px] text-slate-400">{isHi ? 'प्रमाणित वैदिक रिपोर्ट PDF' : 'Official certified downloadable PDF'}</p>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleUnlockClick}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition-all cursor-pointer inline-flex items-center gap-2"
-            >
-              <Lock className="w-4 h-4 text-slate-950" />
-              <span>{isHi ? 'संपूर्ण उपाय रिपोर्ट अनलॉक करें (₹899) →' : 'Unlock Certified Report & Remedies (₹899) →'}</span>
-            </button>
-          </div>
         </div>
-      ) : (
-        /* FULL UNLOCKED TABS VIEW */
-        <div className="clean-card p-6 bg-white border border-slate-200 shadow-md space-y-6 rounded-3xl">
-          <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 border border-emerald-300 p-3.5 rounded-2xl">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <div>
-              <p className="font-extrabold text-xs">
-                {isHi 
-                  ? 'वरिष्ठ वास्तु विशेषज्ञ द्वारा विस्तृत रिपोर्ट कुछ ही घंटों में भेजी जाएगी।' 
-                  : 'A detailed report will be provided by Vastu expert review in a few hours.'}
-              </p>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                {isHi
-                  ? 'आपका नक्शा और 16 दिशाओं का स्कैन हमारे प्रमाणित वास्तु आचार्य को भेज दिया गया है। अनुकूलित रिपोर्ट और बिना तोड़फोड़ का उपाय मैप सीधे आपके WhatsApp पर मिलेगा!'
-                  : 'Your floor plan layout and 16-zone directional scan have been submitted to our Senior Certified Vastu Acharya. A customized, microscopic report and non-demolition remedies map will be delivered directly to your mobile / WhatsApp!'}
-              </p>
-            </div>
-          </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab('rooms')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room Audit (${evaluatedRooms.length})`}
-            </button>
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('rooms')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeTab === 'rooms' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            {isHi ? `कमरेवार विश्लेषण (${evaluatedRooms.length})` : `Room-by-Room Audit (${evaluatedRooms.length})`}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('remedies')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {isHi ? 'बिना तोड़फोड़ वैदिक उपाय' : 'Zero-Demolition Remedies'}
-            </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('remedies')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeTab === 'remedies' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            {isHi ? 'बिना तोड़फोड़ वैदिक उपाय' : 'Zero-Demolition Remedies'}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('yantras')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {isHi ? 'वैदिक यंत्र व दैनिक नियम' : 'Vedic Yantras & Rituals'}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('yantras')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeTab === 'yantras' ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            {isHi ? 'वैदिक यंत्र व दैनिक नियम' : 'Vedic Yantras & Rituals'}
+          </button>
+        </div>
 
-          {/* TAB 1: Room-by-Room Microscopic Audit */}
-          {activeTab === 'rooms' && (
-            <div className="space-y-3">
-              {evaluatedRooms.length === 0 ? (
-                <div className="clean-card p-6 bg-white border border-slate-200 text-center space-y-2">
-                  <Layers className="w-7 h-7 text-slate-400 mx-auto" />
-                  <h4 className="font-extrabold text-xs text-slate-800">
-                    {isHi ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
-                  </h4>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {evaluatedRooms.map((room, idx) => (
-                    <div
-                      key={room.id || idx}
-                      className="clean-card p-4 bg-white border border-slate-200 space-y-2 hover:border-amber-400 transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
-                          <h4 className="font-extrabold text-sm text-slate-900">{room.name}</h4>
-                          {room.zone && (
-                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full font-mono border border-amber-200">
-                              {isHi ? `दिशा: ${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `Zone: ${room.zone.id} (${room.zone.name})`}
-                            </span>
-                          )}
-                        </div>
-
-                        <span className={`text-xs font-black px-2.5 py-1 rounded-full ${
-                          room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {room.rating === 'ideal' || room.rating === 'favorable' 
-                            ? (isHi ? '✅ शुभ संरेखण' : '✅ Auspicious Alignment') 
-                            : (isHi ? '⚠️ वास्तु दोष उपस्थित' : '⚠️ Vastu Defect Found')}
-                        </span>
+        {/* TAB 1: Room-by-Room Microscopic Audit */}
+        {activeTab === 'rooms' && (
+          <div className="space-y-3">
+            {evaluatedRooms.length === 0 ? (
+              <div className="clean-card p-6 bg-white border border-slate-200 text-center space-y-2">
+                <Layers className="w-7 h-7 text-slate-400 mx-auto" />
+                <h4 className="font-extrabold text-xs text-slate-800">
+                  {isHi ? 'कोई कमरा नहीं जोड़ा गया' : 'No Room Boxes Placed Yet'}
+                </h4>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {evaluatedRooms.map((room, idx) => (
+                  <div
+                    key={room.id || idx}
+                    className="clean-card p-4 bg-white border border-slate-200 space-y-2 hover:border-amber-400 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: room.zone?.color || '#d97706' }} />
+                        <h4 className="font-extrabold text-sm text-slate-900">{room.name}</h4>
+                        {room.zone && (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full font-mono border border-amber-200">
+                            {isHi ? `दिशा: ${room.zone.id} (${room.zone.name_hi || room.zone.name})` : `Zone: ${room.zone.id} (${room.zone.name})`}
+                          </span>
+                        )}
                       </div>
 
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        {room.description || 'Room zone evaluated.'}
-                      </p>
-
-                      {room.remedy && (
-                        <div className="bg-amber-50/70 p-2.5 rounded-xl border border-amber-200 text-xs text-amber-900 font-medium">
-                          <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy Solution:'}</strong> {room.remedy}
-                        </div>
-                      )}
-
-                      {room.zone?.lord && (
-                        <div className="text-[11px] text-slate-500 font-mono pt-1 flex items-center gap-2 border-t border-slate-100">
-                          <span className="font-bold text-slate-700">{isHi ? 'दिशा के स्वामी देवता:' : 'Ashtadikpalaka Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
-                        </div>
-                      )}
+                      <span className={`text-xs font-black px-2.5 py-1 rounded-full ${
+                        room.rating === 'ideal' || room.rating === 'favorable' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {room.rating === 'ideal' || room.rating === 'favorable' 
+                          ? (isHi ? '✅ शुभ संरेखण' : '✅ Auspicious Alignment') 
+                          : (isHi ? '⚠️ वास्तु दोष उपस्थित' : '⚠️ Vastu Defect Found')}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* TAB 2: Zero Demolition Remedies */}
-          {activeTab === 'remedies' && (
-            <div className="space-y-3">
-              <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-1">
-                <h4 className="font-black text-xs text-amber-950 font-heading">
-                  {isHi ? 'बिना तोड़फोड़ 100% वैदिक वास्तु समाधान' : '100% Non-Demolition Elemental Balance'}
-                </h4>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  {isHi 
-                    ? 'महावास्तु सिद्धांतों के अनुसार, दीवारों या दरवाजों को तोड़े बिना केवल तांबे की पट्टी, पीतल के तार व पंचतत्व रंगों द्वारा दिशा दोषों को शांत किया जाता है।' 
-                    : 'According to MahaVastu, elemental defects can be fully neutralized using elemental color tapes, brass/copper rods, and pyramid energy balancers without breaking walls.'}
-                </p>
-              </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {room.description || 'Room zone evaluated.'}
+                    </p>
 
-              {evaluatedRooms.filter(r => r.remedy).map((r, idx) => (
-                <div key={idx} className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-slate-900">{r.name} ({r.zone?.id})</span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-mono">{isHi ? 'वैदिक सुधार' : 'Vedic Remedy'}</span>
+                    {room.remedy && (
+                      <div className="bg-amber-50/70 p-2.5 rounded-xl border border-amber-200 text-xs text-amber-900 font-medium">
+                        <strong>{isHi ? 'वैदिक उपाय:' : 'Remedy Solution:'}</strong> {room.remedy}
+                      </div>
+                    )}
+
+                    {room.zone?.lord && (
+                      <div className="text-[11px] text-slate-500 font-mono pt-1 flex items-center gap-2 border-t border-slate-100">
+                        <span className="font-bold text-slate-700">{isHi ? 'दिशा के स्वामी देवता:' : 'Ashtadikpalaka Devta Lord:'}</span> {room.zone.lord_hi || room.zone.lord}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-slate-700 leading-relaxed">{r.remedy}</p>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 2: Zero Demolition Remedies */}
+        {activeTab === 'remedies' && (
+          <div className="space-y-3">
+            <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-1">
+              <h4 className="font-black text-xs text-amber-950 font-heading">
+                {isHi ? 'बिना तोड़फोड़ 100% वैदिक वास्तु समाधान' : '100% Non-Demolition Elemental Balance'}
+              </h4>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                {isHi 
+                  ? 'महावास्तु सिद्धांतों के अनुसार, दीवारों या दरवाजों को तोड़े बिना केवल तांबे की पट्टी, पीतल के तार व पंचतत्व रंगों द्वारा दिशा दोषों को शांत किया जाता है।' 
+                  : 'According to MahaVastu, elemental defects can be fully neutralized using elemental color tapes, brass/copper rods, and pyramid energy balancers without breaking walls.'}
+              </p>
             </div>
-          )}
 
-          {/* TAB 3: Vedic Yantras & Rituals */}
-          {activeTab === 'yantras' && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'श्री यंत्र (Shree Yantra)' : 'Shree Yantra'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'ईशान कोण (North-East)' : 'North-East (Ishanya)'}</span>
-                  <p className="text-[11px] text-slate-600">{isHi ? 'मां लक्ष्मी की कृपा, मानसिक शांति व घर में सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi, divine peace & mental clarity.'}</p>
+            {evaluatedRooms.filter(r => r.remedy).map((r, idx) => (
+              <div key={idx} className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-xs text-slate-900">{r.name} ({r.zone?.id})</span>
+                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-mono">{isHi ? 'वैदिक सुधार' : 'Vedic Remedy'}</span>
                 </div>
+                <p className="text-xs text-slate-700 leading-relaxed">{r.remedy}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
-                <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'कुबेर यंत्र (Kuber Yantra)' : 'Kuber Yantra'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'उत्तर दिशा (North Wall)' : 'North Wall'}</span>
-                  <p className="text-[11px] text-slate-600">{isHi ? 'निरंतर धन प्रवाह, व्यापार में लाभ और नई नौकरी के अवसर बढ़ाता है।' : 'Enhances continuous cash flow, career growth & business wealth.'}</p>
-                </div>
+        {/* TAB 3: Vedic Yantras & Rituals */}
+        {activeTab === 'yantras' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                <span className="font-black text-xs text-slate-900 block">{isHi ? 'श्री यंत्र (Shree Yantra)' : 'Shree Yantra'}</span>
+                <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'ईशान कोण (North-East)' : 'North-East (Ishanya)'}</span>
+                <p className="text-[11px] text-slate-600">{isHi ? 'मां लक्ष्मी की कृपा, मानसिक शांति व घर में सुख-समृद्धि लाता है।' : 'Invites Goddess Lakshmi, divine peace & mental clarity.'}</p>
+              </div>
 
-                <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
-                  <span className="font-black text-xs text-slate-900 block">{isHi ? 'पीतल स्वास्तिक (Brass Swastika)' : 'Brass Swastika'}</span>
-                  <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'मुख्य प्रवेश द्वार' : 'Main Entrance Door'}</span>
-                  <p className="text-[11px] text-slate-600">{isHi ? 'नजर दोष और नकारात्मक ऊर्जा को घर में प्रवेश करने से रोकता है।' : 'Blocks evil eye (Nazar), negativity & financial obstacles.'}</p>
-                </div>
+              <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                <span className="font-black text-xs text-slate-900 block">{isHi ? 'कुबेर यंत्र (Kuber Yantra)' : 'Kuber Yantra'}</span>
+                <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'उत्तर दिशा (North Wall)' : 'North Wall'}</span>
+                <p className="text-[11px] text-slate-600">{isHi ? 'निरंतर धन प्रवाह, व्यापार में लाभ और नई नौकरी के अवसर बढ़ाता है।' : 'Enhances continuous cash flow, career growth & business wealth.'}</p>
+              </div>
+
+              <div className="clean-card p-3.5 bg-white border border-slate-200 space-y-1.5">
+                <span className="font-black text-xs text-slate-900 block">{isHi ? 'पीतल स्वास्तिक (Brass Swastika)' : 'Brass Swastika'}</span>
+                <span className="text-[10px] font-mono text-amber-700 block">{isHi ? 'मुख्य प्रवेश द्वार' : 'Main Entrance Door'}</span>
+                <p className="text-[11px] text-slate-600">{isHi ? 'नजर दोष और नकारात्मक ऊर्जा को घर में प्रवेश करने से रोकता है।' : 'Blocks evil eye (Nazar), negativity & financial obstacles.'}</p>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Paywall Unlock Modal (₹899) */}
       {isPaywallModalOpen && (
