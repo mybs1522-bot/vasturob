@@ -101,7 +101,7 @@ export default function App() {
           setPlacedRooms(detected);
           setScanNotice({
             type: 'success',
-            message: '✨ Plan processed'
+            message: `✨ Scanned via Qwen3 32B Vision AI (${detected.length} rooms placed)`
           });
           return;
         }
