@@ -1,12 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { Compass, RotateCcw, RotateCw, MapPin } from 'lucide-react';
 import { ALL_INDIAN_STATES } from '../utils/aiVisionScanner';
+import { useLanguage } from '@/lib/i18n';
 
 export default function NorthCompassControls({ northAngle, setNorthAngle }) {
+  const { lang } = useLanguage();
   const wheelRef = useRef(null);
   const isDraggingRef = useRef(false);
   const [selectedStateName, setSelectedStateName] = useState('Maharashtra');
 
+  const isHi = lang === 'hi';
   const selectedLoc = ALL_INDIAN_STATES.find(s => s.state === selectedStateName) || ALL_INDIAN_STATES[18];
 
   const handleStateChange = (stateName) => {
@@ -77,10 +80,10 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           <MapPin className="w-4 h-4 text-amber-600 flex-shrink-0" />
           <div>
             <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider block">
-              1. Select Property State (Magnetic Calibration):
+              {isHi ? '1. राज्य चुनें (चुंबकीय उत्तर अंशांकन):' : '1. Select Property State (Magnetic Calibration):'}
             </span>
             <span className="text-[11px] text-slate-500 block">
-              State: <strong className="text-slate-900">{selectedLoc.state}</strong> • Declination Offset: <strong className="text-amber-800 font-mono">{selectedLoc.declination}°</strong>
+              {isHi ? 'राज्य:' : 'State:'} <strong className="text-slate-900">{selectedLoc.state}</strong> • {isHi ? 'चुंबकीय विचलन:' : 'Declination Offset:'} <strong className="text-amber-800 font-mono">{selectedLoc.declination}°</strong>
             </span>
           </div>
         </div>
@@ -107,10 +110,10 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              2. Align North Direction:
+              {isHi ? '2. उत्तर दिशा तय करें:' : '2. Align North Direction:'}
             </span>
             <span className="text-xs font-black text-slate-900 font-mono">
-              🧭 {northAngle}° North Direction
+              🧭 {northAngle}° {isHi ? 'उत्तर दिशा' : 'North Direction'}
             </span>
           </div>
         </div>
@@ -120,7 +123,7 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           <button
             type="button"
             onClick={() => handleRotate(-15)}
-            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-2xs active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
             title="Rotate 15° Counter-Clockwise"
           >
             <RotateCcw className="w-3 h-3 text-amber-600" /> -15°
@@ -129,7 +132,7 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           <button
             type="button"
             onClick={() => handleRotate(-5)}
-            className="px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 shadow-2xs active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 shadow-2xs active:scale-95 cursor-pointer"
           >
             -5°
           </button>
@@ -137,15 +140,15 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           <button
             type="button"
             onClick={() => setNorthAngle(0)}
-            className="px-2.5 py-1 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-xs font-extrabold shadow-2xs"
+            className="px-2.5 py-1 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-xs font-extrabold shadow-2xs cursor-pointer"
           >
-            Reset 0°
+            {isHi ? 'रीसेट 0°' : 'Reset 0°'}
           </button>
 
           <button
             type="button"
             onClick={() => handleRotate(5)}
-            className="px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 shadow-2xs active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 shadow-2xs active:scale-95 cursor-pointer"
           >
             +5°
           </button>
@@ -153,7 +156,7 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
           <button
             type="button"
             onClick={() => handleRotate(15)}
-            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-2xs active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
             title="Rotate 15° Clockwise"
           >
             +15° <RotateCw className="w-3 h-3 text-amber-600" />
@@ -210,7 +213,7 @@ export default function NorthCompassControls({ northAngle, setNorthAngle }) {
         </div>
 
         <p className="text-[10px] text-slate-500 font-medium italic text-center">
-          💡 Drag or touch the compass wheel directly to align North
+          {isHi ? '💡 कंपास व्हील को ड्रैग या टच करके उत्तर दिशा से मिलाएं' : '💡 Drag or touch the compass wheel directly to align North'}
         </p>
       </div>
     </div>

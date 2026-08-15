@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { VASTU_ZONES_16, ROOM_TYPES } from '../utils/vastuEngine';
 import NorthCompassControls from './NorthCompassControls';
 import { convertPdfFileToDataUrl } from '../utils/pdfHelper';
+import { useLanguage } from '@/lib/i18n';
 import {
   ZoomIn, ZoomOut, Upload, Eye, EyeOff, Compass, Plus, Trash2, Layers,
   Flame, BedDouble, Droplets, Sofa, DoorOpen, Sparkles, Utensils, TrendingUp, Waves, Box, Sun
@@ -53,6 +54,9 @@ export default function FloorPlanCanvas({
   showCompassBelow = true,
   isScanning = false,
 }) {
+  const { lang, t } = useLanguage();
+  const isHi = lang === 'hi';
+
   const containerRef = useRef(null);
   const wrapperRef = useRef(null);
   const [zoom, setZoom] = useState(1);
@@ -133,22 +137,6 @@ export default function FloorPlanCanvas({
     };
   };
 
-  const handleCanvasClick = (e) => {
-    if (draggingRoomId || draggingCenter) return;
-    if (!selectedRoomType) return;
-
-    const coords = getCanvasCoords(e);
-    const newRoomBox = {
-      id: `room_${Date.now()}`,
-      typeId: selectedRoomType.id,
-      name: selectedRoomType.name,
-      color: selectedRoomType.color,
-      x: coords.x,
-      y: coords.y,
-    };
-    setPlacedRooms((prev) => [...prev, newRoomBox]);
-  };
-
   const handleStartDragPin = (e, roomId) => {
     e.stopPropagation();
     setDraggingRoomId(roomId);
@@ -201,7 +189,7 @@ export default function FloorPlanCanvas({
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
         {!isCustomGridMode ? (
           <label className="cursor-pointer bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-full font-semibold text-[10px] flex items-center gap-1 shadow-2xs">
-            <Upload className="w-3 h-3 text-amber-400" /> Upload Plan
+            <Upload className="w-3 h-3 text-amber-400" /> {t('upload_new_plan')}
             <input type="file" accept="image/*,.svg,.pdf,application/pdf" onChange={handleFileUpload} className="hidden" />
           </label>
         ) : (
@@ -213,10 +201,10 @@ export default function FloorPlanCanvas({
           <button
             type="button"
             onClick={() => setShowZonesOverlay(!showZonesOverlay)}
-            className={`p-1.5 rounded-full text-xs font-semibold border transition-all ${
+            className={`p-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
               showZonesOverlay ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'
             }`}
-            title="Toggle 16 Zones Grid"
+            title={t('toggle_zones')}
           >
             {showZonesOverlay ? <Eye className="w-3.5 h-3.5 text-amber-400" /> : <EyeOff className="w-3.5 h-3.5" />}
           </button>
@@ -225,7 +213,7 @@ export default function FloorPlanCanvas({
             <button
               type="button"
               onClick={() => setZoom((z) => Math.max(0.7, z - 0.1))}
-              className="p-1 text-slate-600"
+              className="p-1 text-slate-600 cursor-pointer"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -233,7 +221,7 @@ export default function FloorPlanCanvas({
             <button
               type="button"
               onClick={() => setZoom((z) => Math.min(1.4, z + 0.1))}
-              className="p-1 text-slate-600"
+              className="p-1 text-slate-600 cursor-pointer"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
@@ -248,105 +236,55 @@ export default function FloorPlanCanvas({
       >
         <div
           ref={wrapperRef}
-          onClick={handleCanvasClick}
           onMouseMove={handleMove}
           onMouseUp={handleEndDrag}
+          onMouseLeave={handleEndDrag}
           onTouchMove={handleMove}
           onTouchEnd={handleEndDrag}
-          className="relative rounded-xl overflow-hidden shadow-sm bg-white"
           style={{
             width: `${scaledWidth}px`,
             height: `${scaledHeight}px`,
           }}
+          className="relative bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden flex-shrink-0"
         >
+          {/* Internal 800x600 canvas coordinate space */}
           <div
-            className="absolute top-0 left-0 cursor-crosshair origin-top-left bg-white"
             style={{
               width: `${CANVAS_WIDTH}px`,
               height: `${CANVAS_HEIGHT}px`,
               transform: `scale(${totalScale})`,
-              transformOrigin: '0 0',
+              transformOrigin: 'top left',
             }}
+            className="absolute top-0 left-0"
           >
-            {svgContent ? (
-              <div
-                className="absolute inset-0 pointer-events-none bg-white [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
-                dangerouslySetInnerHTML={{ __html: svgContent }}
+            {/* Background Blueprint Image or SVG */}
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Floor Plan"
+                className="w-full h-full object-contain pointer-events-none select-none"
               />
-            ) : imageUrl ? (
-              <div className="relative w-full h-full">
-                <img
-                  src={imageUrl}
-                  alt="Uploaded Floor Plan"
-                  className={`w-full h-full object-contain pointer-events-none bg-white transition-all duration-500 ${isScanning ? 'opacity-60' : 'opacity-100'}`}
-                />
-                {isScanning && (
-                  <>
-                    {/* Scanning laser line animation */}
-                    <div
-                      className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_15px_rgba(245,158,11,0.7)]"
-                      style={{
-                        animation: 'scanLine 2s ease-in-out infinite',
-                      }}
-                    />
-                    {/* Scanning shimmer overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-amber-500/5 animate-pulse" />
-                    {/* Corner scan markers */}
-                    <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-amber-500 animate-pulse" />
-                    <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-amber-500 animate-pulse" />
-                    <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-amber-500 animate-pulse" />
-                    <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-amber-500 animate-pulse" />
-                    {/* Center scanning text */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="px-4 py-2 bg-black/70 rounded-lg backdrop-blur-sm">
-                        <span className="text-amber-400 text-xs font-bold tracking-widest uppercase animate-pulse">Scanning...</span>
-                      </div>
-                    </div>
-                    <style>{`
-                      @keyframes scanLine {
-                        0% { top: 5%; }
-                        50% { top: 90%; }
-                        100% { top: 5%; }
-                      }
-                    `}</style>
-                  </>
-                )}
-              </div>
+            ) : svgContent ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: svgContent }}
+                className="w-full h-full pointer-events-none select-none"
+              />
             ) : (
-              <div className="absolute inset-0 bg-white">
-                <svg className="absolute inset-0 w-full h-full opacity-15" width="100%" height="100%">
-                  <defs>
-                    <pattern id="slateGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#cbd5e1" strokeWidth="1" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#slateGrid)" />
-                </svg>
-
-                {placedRooms.length === 0 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-2 pointer-events-none">
-                    <Layers className="w-10 h-10 text-slate-800 stroke-1" />
-                    <h3 className="font-bold text-slate-800 text-sm">Pure White Slate</h3>
-                    <p className="text-xs text-slate-500 max-w-sm">
-                      Tap black pills above to add <strong>Kitchen, Bedroom, Washroom, Living, Main Door</strong> boxes onto your slate!
-                    </p>
-                  </div>
-                )}
+              <div className="w-full h-full flex items-center justify-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg">
+                <span className="text-xs text-slate-400 font-medium">
+                  {isHi ? 'घर का नक्शा अपलोड करें' : 'Upload floor plan blueprint'}
+                </span>
               </div>
             )}
 
-            {/* 16 Vastu Zones Overlay */}
+            {/* 16 MahaVastu Zones Overlay */}
             {showZonesOverlay && (
-              <svg
-                className={`absolute inset-0 w-full h-full pointer-events-none z-10 transition-opacity duration-500 ${
-                  isRotating ? 'opacity-100' : 'opacity-35 hover:opacity-100'
-                }`}
-                viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
-              >
+              <svg className="absolute inset-0 w-full h-full pointer-events-none select-none">
+                {/* Central Brahmasthan circle */}
                 <circle
                   cx={centerPos.x}
                   cy={centerPos.y}
-                  r="65"
+                  r="60"
                   fill="#fef3c7"
                   fillOpacity={isRotating ? '0.5' : '0.2'}
                   stroke="#d97706"
@@ -378,9 +316,9 @@ export default function FloorPlanCanvas({
                       />
                       <g transform={`translate(${lx}, ${ly})`}>
                         <rect
-                          x="-22"
+                          x="-24"
                           y="-11"
-                          width="44"
+                          width="48"
                           height="22"
                           rx="6"
                           fill="#ffffff"
@@ -452,8 +390,11 @@ export default function FloorPlanCanvas({
               </div>
             </div>
 
-            {/* Placed Room Badges: Sleek, compact, non-blocking room markers */}
+            {/* Placed Room Badges */}
             {placedRooms.map((room) => {
+              const matchedRoom = ROOM_TYPES.find(r => r.id === room.typeId);
+              const displayName = isHi ? (matchedRoom?.name_hi || room.name) : room.name;
+
               return (
                 <div
                   key={room.id}
@@ -470,7 +411,7 @@ export default function FloorPlanCanvas({
                     <div className="px-3 py-1.5 rounded-full bg-slate-950/95 text-white border-2 border-amber-400/90 shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
                       {getRoomIcon(room.typeId, "w-3.5 h-3.5 flex-shrink-0 text-amber-400")}
                       <span className="text-[11px] sm:text-xs font-black tracking-tight text-white">
-                        {room.name}
+                        {displayName}
                       </span>
                       <button
                         type="button"

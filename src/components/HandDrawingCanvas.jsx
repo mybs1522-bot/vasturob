@@ -1,7 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Pencil, Eraser, RotateCcw } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function HandDrawingCanvas({ onSaveDrawing, onCancel }) {
+  const { lang } = useLanguage();
+  const isHi = lang === 'hi';
+
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
@@ -217,17 +221,20 @@ export default function HandDrawingCanvas({ onSaveDrawing, onCancel }) {
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 className="font-extrabold text-slate-900 text-sm font-heading flex items-center gap-1.5">
-            <Pencil className="w-4 h-4 text-amber-600" /> Draw Your Floor Plan
+            <Pencil className="w-4 h-4 text-amber-600" />
+            {isHi ? 'हाथ से नक्शा बनाएं' : 'Draw Your Floor Plan'}
           </h3>
-          <p className="text-xs text-slate-500">Draw house walls across full canvas edge-to-edge</p>
+          <p className="text-xs text-slate-500">
+            {isHi ? 'दीवारों और कमरों का स्केच बनाएं' : 'Draw house walls across full canvas edge-to-edge'}
+          </p>
         </div>
 
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs text-slate-500 hover:text-slate-800 font-bold px-2 py-1"
+          className="text-xs text-slate-500 hover:text-slate-800 font-bold px-2 py-1 cursor-pointer"
         >
-          Cancel
+          {isHi ? 'रद्द करें' : 'Cancel'}
         </button>
       </div>
 
@@ -237,30 +244,30 @@ export default function HandDrawingCanvas({ onSaveDrawing, onCancel }) {
           <button
             type="button"
             onClick={() => setActiveTool('pencil')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTool === 'pencil' ? 'bg-slate-900 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            <Pencil className="w-3.5 h-3.5" /> Pen
+            <Pencil className="w-3.5 h-3.5" /> {isHi ? 'पेन' : 'Pen'}
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTool('eraser')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTool === 'eraser' ? 'bg-slate-900 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            <Eraser className="w-3.5 h-3.5" /> Eraser
+            <Eraser className="w-3.5 h-3.5" /> {isHi ? 'इरेज़र' : 'Eraser'}
           </button>
         </div>
 
         <button
           type="button"
           onClick={handleClearCanvas}
-          className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-red-600 text-xs font-bold flex items-center gap-1"
+          className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-red-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Clear
+          <RotateCcw className="w-3.5 h-3.5" /> {isHi ? 'साफ करें' : 'Clear'}
         </button>
       </div>
 
@@ -286,9 +293,9 @@ export default function HandDrawingCanvas({ onSaveDrawing, onCancel }) {
         <button
           type="button"
           onClick={handleNext}
-          className="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
+          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
         >
-          Next: Mark Room Boxes →
+          {isHi ? 'आगे बढ़ें: कमरों की स्थिति तय करें →' : 'Next: Mark Room Boxes →'}
         </button>
       </div>
     </div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Sparkles, Compass, CheckCircle2, FileText, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
+  const { lang } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0); // 0 to 100 (%)
   const [activeStep, setActiveStep] = useState(1); // 1: Upload | 2: Scan & Align | 3: Calculate Score | 4: Generate Report
@@ -42,6 +44,8 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
     setIsPlaying(true);
   };
 
+  const isHi = lang === 'hi';
+
   return (
     <div className="max-w-5xl mx-auto rounded-3xl border border-amber-400/40 bg-slate-950 text-white shadow-2xl overflow-hidden relative my-12 backdrop-blur-md">
       {/* Screen Canvas (Animated Simulation Window) */}
@@ -51,10 +55,10 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-slate-950/95 border border-amber-400/50 text-amber-300 px-3.5 py-1 rounded-full text-[9px] sm:text-xs font-mono font-extrabold shadow-xl tracking-wider uppercase flex items-center gap-1.5 whitespace-nowrap max-w-[92%]">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping flex-shrink-0" />
           <span>
-            {activeStep === 1 && 'Step 1: Upload Floor Plan'}
-            {activeStep === 2 && 'Step 2: Auto 16-Zone Scan'}
-            {activeStep === 3 && 'Step 3: Instant Vastu Score'}
-            {activeStep === 4 && 'Step 4: Generate Vedic Report'}
+            {activeStep === 1 && (isHi ? 'चरण 1: घर का नक्शा अपलोड' : 'Step 1: Upload Floor Plan')}
+            {activeStep === 2 && (isHi ? 'चरण 2: 16-दिशा ऑटो स्कैन' : 'Step 2: Auto 16-Zone Scan')}
+            {activeStep === 3 && (isHi ? 'चरण 3: तुरंत वास्तु स्कोर' : 'Step 3: Instant Vastu Score')}
+            {activeStep === 4 && (isHi ? 'चरण 4: वैदिक रिपोर्ट व उपाय' : 'Step 4: Generate Vedic Report')}
           </span>
         </div>
 
@@ -73,7 +77,7 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
               <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px] flex items-center justify-center">
                 <div className="bg-slate-950/95 border border-amber-400 px-5 py-2.5 rounded-xl text-amber-300 text-xs font-mono font-bold flex items-center gap-2 shadow-2xl">
                   <Compass className="w-5 h-5 text-amber-400 animate-spin-slow" />
-                  <span>Processing Floor Plan Architectural Vector...</span>
+                  <span>{isHi ? 'नक्शे का आर्किटेक्चरल विश्लेषण जारी है...' : 'Processing Floor Plan Architectural Vector...'}</span>
                 </div>
               </div>
             </div>
@@ -99,19 +103,19 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
 
               {/* Positioned Room Pills overlaying the floor plan */}
               <div className="absolute top-4 right-16 bg-slate-950/95 border border-emerald-400 text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> KITCHEN (SE)
+                <span className="w-2 h-2 rounded-full bg-emerald-400" /> {isHi ? 'रसोई (आग्नेय)' : 'KITCHEN (SE)'}
               </div>
 
               <div className="absolute top-4 left-8 bg-slate-950/95 border border-amber-400 text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> MASTER BDR (NE)
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> {isHi ? 'मास्टर बेडरूम (NE)' : 'MASTER BDR (NE)'}
               </div>
 
               <div className="absolute bottom-12 left-8 bg-slate-950/95 border border-amber-400 text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> BEDROOM 2 (NW)
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> {isHi ? 'बेडरूम 2 (NW)' : 'BEDROOM 2 (NW)'}
               </div>
 
               <div className="absolute bottom-12 right-12 bg-slate-950/95 border border-amber-400 text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> GARAGE (SE)
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> {isHi ? 'गैराज (SE)' : 'GARAGE (SE)'}
               </div>
 
               {/* Rotating Compass Wheel Center */}
@@ -124,7 +128,7 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
             {/* Floating Banner */}
             <div className="absolute bottom-3 bg-slate-950/90 border border-amber-400/50 text-amber-300 px-4 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-2 shadow-xl">
               <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-              <span>Scanning 16 MahaVastu Energy Zones...</span>
+              <span>{isHi ? '16 महावास्तु ऊर्जा दिशाओं का स्कैन जारी है...' : 'Scanning 16 MahaVastu Energy Zones...'}</span>
             </div>
           </div>
         )}
@@ -158,22 +162,25 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-3xl font-black text-amber-400 font-mono">88</span>
-                <span className="text-[9px] font-bold text-slate-400">/ 100 SCORE</span>
+                <span className="text-[9px] font-bold text-slate-400">/ 100 {isHi ? 'स्कोर' : 'SCORE'}</span>
               </div>
             </div>
 
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-3 py-1 rounded-full text-xs font-mono font-extrabold">
-                <CheckCircle2 className="w-3.5 h-3.5" /> High Prosperity &amp; Harmony Index
+                <CheckCircle2 className="w-3.5 h-3.5" /> {isHi ? 'उच्च समृद्धि व सकारात्मक ऊर्जा सूचकांक' : 'High Prosperity & Harmony Index'}
               </div>
-              <h4 className="text-base font-extrabold text-white">Vastu Score Calculated Successfully</h4>
+              <h4 className="text-base font-extrabold text-white">
+                {isHi ? 'वास्तु स्कोर सफलतापूर्वक तैयार' : 'Vastu Score Calculated Successfully'}
+              </h4>
             </div>
 
             <button
               type="button"
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs shadow-lg inline-flex items-center gap-2 animate-pulse"
+              onClick={onNavigateToStart}
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs shadow-lg inline-flex items-center gap-2 animate-pulse cursor-pointer"
             >
-              <span>CHECK VAASTU REPORT NOW &rarr;</span>
+              <span>{isHi ? 'वास्तु रिपोर्ट अभी देखें →' : 'CHECK VAASTU REPORT NOW →'}</span>
             </button>
           </div>
         )}
@@ -186,7 +193,9 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-amber-400" />
                   <div>
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider">OFFICIAL 16-ZONE VASTU AUDIT</h4>
+                    <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                      {isHi ? 'प्रामाणिक 16-दिशा वास्तु रिपोर्ट' : 'OFFICIAL 16-ZONE VASTU AUDIT'}
+                    </h4>
                     <p className="text-[10px] text-amber-300/80 font-mono">ID: VS-2026-8890 • Certified Report</p>
                   </div>
                 </div>
@@ -197,18 +206,24 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
 
               <div className="grid grid-cols-2 gap-3 text-left">
                 <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block font-mono">LAKSHMI CASH FLOW</span>
-                  <span className="text-xs font-extrabold text-amber-400">92% Optimal</span>
+                  <span className="text-[10px] text-slate-400 block font-mono">{isHi ? 'लक्ष्मी धन प्रवाह' : 'LAKSHMI CASH FLOW'}</span>
+                  <span className="text-xs font-extrabold text-amber-400">{isHi ? '92% उत्तम' : '92% Optimal'}</span>
                 </div>
                 <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block font-mono">HEALTH &amp; PEACE</span>
-                  <span className="text-xs font-extrabold text-emerald-400">85% Balanced</span>
+                  <span className="text-[10px] text-slate-400 block font-mono">{isHi ? 'स्वास्थ्य व शांति' : 'HEALTH & PEACE'}</span>
+                  <span className="text-xs font-extrabold text-emerald-400">{isHi ? '85% संतुलित' : '85% Balanced'}</span>
                 </div>
               </div>
 
               <div className="bg-amber-400/10 border border-amber-400/30 p-2.5 rounded-xl text-left">
-                <span className="text-[10px] font-bold text-amber-300 block mb-0.5">✅ Demolition-Free Remedy:</span>
-                <p className="text-[11px] text-slate-300">Apply 3-inch elemental brass strip in South-West corner to lock cash flow.</p>
+                <span className="text-[10px] font-bold text-amber-300 block mb-0.5">
+                  {isHi ? '✅ बिना तोड़फोड़ वैदिक उपाय:' : '✅ Demolition-Free Remedy:'}
+                </span>
+                <p className="text-[11px] text-slate-300">
+                  {isHi 
+                    ? 'धन की स्थिरता के लिए नैऋत्य (SW) कोण में 3-इंच पीतल की धातु पट्टी लगाएं।' 
+                    : 'Apply 3-inch elemental brass strip in South-West corner to lock cash flow.'}
+                </p>
               </div>
 
               <button
@@ -216,7 +231,7 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
                 onClick={onNavigateToStart}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg hover:scale-102 transition-all cursor-pointer"
               >
-                <span>GENERATE YOUR REPORT FREE &rarr;</span>
+                <span>{isHi ? 'अपनी मुफ्त रिपोर्ट निकालें →' : 'GENERATE YOUR REPORT FREE →'}</span>
               </button>
             </div>
           </div>
@@ -238,14 +253,14 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
           <button
             type="button"
             onClick={restartVideo}
-            className="text-slate-400 hover:text-white transition-colors p-1"
+            className="text-slate-400 hover:text-white transition-colors p-1 cursor-pointer"
             title="Restart Demo Video"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
 
           <span className="font-mono text-[11px] text-amber-300/90 font-bold hidden sm:inline">
-            Step {activeStep} of 4 • {Math.min(Math.floor((progress / 100) * 10), 10)}s / 10s
+            {isHi ? `चरण ${activeStep} (कुल 4)` : `Step ${activeStep} of 4`} • {Math.min(Math.floor((progress / 100) * 10), 10)}s / 10s
           </span>
         </div>
 
@@ -254,7 +269,7 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
           onClick={onNavigateToStart}
           className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-[11px] flex items-center gap-1 shadow-md hover:scale-102 transition-all cursor-pointer"
         >
-          <span>Check Vaastu</span>
+          <span>{isHi ? 'वास्तु जांचें' : 'Check Vaastu'}</span>
           <ArrowRight className="w-3 h-3 text-slate-950" />
         </button>
       </div>
