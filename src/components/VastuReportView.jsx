@@ -219,6 +219,9 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                 hours={hours}
                 minutes={minutes}
                 seconds={seconds}
+                overallScore={overallScore}
+                doshasCount={doshasCount}
+                idealCount={idealCount}
               />
             </div>
           </div>

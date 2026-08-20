@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Clock, Check } from "lucide-react";
+import { Clock, Check, Lock, Compass, ShieldAlert, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const ProductPacks = ({
@@ -8,18 +8,63 @@ export const ProductPacks = ({
   hours = "02",
   minutes = "37",
   seconds = "00",
+  overallScore = 49,
+  doshasCount = 4,
+  idealCount = 2,
   className = ""
 }) => {
   return (
-    <section className={`py-3 px-2 sm:px-4 text-black ${className}`}>
-      <div className="max-w-4xl mx-auto space-y-4">
+    <section className={`py-2 px-2 sm:px-4 text-black ${className}`}>
+      <div className="max-w-4xl mx-auto space-y-3.5">
         
-        {/* Top Header: "Your Report is Ready!" (Black & White) */}
-        <div className="text-center space-y-1">
+        {/* ========================================================================= */}
+        {/* COMPACT TOP VISUAL TEASER (BLURRED VASTU SCORE & 16-ZONE CHAKRA IMPRESSION) */}
+        {/* ========================================================================= */}
+        <div className="relative rounded-2xl border-2 border-black/15 bg-slate-950/5 p-2 sm:p-2.5 overflow-hidden shadow-xs">
+          {/* Blurred Background Visual Strip */}
+          <div className="filter blur-[4px] select-none pointer-events-none opacity-85 flex items-center justify-between gap-1.5 sm:gap-3 text-xs">
+            {/* Score Pill */}
+            <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2.5 py-1 rounded-xl shadow-xs flex-shrink-0">
+              <span className="font-mono text-[10px] font-bold text-slate-500">{isHi ? "वास्तु स्कोर:" : "SCORE:"}</span>
+              <span className="font-mono font-black text-slate-900 text-sm">{overallScore}/100</span>
+              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                {overallScore >= 70 ? "Optimal" : "Defects Found"}
+              </span>
+            </div>
+
+            {/* 16-Zone Energy Mapped Pill */}
+            <div className="flex items-center gap-1 bg-white border border-slate-300 px-2.5 py-1 rounded-xl shadow-xs hidden sm:flex">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="font-mono text-[10px] font-bold text-slate-700">16-ZONE GRID AUDITED</span>
+            </div>
+
+            {/* Critical Defects Warning Pill */}
+            <div className="flex items-center gap-1 bg-red-50 border border-red-200 px-2.5 py-1 rounded-xl shadow-xs flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span className="font-mono text-[10px] font-black text-red-700">
+                {doshasCount} {isHi ? "दोष पहचाने गए" : "CRITICAL DOSHAS"}
+              </span>
+            </div>
+          </div>
+
+          {/* Floating Lock Badge Overlay */}
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/10 backdrop-blur-[1.5px]">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950 text-amber-300 text-[10px] font-mono font-black shadow-md border border-amber-400/40">
+              <Lock className="w-3 h-3 text-amber-400" />
+              <span>{isHi ? "🔒 वास्तु गणना पूर्ण • अनलॉक करें" : "🔒 AUDIT READY • UNLOCK BELOW"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Header: "Your Report is Ready!" (Shifted Below Visual Teaser) */}
+        <div className="text-center space-y-0.5">
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 border border-neutral-300 text-neutral-900 text-[11px] font-mono font-black uppercase">
             <span>{isHi ? "वास्तु विश्लेषण पूर्ण" : "VASTU AUDIT COMPLETE"}</span>
           </div>
-          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-black font-heading">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-black font-heading">
             {isHi ? "आपकी वास्तु रिपोर्ट तैयार है!" : "Your Report is Ready!"}
           </h1>
           <p className="text-neutral-600 text-xs sm:text-sm font-medium leading-tight max-w-md mx-auto">
