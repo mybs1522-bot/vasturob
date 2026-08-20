@@ -8,6 +8,7 @@ import { useLanguage } from '@/lib/i18n';
 import { saveVastuReport } from '@/lib/supabase';
 import { openRazorpayCheckout } from '@/lib/razorpay';
 import ProductPacks from '@/components/ui/product-packs';
+import { Button } from '@/components/ui/button';
 
 // Sample preview rooms to ensure rich background content
 const DEFAULT_PREVIEW_ROOMS = [
