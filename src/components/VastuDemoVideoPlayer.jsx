@@ -231,7 +231,7 @@ export default function VastuDemoVideoPlayer({ onNavigateToStart }) {
                 onClick={onNavigateToStart}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg hover:scale-102 transition-all cursor-pointer"
               >
-                <span>{isHi ? 'अपनी मुफ्त रिपोर्ट निकालें →' : 'GENERATE YOUR REPORT FREE →'}</span>
+                <span>{isHi ? 'अपनी रिपोर्ट प्राप्त करें →' : 'GENERATE YOUR REPORT →'}</span>
               </button>
             </div>
           </div>

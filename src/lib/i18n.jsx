@@ -54,7 +54,7 @@ export const translations = {
     hero_title_2: 'Vastu Analysis',
     hero_title_3: 'For Your Home in 60 Seconds',
     hero_desc: 'Upload your blueprint or sketch by hand. Our MahaVastu AI Engine scans 16 directional zones, detects critical doshas, and gives 100% non-demolition remedies.',
-    cta_start_free: 'Start Instant Vastu Audit Free →',
+    cta_start_free: 'Scan Floor Plan →',
     cta_expert: 'Chat with Expert (₹999)',
     guarantee_subtext: 'Zero Wall Breaking • Instant PDF Report • 100% Vedic Accuracy',
 
@@ -164,7 +164,7 @@ export const translations = {
     hero_title_2: 'महावास्तु विश्लेषण',
     hero_title_3: 'मात्र 60 सेकंड में अपने घर का',
     hero_desc: 'घर का नक्शा अपलोड करें या हाथ से बनाएं। हमारा AI इंजन 16 दिशाओं की ऊर्जा जांचकर बिना तोड़फोड़ 100% अचूक वैदिक उपाय प्रदान करता है।',
-    cta_start_free: 'मुफ्त वास्तु विश्लेषण शुरू करें →',
+    cta_start_free: 'नक्शा स्कैन करें →',
     cta_expert: 'एक्सपर्ट से परामर्श (₹999)',
     guarantee_subtext: 'बिना तोड़फोड़ उपाय • तुरंत PDF रिपोर्ट • 100% वैदिक प्रामाणिकता',
 

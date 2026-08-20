@@ -287,7 +287,7 @@ export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOp
                   className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-950 hover:bg-slate-900 text-amber-400 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer whitespace-nowrap"
                 >
                   <Compass className="w-4 h-4 text-amber-400" />
-                  <span>{isHi ? 'नक्शा जांचें (मुफ्त)' : 'Scan Floor Plan Free →'}</span>
+                  <span>{isHi ? 'नक्शा स्कैन करें →' : 'Scan Floor Plan →'}</span>
                 </button>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOp
           <div className="bg-gradient-to-br from-amber-50 to-yellow-50/80 border-2 border-amber-400 rounded-3xl p-6 sm:p-8 space-y-4 shadow-lg text-left">
             <div className="flex items-center justify-between border-b border-amber-200 pb-3">
               <span className="text-xs font-mono font-bold text-amber-800">{isHi ? '✅ वास्तुस्कोप AI समाधान' : '✅ VastuScope 16-Zone Audit'}</span>
-              <span className="text-xs font-black text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full font-mono">100% {isHi ? 'सटीक' : 'FREE AUDIT'}</span>
+              <span className="text-xs font-black text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full font-mono">100% {isHi ? 'सटीक' : 'ACCURATE AUDIT'}</span>
             </div>
             <ul className="space-y-2.5 text-xs text-amber-950 font-medium">
               <li className="flex items-start gap-2">
