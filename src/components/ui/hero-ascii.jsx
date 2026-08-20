@@ -183,10 +183,10 @@ export default function HeroAscii({ onNavigateToStart }) {
             <span className="text-amber-300/80 text-[10px] sm:text-xs font-mono tracking-wider hidden sm:inline">16-ZONE ENGINE</span>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 text-xs font-mono text-amber-200/70">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 text-[10px] sm:text-xs font-mono text-amber-200/80 whitespace-nowrap">
               <span>LAT: 28.6139° N</span>
-              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-500 rounded-full animate-ping flex-shrink-0"></div>
               <span>LONG: 77.2090° E</span>
             </div>
           </div>
