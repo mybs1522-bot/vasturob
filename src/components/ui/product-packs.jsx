@@ -35,7 +35,7 @@ export const ProductPacks = ({
           {/* ======================================================== */}
           {/* OPTION 1: ₹299 BASIC VASTU REPORT (Clean White Card)     */}
           {/* ======================================================== */}
-          <div className="bg-white border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-4 min-h-[260px]">
+          <div className="bg-white border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-3 min-h-[260px]">
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
@@ -58,19 +58,8 @@ export const ProductPacks = ({
                 </div>
               </div>
 
-              {/* Countdown Timer in Card 1 */}
-              <div className="bg-yellow-400/15 border-2 border-yellow-500 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-slate-950 shadow-xs">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-600 animate-spin-slow" />
-                  <span className="font-bold text-slate-950">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
-                </div>
-                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
-                  {hours}h : {minutes}m : {seconds}s
-                </span>
-              </div>
-
               {/* Feature Checklist */}
-              <div className="space-y-2 pt-1 border-t border-neutral-200 text-xs">
+              <div className="space-y-2 pt-2 border-t border-neutral-200 text-xs">
                 {[
                   { label: isHi ? "16 दिशा समग्र वास्तु स्कोर" : "16-Zone Overall Score", val: "/100" },
                   { label: isHi ? "4 मुख्य ऊर्जा स्तंभ (धन, स्वास्थ्य)" : "4 Core Energy Pillars", val: "Cash & Health" },
@@ -90,22 +79,36 @@ export const ProductPacks = ({
               </div>
             </div>
 
-            {/* Action Button (Solid Black) */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onSelectPlan && onSelectPlan(299)}
-              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-black text-white border-2 border-black px-4 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-neutral-800 cursor-pointer mt-1"
-            >
-              <span>{isHi ? "मूल रिपोर्ट अनलॉक करें →" : "Unlock Basic Report →"}</span>
-            </Button>
+            {/* Bottom Stack: Timer Directly Above CTA Button */}
+            <div className="space-y-2 pt-1">
+              {/* Countdown Timer */}
+              <div className="bg-yellow-400/15 border-2 border-yellow-500 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-slate-950 shadow-xs">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-600 animate-spin-slow" />
+                  <span className="font-bold text-slate-950">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
+                </div>
+                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
+                  {hours}h : {minutes}m : {seconds}s
+                </span>
+              </div>
+
+              {/* Action Button (Solid Black) */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onSelectPlan && onSelectPlan(299)}
+                className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-black text-white border-2 border-black px-4 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-neutral-800 cursor-pointer"
+              >
+                <span>{isHi ? "मूल रिपोर्ट अनलॉक करें →" : "Unlock Basic Report →"}</span>
+              </Button>
+            </div>
           </div>
 
 
           {/* ======================================================== */}
           {/* OPTION 2: ₹899 DETAILED VASTU REPORT (Solid Black Card)  */}
           {/* ======================================================== */}
-          <div className="bg-black text-white border-2 border-neutral-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-4 relative overflow-hidden min-h-[260px]">
+          <div className="bg-black text-white border-2 border-neutral-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-3 relative overflow-hidden min-h-[260px]">
             
             {/* Top Ribbon (Black & White) */}
             <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
@@ -139,17 +142,6 @@ export const ProductPacks = ({
                 </div>
               </div>
 
-              {/* Countdown Timer in Card 2 */}
-              <div className="bg-yellow-400/10 border-2 border-yellow-400 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-yellow-400 shadow-sm">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-yellow-400 animate-spin-slow" />
-                  <span className="font-bold text-yellow-400">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
-                </div>
-                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
-                  {hours}h : {minutes}m : {seconds}s
-                </span>
-              </div>
-
               {/* Feature Checklist */}
               <div className="space-y-2 pt-1 border-t border-neutral-800 text-xs">
                 {[
@@ -171,15 +163,29 @@ export const ProductPacks = ({
               </div>
             </div>
 
-            {/* Action Button (Solid White with Black Text) */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onSelectPlan && onSelectPlan(899)}
-              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-white hover:bg-neutral-200 border-2 border-white text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(255,255,255,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer mt-1"
-            >
-              <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें →" : "Unlock Full Report →"}</span>
-            </Button>
+            {/* Bottom Stack: Timer Directly Above CTA Button */}
+            <div className="space-y-2 pt-1">
+              {/* Countdown Timer */}
+              <div className="bg-yellow-400/10 border-2 border-yellow-400 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-yellow-400 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-yellow-400 animate-spin-slow" />
+                  <span className="font-bold text-yellow-400">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
+                </div>
+                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
+                  {hours}h : {minutes}m : {seconds}s
+                </span>
+              </div>
+
+              {/* Action Button (Solid White with Black Text) */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onSelectPlan && onSelectPlan(899)}
+                className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-white hover:bg-neutral-200 border-2 border-white text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(255,255,255,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
+              >
+                <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें →" : "Unlock Full Report →"}</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
