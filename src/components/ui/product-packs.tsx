@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { Zap, Sparkles, Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,12 +24,12 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
     <section className={`py-3 px-2 sm:px-4 text-black ${className}`}>
       <div className="max-w-4xl mx-auto space-y-4">
         
-        {/* Top Header: "Your Report is Ready!" */}
+        {/* Top Header: "Your Report is Ready!" (Black & White) */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-mono font-black uppercase">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 border border-neutral-300 text-neutral-900 text-[11px] font-mono font-black uppercase">
             <span>✨ {isHi ? "वास्तु विश्लेषण पूर्ण" : "VASTU AUDIT COMPLETE"}</span>
           </div>
-          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-950 font-heading">
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-black font-heading">
             {isHi ? "आपकी वास्तु रिपोर्ट तैयार है!" : "Your Report is Ready!"}
           </h1>
           <p className="text-neutral-600 text-xs sm:text-sm font-medium leading-tight max-w-md mx-auto">
@@ -39,13 +39,13 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
           </p>
         </div>
 
-        {/* 1:1 Proportional Grid Cards */}
+        {/* 1:1 Black and White Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch max-w-3xl mx-auto">
           
           {/* ======================================================== */}
-          {/* OPTION 1: ₹299 BASIC SCORE REPORT (1:1 Amber Box)        */}
+          {/* OPTION 1: ₹299 BASIC SCORE REPORT (Clean White Card)     */}
           {/* ======================================================== */}
-          <div className="bg-amber-300 border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-4 min-h-[260px]">
+          <div className="bg-white border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-4 min-h-[260px]">
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
@@ -55,7 +55,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                       {isHi ? "1. मूल स्कोर रिपोर्ट" : "1. Basic Score"}
                     </h3>
                   </div>
-                  <p className="text-xs text-neutral-900 font-medium leading-snug">
+                  <p className="text-xs text-neutral-600 font-medium leading-snug">
                     {isHi ? "घर का मुख्य वास्तु स्कोर व 4 मुख्य स्तंभ" : "Macro prosperity score & defect count"}
                   </p>
                 </div>
@@ -63,16 +63,16 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                 <div className="text-right flex-shrink-0">
                   <div className="flex items-baseline gap-1.5 justify-end">
                     <span className="text-2xl sm:text-3xl font-black font-mono text-black">₹299</span>
-                    <span className="text-xs font-bold text-neutral-700 line-through">₹799</span>
+                    <span className="text-xs font-bold text-neutral-400 line-through">₹799</span>
                   </div>
-                  <span className="text-[10px] font-bold text-neutral-800">
+                  <span className="text-[10px] font-bold text-neutral-500">
                     {isHi ? "एकमुश्त" : "One-time"}
                   </span>
                 </div>
               </div>
 
               {/* Feature Checklist */}
-              <div className="space-y-2 pt-2 border-t border-black/20 text-xs">
+              <div className="space-y-2 pt-2 border-t border-neutral-200 text-xs">
                 {[
                   { label: isHi ? "16 दिशा समग्र वास्तु स्कोर" : "16-Zone Overall Score", val: "/100" },
                   { label: isHi ? "4 मुख्य ऊर्जा स्तंभ (धन, स्वास्थ्य)" : "4 Core Energy Pillars", val: "Cash & Health" },
@@ -84,7 +84,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                       <span className="text-black font-black text-sm">✓</span>
                       <span>{item.label}</span>
                     </div>
-                    <span className="font-extrabold font-mono text-neutral-900 text-xs">
+                    <span className="font-extrabold font-mono text-black text-xs">
                       {item.val}
                     </span>
                   </div>
@@ -92,12 +92,12 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
               </div>
             </div>
 
-            {/* Action Button: Unlock Basic Report */}
+            {/* Action Button (Solid Black) */}
             <Button
               type="button"
               variant="outline"
               onClick={() => onSelectPlan && onSelectPlan(299)}
-              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-neutral-950 text-white border-2 border-black px-4 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-neutral-800 cursor-pointer mt-1"
+              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-black text-white border-2 border-black px-4 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-neutral-800 cursor-pointer mt-1"
             >
               <span>{isHi ? "मूल रिपोर्ट अनलॉक करें →" : "Unlock Basic Report →"}</span>
             </Button>
@@ -105,16 +105,16 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
 
 
           {/* ======================================================== */}
-          {/* OPTION 2: ₹899 FULL REMEDY AUDIT (1:1 Dark Luxury Card)  */}
+          {/* OPTION 2: ₹899 FULL REMEDY AUDIT (Solid Black Card)      */}
           {/* ======================================================== */}
-          <div className="bg-neutral-900 text-white border-2 border-amber-400 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-4 relative overflow-hidden min-h-[260px] ring-2 ring-amber-400/30">
+          <div className="bg-black text-white border-2 border-neutral-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-4 relative overflow-hidden min-h-[260px]">
             
-            {/* Top Ribbon */}
+            {/* Top Ribbon (Black & White) */}
             <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-              <span className="bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-mono font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-2xs">
+              <span className="bg-white text-black font-mono font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                 {isHi ? "⭐ सर्वश्रेष्ठ / अनुशंसित" : "⭐ BEST VALUE / RECOMMENDED"}
               </span>
-              <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-neutral-300 bg-neutral-900 border border-neutral-700 px-2 py-0.5 rounded-full">
                 {isHi ? "64% छूट" : "SAVE 64%"}
               </span>
             </div>
@@ -123,12 +123,12 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="size-5 text-amber-400 flex-shrink-0" />
+                    <Sparkles className="size-5 text-white flex-shrink-0" />
                     <h3 className="text-lg sm:text-xl font-black text-white font-heading leading-tight">
                       {isHi ? "2. संपूर्ण वैदिक उपाय" : "2. Full Remedies"}
                     </h3>
                   </div>
-                  <p className="text-xs text-neutral-300 font-medium leading-snug">
+                  <p className="text-xs text-neutral-400 font-medium leading-snug">
                     {isHi ? "बिना तोड़फोड़ 16-दिशा उपाय + आचार्य PDF" : "Zero-demolition remedies & certified PDF"}
                   </p>
                 </div>
@@ -138,19 +138,19 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                     <span className="text-2xl sm:text-3xl font-black font-mono text-white">₹899</span>
                     <span className="text-xs font-bold text-neutral-500 line-through">₹2,499</span>
                   </div>
-                  <span className="text-[10px] font-bold text-amber-400">
+                  <span className="text-[10px] font-bold text-neutral-400">
                     {isHi ? "संपूर्ण रिपोर्ट" : "Complete Audit"}
                   </span>
                 </div>
               </div>
 
-              {/* Countdown Timer */}
-              <div className="bg-neutral-800/90 border border-amber-400/20 rounded-xl px-2.5 py-1 flex items-center justify-between gap-1 text-[11px] text-amber-300">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
-                  <span className="font-bold">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
+              {/* Countdown Timer (THE ONLY YELLOW ACCENT) */}
+              <div className="bg-yellow-400/10 border-2 border-yellow-400 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-yellow-400 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-yellow-400 animate-spin-slow" />
+                  <span className="font-bold text-yellow-400">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
                 </div>
-                <span className="font-mono font-black bg-black/60 px-2 py-0.5 rounded text-amber-300">
+                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
                   {hours}h : {minutes}m : {seconds}s
                 </span>
               </div>
@@ -165,7 +165,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-0.5">
                     <div className="flex items-center gap-2 text-neutral-200 font-medium text-xs">
-                      <span className="text-amber-400 font-black text-sm">✓</span>
+                      <span className="text-white font-black text-sm">✓</span>
                       <span>{item.label}</span>
                     </div>
                     <span className="font-bold font-mono text-neutral-400 text-xs">
@@ -176,12 +176,12 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
               </div>
             </div>
 
-            {/* Action Button: Unlock Full Report */}
+            {/* Action Button (Solid White with Black Text) */}
             <Button
               type="button"
               variant="outline"
               onClick={() => onSelectPlan && onSelectPlan(899)}
-              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 border-2 border-amber-300 px-4 font-black text-slate-950 text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_rgb(255_210_48)] active:translate-x-[1px] active:translate-y-[1px] hover:bg-yellow-300 active:shadow-none cursor-pointer mt-1"
+              className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-white hover:bg-neutral-200 border-2 border-white text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(255,255,255,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer mt-1"
             >
               <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें →" : "Unlock Full Report →"}</span>
             </Button>
