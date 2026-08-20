@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef } from "react";
-import { Zap, Sparkles, Clock, Check } from "lucide-react";
+import { Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface ProductPacksProps {
@@ -27,7 +27,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
         {/* Top Header: "Your Report is Ready!" (Black & White) */}
         <div className="text-center space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 border border-neutral-300 text-neutral-900 text-[11px] font-mono font-black uppercase">
-            <span>✨ {isHi ? "वास्तु विश्लेषण पूर्ण" : "VASTU AUDIT COMPLETE"}</span>
+            <span>{isHi ? "वास्तु विश्लेषण पूर्ण" : "VASTU AUDIT COMPLETE"}</span>
           </div>
           <h1 className="text-xl sm:text-3xl font-black tracking-tight text-black font-heading">
             {isHi ? "आपकी वास्तु रिपोर्ट तैयार है!" : "Your Report is Ready!"}
@@ -43,18 +43,15 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch max-w-3xl mx-auto">
           
           {/* ======================================================== */}
-          {/* OPTION 1: ₹299 BASIC SCORE REPORT (Clean White Card)     */}
+          {/* OPTION 1: ₹299 BASIC VASTU REPORT (Clean White Card)     */}
           {/* ======================================================== */}
           <div className="bg-white border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-4 min-h-[260px]">
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <Zap className="size-5 text-black fill-current flex-shrink-0" />
-                    <h3 className="text-lg sm:text-xl font-black text-black font-heading leading-tight">
-                      {isHi ? "1. मूल स्कोर रिपोर्ट" : "1. Basic Score"}
-                    </h3>
-                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-black font-heading leading-tight">
+                    {isHi ? "1. मूल वास्तु रिपोर्ट" : "1. Basic Vastu Report"}
+                  </h3>
                   <p className="text-xs text-neutral-600 font-medium leading-snug">
                     {isHi ? "घर का मुख्य वास्तु स्कोर व 4 मुख्य स्तंभ" : "Macro prosperity score & defect count"}
                   </p>
@@ -105,7 +102,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
 
 
           {/* ======================================================== */}
-          {/* OPTION 2: ₹899 FULL REMEDY AUDIT (Solid Black Card)      */}
+          {/* OPTION 2: ₹899 DETAILED VASTU REPORT (Solid Black Card)  */}
           {/* ======================================================== */}
           <div className="bg-black text-white border-2 border-neutral-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-4 relative overflow-hidden min-h-[260px]">
             
@@ -122,12 +119,9 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="size-5 text-white flex-shrink-0" />
-                    <h3 className="text-lg sm:text-xl font-black text-white font-heading leading-tight">
-                      {isHi ? "2. संपूर्ण वैदिक उपाय" : "2. Full Remedies"}
-                    </h3>
-                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-white font-heading leading-tight">
+                    {isHi ? "2. विस्तृत वास्तु रिपोर्ट" : "2. Detailed Vastu Report"}
+                  </h3>
                   <p className="text-xs text-neutral-400 font-medium leading-snug">
                     {isHi ? "बिना तोड़फोड़ 16-दिशा उपाय + आचार्य PDF" : "Zero-demolition remedies & certified PDF"}
                   </p>
