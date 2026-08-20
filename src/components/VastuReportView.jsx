@@ -204,91 +204,31 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
     <div className={`max-w-3xl mx-auto ${isHi ? 'font-hindi' : 'font-sans'}`}>
       
       {/* ========================================================================= */}
-      {/* 1. GLASSMORPHIC PRICING PRODUCT PACKS WITH BLURRED VASTU REPORT IN BG      */}
+      {/* 1. REPORT CONTAINER WITH ACTIVE/BLURRED PAYWALL OVERLAY                   */}
       {/* ========================================================================= */}
-      {!isBasicUnlocked && !isUnderReview ? (
-        <div className="relative rounded-3xl overflow-hidden border-2 border-black/80 shadow-2xl animate-in fade-in duration-300 bg-white">
-          
-          {/* 1. AUTHENTIC SAMPLE VASTU REPORT IN BACKGROUND (BLURRED) */}
-          <div className="absolute inset-0 select-none pointer-events-none filter blur-[5px] opacity-45 bg-slate-50 p-4 sm:p-6 space-y-4 overflow-hidden">
-            {/* Mock Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-black text-xs sm:text-sm text-slate-900 font-heading">VEDIC MAHAVASTU 16-ZONE CHAKRA AUDIT</span>
-              </div>
-              <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px] font-bold">LAKSHMI-KUBER GRID</span>
-            </div>
-
-            {/* Mock Scoreboard */}
-            <div className="grid grid-cols-3 gap-2.5 text-center">
-              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-bold text-slate-500 font-mono block">PROSPERITY SCORE</span>
-                <div className="text-3xl font-black text-slate-900 font-mono my-1">{overallScore || 49}<span className="text-xs text-slate-400">/100</span></div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">Moderate Dosha</span>
-              </div>
-              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-bold text-slate-500 font-mono block">CRITICAL DEFECTS</span>
-                <div className="text-3xl font-black text-red-600 font-mono my-1">{doshasCount || 4}</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">Urgent Fix</span>
-              </div>
-              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-bold text-slate-500 font-mono block">BALANCED ZONES</span>
-                <div className="text-3xl font-black text-emerald-600 font-mono my-1">{idealCount || 2}</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Auspicious</span>
-              </div>
-            </div>
-
-            {/* Mock 4 Pillars */}
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs"><span className="text-[10px] text-slate-500 font-mono block">CASH</span><span className="text-xs font-black text-amber-700">47%</span></div>
-              <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs"><span className="text-[10px] text-slate-500 font-mono block">HEALTH</span><span className="text-xs font-black text-emerald-700">51%</span></div>
-              <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs"><span className="text-[10px] text-slate-500 font-mono block">HARMONY</span><span className="text-xs font-black text-blue-700">48%</span></div>
-              <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs"><span className="text-[10px] text-slate-500 font-mono block">CAREER</span><span className="text-xs font-black text-purple-700">50%</span></div>
-            </div>
-
-            {/* Mock Room Audits */}
-            <div className="space-y-2">
-              <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
-                <div>
-                  <span className="font-bold text-xs text-slate-900 block">Master Bedroom • South-West (SW)</span>
-                  <span className="text-[10px] text-slate-500">Nirriti Devta energy alignment & stability</span>
-                </div>
-                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Optimal</span>
-              </div>
-              <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
-                <div>
-                  <span className="font-bold text-xs text-red-900 block">Kitchen (Fire Element) • North-East (NE)</span>
-                  <span className="text-[10px] text-red-600">Elemental clash: Fire in Water zone drains savings</span>
-                </div>
-                <span className="text-[10px] font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded">Critical Defect</span>
-              </div>
-              <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
-                <div>
-                  <span className="font-bold text-xs text-slate-900 block">Main Entrance Gateway • North (N)</span>
-                  <span className="text-[10px] text-slate-500">Lord Kuber wealth gateway alignment</span>
-                </div>
-                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Auspicious</span>
-              </div>
+      <div className="relative">
+        
+        {/* PAYWALL OVERLAY (ONLY WHEN UNPAID) */}
+        {!isBasicUnlocked && !isUnderReview && (
+          <div className="absolute inset-0 z-40 bg-slate-950/30 backdrop-blur-[5px] flex items-start justify-center pt-2 sm:pt-4 px-2 sm:px-4 rounded-3xl animate-in fade-in duration-300">
+            <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl border-2 border-black rounded-3xl shadow-2xl p-3 sm:p-5 my-2">
+              <ProductPacks
+                onSelectPlan={handleSelectPlan}
+                isHi={isHi}
+                hours={hours}
+                minutes={minutes}
+                seconds={seconds}
+              />
             </div>
           </div>
+        )}
 
-          {/* 2. FOREGROUND GLASSMORPHIC PRICING PRODUCT PACKS */}
-          <div className="relative z-10 backdrop-blur-md bg-white/80 sm:bg-white/90 p-3 sm:p-5">
-            <ProductPacks
-              onSelectPlan={handleSelectPlan}
-              isHi={isHi}
-              hours={hours}
-              minutes={minutes}
-              seconds={seconds}
-            />
-          </div>
-        </div>
-      ) : (
-        /* ========================================================================= */
-        /* 2. UNLOCKED FULL VASTU AUDIT REPORT VIEW                                  */
-        /* ========================================================================= */
-        <div className="space-y-4 animate-in fade-in duration-300">
+        {/* ACTUAL VASTU REPORT (BLURRED WHEN UNPAID, CRISP WHEN PAID) */}
+        <div className={`space-y-4 transition-all duration-300 ${
+          !isBasicUnlocked && !isUnderReview 
+            ? 'filter blur-[7px] opacity-40 select-none pointer-events-none min-h-[700px]' 
+            : 'animate-in fade-in duration-300'
+        }`}>
           
           {/* PART 1: SCOREBOARD */}
           <div className="clean-card p-4 sm:p-6 bg-white border-2 border-amber-300 shadow-lg rounded-3xl space-y-4">
@@ -456,7 +396,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
             )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* ========================================================================= */}
       {/* CHECKOUT MODAL (₹299 or ₹899)                                             */}
