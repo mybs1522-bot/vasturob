@@ -380,9 +380,8 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                 <Button
                   type="button"
                   onClick={() => handleSelectPlan(899)}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:scale-101 transition-all cursor-pointer flex items-center justify-center"
                 >
-                  <Sparkles className="w-4 h-4 text-slate-950" />
                   <span>{isHi ? 'संपूर्ण उपाय रिपोर्ट अनलॉक करें (₹899) →' : 'Upgrade & Unlock Full Remedies (₹899) →'}</span>
                 </Button>
               </div>
@@ -458,9 +457,8 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
               <button
                 type="button"
                 onClick={handleConfirmUnlock}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition-all cursor-pointer flex items-center justify-center"
               >
-                <Lock className="w-4 h-4 text-slate-950" />
                 <span>
                   {selectedPlanAmount === 299
                     ? (isHi ? 'मूल स्कोर अनलॉक करें (₹299) →' : 'Unlock Basic Score (₹299) →')

@@ -173,7 +173,6 @@ export const ProductPacks = ({
               onClick={() => onSelectPlan && onSelectPlan(899)}
               className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 border-2 border-amber-300 px-4 font-black text-slate-950 text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_rgb(255_210_48)] active:translate-x-[1px] active:translate-y-[1px] hover:bg-yellow-300 active:shadow-none cursor-pointer mt-1"
             >
-              <Sparkles className="w-4 h-4" />
               <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें →" : "Unlock Full Report →"}</span>
             </Button>
           </div>
