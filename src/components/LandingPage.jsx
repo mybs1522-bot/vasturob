@@ -87,32 +87,30 @@ export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOp
   return (
     <div className={`min-h-screen chequered-bg text-slate-900 selection:bg-amber-100 selection:text-amber-900 flex flex-col smooth-hardware bg-white ${isHi ? 'font-hindi' : 'font-sans'}`}>
       
-      {/* 1. Subtle Fear Emergency Warning Top Bar */}
-      <div className="bg-slate-950 text-amber-300 border-b border-amber-500/30 px-4 py-2.5 text-center text-xs font-extrabold flex items-center justify-between sm:justify-center gap-2 shadow-sm relative z-50">
-        <div className="flex items-center gap-2">
+      {/* 1. Fear Emergency Warning Top Bar (Responsive Stack on Mobile, Inline on Desktop) */}
+      <div className="bg-slate-950 text-amber-300 border-b border-amber-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-center text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 shadow-sm relative z-50">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-center leading-snug max-w-2xl">
           <AlertTriangle className="w-4 h-4 text-amber-400 animate-bounce flex-shrink-0" />
-          <span>
+          <span className="text-[11px] sm:text-xs">
             {isHi ? (
               <>
-                <strong className="text-white">अति-महत्वपूर्ण चेतावनी:</strong> 85% भारतीय घरों में छिपे दिशा दोष होते हैं, जो परिवार की सुख-शांति व धन को चुपचाप नष्ट करते हैं।
+                <strong className="text-white">अति-महत्वपूर्ण चेतावनी:</strong> 85% भारतीय घरों में छिपे वास्तु दोष होते हैं, जो सुख-शांति व धन को चुपचाप नष्ट करते हैं।
               </>
             ) : (
               <>
-                <strong className="text-white">CRITICAL WARNING:</strong> 85% of Indian Homes Suffer from Silent Vastu Defects That Silently Drain Wealth &amp; Health.
+                <strong className="text-white">CRITICAL WARNING:</strong> 85% of Indian Homes Suffer from Hidden Vastu Defects That Silently Drain Wealth &amp; Health.
               </>
             )}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onNavigateToStart}
-            className="bg-amber-400 text-slate-950 px-3.5 py-1 rounded-full font-black text-xs hover:bg-yellow-300 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-          >
-            {isHi ? 'घर का दोष जांचें →' : 'Diagnose Your Risk Now →'}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onNavigateToStart}
+          className="bg-amber-400 text-slate-950 px-3.5 py-1 rounded-full font-black text-[11px] sm:text-xs hover:bg-yellow-300 transition-all shadow-sm cursor-pointer whitespace-nowrap flex-shrink-0"
+        >
+          {isHi ? 'घर का दोष जांचें →' : 'Diagnose Your Risk Now →'}
+        </button>
       </div>
 
       {/* 2. HERO SECTION WITH UNICORN VITRUVIAN ASCII ANIMATION */}
