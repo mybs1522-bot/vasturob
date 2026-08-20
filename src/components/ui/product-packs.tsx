@@ -68,8 +68,19 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                 </div>
               </div>
 
+              {/* Countdown Timer in Card 1 */}
+              <div className="bg-yellow-400/15 border-2 border-yellow-500 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-slate-950 shadow-xs">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-600 animate-spin-slow" />
+                  <span className="font-bold text-slate-950">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
+                </div>
+                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
+                  {hours}h : {minutes}m : {seconds}s
+                </span>
+              </div>
+
               {/* Feature Checklist */}
-              <div className="space-y-2 pt-2 border-t border-neutral-200 text-xs">
+              <div className="space-y-2 pt-1 border-t border-neutral-200 text-xs">
                 {[
                   { label: isHi ? "16 दिशा समग्र वास्तु स्कोर" : "16-Zone Overall Score", val: "/100" },
                   { label: isHi ? "4 मुख्य ऊर्जा स्तंभ (धन, स्वास्थ्य)" : "4 Core Energy Pillars", val: "Cash & Health" },
@@ -138,7 +149,7 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
                 </div>
               </div>
 
-              {/* Countdown Timer (THE ONLY YELLOW ACCENT) */}
+              {/* Countdown Timer in Card 2 */}
               <div className="bg-yellow-400/10 border-2 border-yellow-400 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-yellow-400 shadow-sm">
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-yellow-400 animate-spin-slow" />
