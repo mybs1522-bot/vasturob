@@ -202,14 +202,14 @@ export default function LandingPage({ onNavigateToStart, onOpenExpertModal, onOp
             </div>
           </div>
 
-          <div className="text-center pt-2">
+          <div className="text-center pt-2 px-2">
             <button
               type="button"
               onClick={onNavigateToStart}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-2xl inline-flex items-center gap-2 hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto max-w-sm mx-auto px-6 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-2xl inline-flex items-center justify-center gap-2 hover:scale-102 transition-all cursor-pointer"
             >
-              <Compass className="w-5 h-5 text-slate-950" />
-              <span>{isHi ? 'अपने घर का नक्शा तुरंत स्कैन करें →' : 'Scan Your Floor Plan Before It Is Too Late →'}</span>
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 flex-shrink-0" />
+              <span>{isHi ? 'नक्शा तुरंत स्कैन करें →' : 'Scan Floor Plan Now →'}</span>
             </button>
           </div>
         </div>
