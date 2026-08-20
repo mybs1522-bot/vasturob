@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Zap, Clock, Check, Sparkles, Compass } from "lucide-react";
+import { Zap, Clock, Sparkles, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface ProductPacksProps {
@@ -21,8 +21,8 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
   className = ""
 }) => {
   return (
-    <section className={`py-2 px-1 sm:px-3 text-slate-900 ${className}`}>
-      <div className="max-w-4xl mx-auto space-y-2.5">
+    <section className={`py-1 px-1 sm:px-3 text-slate-900 ${className}`}>
+      <div className="max-w-xl mx-auto space-y-2">
         
         {/* Compact Header */}
         <div className="text-center space-y-0.5">
@@ -30,135 +30,106 @@ export const ProductPacks: React.FC<ProductPacksProps> = ({
             <Compass className="w-3 h-3 text-amber-700 animate-spin-slow" />
             <span>{isHi ? "वास्तु रिपोर्ट योजनाएं" : "Vastu Audit Plans"}</span>
           </div>
-          <h2 className="text-base sm:text-2xl font-black text-slate-950 font-heading tracking-tight">
+          <h2 className="text-sm sm:text-lg font-black text-slate-950 font-heading tracking-tight">
             {isHi ? "अपनी वास्तु रिपोर्ट चुनें" : "Select Your Vastu Report"}
           </h2>
         </div>
 
-        {/* 2 Plans Grid: Side-by-side on all screens (mobile & desktop) to fit in 1 viewport */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-4 items-stretch">
+        {/* Up-Down Stacked Container: Both Cards Fit in Viewport */}
+        <div className="space-y-2">
           
-          {/* ======================================================== */}
-          {/* OPTION 1: ₹299 BASIC SCORE REPORT                        */}
-          {/* ======================================================== */}
-          <div className="bg-white border-2 border-slate-200 hover:border-amber-400 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between shadow-sm transition-all text-left relative">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-1">
-                <h3 className="text-xs sm:text-base font-black text-slate-900 font-heading flex items-center gap-1 truncate">
-                  <Zap className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                  <span className="truncate">{isHi ? "मूल स्कोर" : "Basic Score"}</span>
-                </h3>
-                <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono text-[9px] font-bold uppercase border border-slate-200 flex-shrink-0">
-                  {isHi ? "डिजिटल" : "Instant"}
-                </span>
+          {/* OPTION 1 (TOP): ₹299 BASIC SCORE REPORT */}
+          <div className="bg-white border-2 border-slate-200 hover:border-amber-400 rounded-2xl p-2.5 sm:p-3.5 shadow-sm transition-all text-left space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-3.5 h-3.5 text-amber-700" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 font-heading truncate">
+                    {isHi ? "1. मूल स्कोर रिपोर्ट" : "1. Basic Score Report"}
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-slate-500 truncate">
+                    {isHi ? "16-दिशा स्कोर, धन व स्वास्थ्य विश्लेषण" : "16-Zone Score, Cash & Health Bars"}
+                  </p>
+                </div>
               </div>
 
-              {/* Price Tag */}
-              <div className="flex items-baseline gap-1 py-0.5 border-y border-slate-100">
-                <span className="text-xl sm:text-3xl font-black text-slate-950 font-mono">₹299</span>
-                <span className="text-[10px] sm:text-xs font-bold text-slate-400 line-through">₹799</span>
-              </div>
-
-              {/* Short Bullets */}
-              <div className="space-y-1.5 text-[10px] sm:text-xs">
-                <div className="flex items-center gap-1.5 text-slate-800 font-medium">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "16-दिशा वास्तु स्कोर (/100)" : "16-Zone Score (/100)"}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-800 font-medium">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "धन, स्वास्थ्य, करियर स्तंभ" : "Cash, Health & Career"}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-800 font-medium">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "गंभीर वास्तु दोष गणना" : "Defect Count & Risk"}</span>
+              {/* Price */}
+              <div className="text-right flex-shrink-0">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base sm:text-xl font-black text-slate-950 font-mono">₹299</span>
+                  <span className="text-[10px] text-slate-400 line-through">₹799</span>
                 </div>
               </div>
             </div>
 
             {/* Action Button */}
-            <div className="pt-2.5">
-              <Button
-                type="button"
-                onClick={() => onSelectPlan && onSelectPlan(299)}
-                className="w-full h-9 sm:h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-sm hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1 p-1"
-              >
-                <span>{isHi ? "अनलॉक (₹299) →" : "Unlock (₹299) →"}</span>
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={() => onSelectPlan && onSelectPlan(299)}
+              className="w-full h-8 sm:h-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-sm hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1"
+            >
+              <span>{isHi ? "मूल रिपोर्ट अनलॉक करें (₹299) →" : "Unlock Basic Score (₹299) →"}</span>
+            </Button>
           </div>
 
 
-          {/* ======================================================== */}
-          {/* OPTION 2: ₹899 FULL REMEDY AUDIT (RECOMMENDED)           */}
-          {/* ======================================================== */}
-          <div className="bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white border-2 border-amber-400 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between shadow-md text-left relative ring-1 ring-amber-400/30">
+          {/* OPTION 2 (BOTTOM): ₹899 FULL VASTU REMEDY AUDIT */}
+          <div className="bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white border-2 border-amber-400 rounded-2xl p-2.5 sm:p-3.5 shadow-md text-left space-y-2 relative ring-1 ring-amber-400/30 overflow-hidden">
             
-            {/* Top Recommended Tag */}
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-mono font-black text-[8px] sm:text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-bl-lg shadow-2xs">
-              {isHi ? "⭐ सर्वश्रेष्ठ" : "⭐ BEST VALUE"}
-            </div>
-
-            <div className="space-y-2">
-              <div className="space-y-0.5">
-                <h3 className="text-xs sm:text-base font-black text-slate-950 font-heading flex items-center gap-1 truncate">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                  <span className="truncate">{isHi ? "वैदिक उपाय" : "Full Remedies"}</span>
-                </h3>
-              </div>
-
-              {/* Price Tag with Evergreen Timer */}
-              <div className="space-y-1 py-0.5 border-y border-amber-200/80">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-xl sm:text-3xl font-black text-slate-950 font-mono">₹899</span>
-                  <span className="text-[10px] sm:text-xs font-bold text-slate-400 line-through">₹2,499</span>
-                  <span className="text-[8px] sm:text-[9px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-1 rounded">
-                    {isHi ? "-64%" : "64% OFF"}
-                  </span>
+            {/* Top Badge */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-slate-950" />
                 </div>
-
-                {/* Compact Timer */}
-                <div className="bg-white/90 border border-amber-300 rounded-lg px-1.5 py-0.5 flex items-center justify-between gap-1 shadow-2xs">
-                  <div className="flex items-center gap-1 min-w-0">
-                    <Clock className="w-3 h-3 text-amber-700 animate-spin-slow flex-shrink-0" />
-                    <span className="text-[8px] sm:text-[10px] font-black text-slate-900 truncate">
-                      {isHi ? "⚡ छूट:" : "⚡ Ends:"}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-xs sm:text-sm font-black text-slate-950 font-heading truncate">
+                      {isHi ? "2. संपूर्ण वैदिक उपाय रिपोर्ट" : "2. Full Remedy Audit"}
+                    </h3>
+                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-mono font-black text-[8px] uppercase tracking-wider px-1.5 py-0.2 rounded shadow-2xs">
+                      {isHi ? "सर्वश्रेष्ठ" : "BEST VALUE"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-0.5 bg-slate-950 text-amber-300 px-1 rounded font-mono font-black text-[8px] sm:text-[10px] flex-shrink-0">
-                    <span>{hours}h</span>:<span>{minutes}m</span>:<span>{seconds}s</span>
-                  </div>
+                  <p className="text-[10px] sm:text-xs text-amber-900 font-semibold truncate">
+                    {isHi ? "बिना तोड़फोड़ उपाय + आचार्य PDF (WhatsApp)" : "Zero-Demolition Remedies + Acharya PDF"}
+                  </p>
                 </div>
               </div>
 
-              {/* Short Bullets */}
-              <div className="space-y-1.5 text-[10px] sm:text-xs">
-                <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "मूल रिपोर्ट की सभी सुविधाएं" : "All Basic Features"}</span>
+              {/* Price */}
+              <div className="text-right flex-shrink-0">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base sm:text-xl font-black text-slate-950 font-mono">₹899</span>
+                  <span className="text-[10px] text-slate-400 line-through">₹2,499</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "रंगीन टेप व धातु रॉड माप" : "Color Tape & Metal Rods"}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="leading-tight">{isHi ? "आचार्य PDF (WhatsApp/Email)" : "Acharya PDF on WhatsApp"}</span>
-                </div>
+              </div>
+            </div>
+
+            {/* Compact Timer Row */}
+            <div className="bg-amber-50 border border-amber-300/80 rounded-lg px-2 py-0.5 flex items-center justify-between gap-1 text-[10px]">
+              <div className="flex items-center gap-1 min-w-0">
+                <Clock className="w-3 h-3 text-amber-700 animate-spin-slow flex-shrink-0" />
+                <span className="font-bold text-slate-800 truncate">
+                  {isHi ? "⚡ विशेष छूट समाप्त:" : "⚡ Special Offer Ends:"}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5 bg-slate-950 text-amber-300 px-1.5 py-0.2 rounded font-mono font-black text-[9px] flex-shrink-0">
+                <span>{hours}h</span>:<span>{minutes}m</span>:<span>{seconds}s</span>
               </div>
             </div>
 
             {/* Action Button */}
-            <div className="pt-2.5">
-              <Button
-                type="button"
-                onClick={() => onSelectPlan && onSelectPlan(899)}
-                className="w-full h-9 sm:h-10 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1 p-1"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-                <span>{isHi ? "संपूर्ण अनलॉक (₹899) →" : "Unlock Full (₹899) →"}</span>
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={() => onSelectPlan && onSelectPlan(899)}
+              className="w-full h-9 sm:h-10 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-md hover:scale-101 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+              <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें (₹899) →" : "Unlock Full Report (₹899) →"}</span>
+            </Button>
           </div>
         </div>
       </div>
