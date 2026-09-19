@@ -43,7 +43,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
   const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [selectedPlanAmount, setSelectedPlanAmount] = useState(899);
+  const [selectedPlanAmount, setSelectedPlanAmount] = useState(299);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [userName, setUserName] = useState(userData?.name || '');
   const [userPhone, setUserPhone] = useState(userData?.phone || '');
@@ -168,13 +168,43 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
         setPaymentDetails(payDetails);
         setIsDownloading(false);
         setIsPaywallModalOpen(false);
+        
+        // Track Meta Pixel Purchase
+        if (typeof window !== 'undefined' && window.fbq) {
+          window.fbq('track', 'Purchase', { value: amount, currency: 'INR' });
+        }
+        
+        // Send CAPI Event
+        try {
+          fetch('/api/meta-capi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventName: 'Purchase',
+              eventId: payDetails.paymentId,
+              eventSourceUrl: window.location.href,
+              customData: {
+                value: amount,
+                currency: 'INR'
+              },
+              userData: {
+                ph: userPhone ? [userPhone] : undefined,
+                em: userData?.email ? [userData.email] : undefined,
+                fn: userName ? [userName] : undefined
+              }
+            })
+          }).catch(console.error);
+        } catch (e) {}
 
         if (amount === 299) {
           // Unlock Basic Macro Scoreboard
           setIsBasicUnlocked(true);
+          setIsUnderReview(true);
           try {
             localStorage.setItem('vastu_report_basic_unlocked', 'true');
+            localStorage.setItem('vastu_report_under_review', 'true');
           } catch {}
+          setIsReviewModalOpen(true);
           alert(isHi ? '✅ भुगतान सफल! आपका मूल वास्तु स्कोर व जोखिम विश्लेषण अनलॉक हो गया है।' : '✅ Payment Successful! Your Basic Vastu Score & Risk Audit are unlocked.');
         } else {
           // ₹899 Full Plan: Unlock Scoreboard + Trigger Review In Progress Modal
@@ -342,15 +372,15 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
                 <div className="space-y-1">
                   <span className="text-[10px] font-mono font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-0.5 rounded-full inline-block">
-                    {isHi ? '⏳ समीक्षा जारी है • 2 से 4 घंटे' : '⏳ ACHARYA REVIEW IN PROGRESS'}
+                    {isHi ? '⏳ समीक्षा जारी है • 24 घंटे' : '⏳ ACHARYA REVIEW IN PROGRESS'}
                   </span>
                   <h3 className="text-base sm:text-xl font-black text-slate-950 font-heading">
                     {isHi ? 'वरिष्ठ वास्तु आचार्य आपके नक्शे की समीक्षा कर रहे हैं' : 'Senior Vastu Acharyas Are Reviewing Your Report'}
                   </h3>
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed font-medium">
                     {isHi 
-                      ? `भुगतान सत्यापित (₹899)। 16 दिशाओं के सटीक रंगीन टेप व धातु रॉड्स के उपाय तैयार हो रहे हैं। संपूर्ण प्रमाणित PDF रिपोर्ट आपके WhatsApp (${userPhone || 'नंबर'}) पर प्राप्त होगी।`
-                      : `Payment verified (₹899). Certified non-demolition remedies and Devta grid alignments are being prepared for delivery to your WhatsApp (${userPhone || 'number'}) within 2–4 hours.`}
+                      ? `भुगतान सत्यापित। 16 दिशाओं के सटीक रंगीन टेप व धातु रॉड्स के उपाय तैयार हो रहे हैं। संपूर्ण प्रमाणित PDF रिपोर्ट आपके WhatsApp (${userPhone || 'नंबर'}) व ईमेल पर 24 घंटे के भीतर प्राप्त होगी।`
+                      : `Payment verified. Certified non-demolition remedies and Devta grid alignments are being prepared for delivery to your WhatsApp (${userPhone || 'number'}) and email within 24 hours.`}
                   </p>
                 </div>
 

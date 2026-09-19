@@ -59,7 +59,7 @@ export async function sendReportConfirmationEmail({ toEmail, userName, score = 8
               <div class="status-badge">✨ Vastu Acharyas At Work</div>
               <h3 class="soothing-title">Your Microscopic Vastu Report Is Being Prepared</h3>
               <p class="soothing-text">
-                Our Senior Certified Vastu Acharyas are meticulously scanning your 16 directional zones, Devta grid alignment, and energy points. A comprehensive report and zero-demolition remedy plan will be delivered to your inbox &amp; WhatsApp in a few hours.
+                Our Senior Certified Vastu Acharyas are meticulously scanning your 16 directional zones, Devta grid alignment, and energy points. A comprehensive report and zero-demolition remedy plan will be delivered to your inbox &amp; WhatsApp within 24 hours.
               </p>
             </div>
 

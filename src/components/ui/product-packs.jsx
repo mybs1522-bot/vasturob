@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Clock, Check, Lock, Compass, ShieldAlert, Sparkles } from "lucide-react";
+import React from "react";
+import { Clock, Lock, Sparkles, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const ProductPacks = ({
@@ -10,140 +10,91 @@ export const ProductPacks = ({
   seconds = "00",
   overallScore = 49,
   doshasCount = 4,
-  idealCount = 2,
   className = ""
 }) => {
   return (
-    <section className={`py-2 px-2 sm:px-4 text-black ${className}`}>
-      <div className="max-w-4xl mx-auto space-y-3.5">
+    <section className={`py-4 px-2 sm:px-4 ${className} bg-amber-50 rounded-xl relative overflow-hidden`}>
+      {/* Subtle Vastu Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d97706' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}
+      />
+      
+      <div className="max-w-4xl mx-auto space-y-5 relative z-10">
         
-        {/* ========================================================================= */}
-        {/* COMPACT TOP VISUAL TEASER (BLURRED VASTU SCORE & 16-ZONE CHAKRA IMPRESSION) */}
-        {/* ========================================================================= */}
-        <div className="relative rounded-2xl border-2 border-black/15 bg-slate-950/5 p-2 sm:p-2.5 overflow-hidden shadow-xs">
-          {/* Blurred Background Visual Strip */}
-          <div className="filter blur-[4px] select-none pointer-events-none opacity-85 flex items-center justify-between gap-1.5 sm:gap-3 text-xs">
-            {/* Score Pill */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2.5 py-1 rounded-xl shadow-xs flex-shrink-0">
-              <span className="font-mono text-[10px] font-bold text-slate-500">{isHi ? "वास्तु स्कोर:" : "SCORE:"}</span>
-              <span className="font-mono font-black text-slate-900 text-sm">{overallScore}/100</span>
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
-                {overallScore >= 70 ? "Optimal" : "Defects Found"}
-              </span>
-            </div>
-
-            {/* 16-Zone Energy Mapped Pill */}
-            <div className="flex items-center gap-1 bg-white border border-slate-300 px-2.5 py-1 rounded-xl shadow-xs hidden sm:flex">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="font-mono text-[10px] font-bold text-slate-700">16-ZONE GRID AUDITED</span>
-            </div>
-
-            {/* Critical Defects Warning Pill */}
-            <div className="flex items-center gap-1 bg-red-50 border border-red-200 px-2.5 py-1 rounded-xl shadow-xs flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span className="font-mono text-[10px] font-black text-red-700">
-                {doshasCount} {isHi ? "दोष पहचाने गए" : "CRITICAL DOSHAS"}
-              </span>
-            </div>
-          </div>
-
-          {/* Floating Lock Badge Overlay */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/10 backdrop-blur-[1.5px]">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950 text-amber-300 text-[10px] font-mono font-black shadow-md border border-amber-400/40">
-              <Lock className="w-3 h-3 text-amber-400" />
-              <span>{isHi ? "🔒 वास्तु गणना पूर्ण • अनलॉक करें" : "🔒 AUDIT READY • UNLOCK BELOW"}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Header: "Your Report is Ready!" (Shifted Below Visual Teaser) */}
-        <div className="text-center space-y-0.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 border border-neutral-300 text-neutral-900 text-[11px] font-mono font-black uppercase">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold uppercase tracking-widest shadow-sm">
+            <Sun className="w-4 h-4 text-amber-600" />
             <span>{isHi ? "वास्तु विश्लेषण पूर्ण" : "VASTU AUDIT COMPLETE"}</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-black font-heading">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-950">
             {isHi ? "आपकी वास्तु रिपोर्ट तैयार है!" : "Your Report is Ready!"}
           </h1>
-          <p className="text-neutral-600 text-xs sm:text-sm font-medium leading-tight max-w-md mx-auto">
+          <p className="text-amber-800 text-sm font-medium leading-tight max-w-md mx-auto">
             {isHi 
-              ? "16 दिशाओं की ऊर्जा संतुलन रिपोर्ट। अनलॉक करने के लिए सही योजना चुनें।" 
-              : "16-zone precision analytics. Choose a plan to unlock your report."}
+              ? "16 दिशाओं की ऊर्जा संतुलन रिपोर्ट। अपनी रिपोर्ट प्राप्त करने के लिए नीचे दी गई योजना चुनें।" 
+              : "16-zone precision analytics. Choose your preferred plan below to instantly unlock your report."}
           </p>
         </div>
 
-        {/* 1:1 Black and White Cards */}
+        {/* 1:1 Warm Vastu Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch max-w-3xl mx-auto">
           
           {/* ======================================================== */}
-          {/* OPTION 1: ₹299 BASIC VASTU REPORT (Clean White Card)     */}
+          {/* OPTION 1: ₹299 BASIC VASTU REPORT (Emphasized Default)     */}
           {/* ======================================================== */}
-          <div className="bg-white border-2 border-black rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] text-left space-y-3 min-h-[260px]">
-            <div className="space-y-3">
+          <div className="bg-gradient-to-b from-amber-100 to-white border-2 border-amber-400 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-lg text-left space-y-4 relative min-h-[260px]">
+            {/* Top Ribbon */}
+            <div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-bl-lg shadow-sm">
+              {isHi ? "सबसे लोकप्रिय" : "MOST POPULAR"}
+            </div>
+
+            <div className="space-y-4 pt-2">
               <div className="flex items-start justify-between gap-2">
-                <div className="space-y-0.5">
-                  <h3 className="text-lg sm:text-xl font-black text-black font-heading leading-tight">
-                    {isHi ? "1. मूल वास्तु रिपोर्ट" : "1. Basic Vastu Report"}
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-amber-950 leading-tight">
+                    {isHi ? "मूल वास्तु रिपोर्ट" : "Basic Vastu Report"}
                   </h3>
-                  <p className="text-xs text-neutral-600 font-medium leading-snug">
+                  <p className="text-xs text-amber-800 font-medium">
                     {isHi ? "घर का मुख्य वास्तु स्कोर व 4 मुख्य स्तंभ" : "Macro prosperity score & defect count"}
                   </p>
                 </div>
-
                 <div className="text-right flex-shrink-0">
                   <div className="flex items-baseline gap-1.5 justify-end">
-                    <span className="text-2xl sm:text-3xl font-black font-mono text-black">₹299</span>
-                    <span className="text-xs font-bold text-neutral-400 line-through">₹799</span>
+                    <span className="text-3xl font-black text-amber-600">₹299</span>
                   </div>
-                  <span className="text-[10px] font-bold text-neutral-500">
-                    {isHi ? "एकमुश्त" : "One-time"}
+                  <span className="text-[10px] font-bold text-amber-500 line-through">
+                    ₹799
                   </span>
                 </div>
               </div>
 
               {/* Feature Checklist */}
-              <div className="space-y-2 pt-2 border-t border-neutral-200 text-xs">
+              <div className="space-y-2 pt-3 border-t border-amber-200/60 text-sm">
                 {[
-                  { label: isHi ? "16 दिशा समग्र वास्तु स्कोर" : "16-Zone Overall Score", val: "/100" },
-                  { label: isHi ? "4 मुख्य ऊर्जा स्तंभ (धन, स्वास्थ्य)" : "4 Core Energy Pillars", val: "Cash & Health" },
-                  { label: isHi ? "गंभीर वास्तु दोषों की गणना" : "Defect Count & Risk", val: "Instant" },
-                  { label: isHi ? "तत्काल डिजिटल स्कोरकार्ड" : "Digital Scorecard", val: "Immediate" },
+                  { label: isHi ? "16 दिशा समग्र वास्तु स्कोर" : "16-Zone Overall Score" },
+                  { label: isHi ? "4 मुख्य ऊर्जा स्तंभ (धन, स्वास्थ्य)" : "4 Core Energy Pillars (Cash & Health)" },
+                  { label: isHi ? "गंभीर वास्तु दोषों की गणना" : "Defect Count & Risk Analysis" },
+                  { label: isHi ? "तत्काल डिजिटल स्कोरकार्ड" : "Immediate Digital Scorecard" },
                 ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-0.5">
-                    <div className="flex items-center gap-2 font-bold text-black text-xs">
-                      <span className="text-black font-black text-sm">✓</span>
-                      <span>{item.label}</span>
-                    </div>
-                    <span className="font-extrabold font-mono text-black text-xs">
-                      {item.val}
-                    </span>
+                  <div key={i} className="flex items-center gap-2 text-amber-900 font-medium text-xs sm:text-sm">
+                    <span className="text-amber-600">🕉️</span>
+                    <span>{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Bottom Stack: Timer Directly Above CTA Button */}
-            <div className="space-y-2 pt-1">
-              {/* Countdown Timer */}
-              <div className="bg-yellow-400/15 border-2 border-yellow-500 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-slate-950 shadow-xs">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-600 animate-spin-slow" />
-                  <span className="font-bold text-slate-950">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
-                </div>
-                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
-                  {hours}h : {minutes}m : {seconds}s
-                </span>
-              </div>
-
-              {/* Action Button (Solid Black) */}
+            <div className="space-y-3 pt-3">
               <Button
                 type="button"
-                variant="outline"
                 onClick={() => onSelectPlan && onSelectPlan(299)}
-                className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-black text-white border-2 border-black px-4 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-neutral-800 cursor-pointer"
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-sm uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2"
               >
+                <Lock className="w-4 h-4" />
                 <span>{isHi ? "मूल रिपोर्ट अनलॉक करें →" : "Unlock Basic Report →"}</span>
               </Button>
             </div>
@@ -151,91 +102,74 @@ export const ProductPacks = ({
 
 
           {/* ======================================================== */}
-          {/* OPTION 2: ₹899 DETAILED VASTU REPORT (Solid Black Card)  */}
+          {/* OPTION 2: ₹899 DETAILED VASTU REPORT                       */}
           {/* ======================================================== */}
-          <div className="bg-black text-white border-2 border-neutral-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl text-left space-y-3 relative overflow-hidden min-h-[260px]">
-            
-            {/* Top Ribbon (Black & White) */}
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-              <span className="bg-white text-black font-mono font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
-                {isHi ? "⭐ सर्वश्रेष्ठ / अनुशंसित" : "⭐ BEST VALUE / RECOMMENDED"}
-              </span>
-              <span className="text-[10px] font-bold text-neutral-300 bg-neutral-900 border border-neutral-700 px-2 py-0.5 rounded-full">
-                {isHi ? "64% छूट" : "SAVE 64%"}
-              </span>
-            </div>
-
-            <div className="space-y-3">
+          <div className="bg-white border-2 border-orange-200 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-md text-left space-y-4 min-h-[260px]">
+            <div className="space-y-4">
               <div className="flex items-start justify-between gap-2">
-                <div className="space-y-0.5">
-                  <h3 className="text-lg sm:text-xl font-black text-white font-heading leading-tight">
-                    {isHi ? "2. विस्तृत वास्तु रिपोर्ट" : "2. Detailed Vastu Report"}
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-slate-800 leading-tight">
+                    {isHi ? "विस्तृत वास्तु रिपोर्ट" : "Detailed Vastu Report"}
                   </h3>
-                  <p className="text-xs text-neutral-400 font-medium leading-snug">
+                  <p className="text-xs text-slate-600 font-medium">
                     {isHi ? "बिना तोड़फोड़ 16-दिशा उपाय + आचार्य PDF" : "Zero-demolition remedies & certified PDF"}
                   </p>
                 </div>
-
                 <div className="text-right flex-shrink-0">
                   <div className="flex items-baseline gap-1.5 justify-end">
-                    <span className="text-2xl sm:text-3xl font-black font-mono text-white">₹899</span>
-                    <span className="text-xs font-bold text-neutral-500 line-through">₹2,499</span>
+                    <span className="text-2xl font-black text-slate-800">₹899</span>
                   </div>
-                  <span className="text-[10px] font-bold text-neutral-400">
-                    {isHi ? "संपूर्ण रिपोर्ट" : "Complete Audit"}
+                  <span className="text-[10px] font-bold text-slate-400 line-through">
+                    ₹2,499
                   </span>
                 </div>
               </div>
 
               {/* Feature Checklist */}
-              <div className="space-y-2 pt-1 border-t border-neutral-800 text-xs">
+              <div className="space-y-2 pt-3 border-t border-slate-100 text-sm">
                 {[
-                  { label: isHi ? "मूल रिपोर्ट की सभी सुविधाएं शामिल" : "All Basic Features Included", val: "Yes" },
-                  { label: isHi ? "रंगीन टेप व धातु रॉड्स के सटीक माप" : "Color Tape & Rod Sizes", val: "Custom" },
-                  { label: isHi ? "16 दिशा देवता ऊर्जा ग्रिड मैप" : "16-Zone Devta Grid Map", val: "Included" },
-                  { label: isHi ? "आचार्य द्वारा प्रमाणित PDF (WhatsApp)" : "Acharya Certified PDF", val: "WhatsApp & Mail" },
+                  { label: isHi ? "मूल रिपोर्ट की सभी सुविधाएं शामिल" : "All Basic Features Included" },
+                  { label: isHi ? "रंगीन टेप व धातु रॉड्स के सटीक माप" : "Color Tape & Rod Sizes" },
+                  { label: isHi ? "16 दिशा देवता ऊर्जा ग्रिड मैप" : "16-Zone Devta Grid Map" },
+                  { label: isHi ? "आचार्य द्वारा प्रमाणित PDF (WhatsApp)" : "Acharya Certified PDF (WhatsApp)" },
                 ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-0.5">
-                    <div className="flex items-center gap-2 text-neutral-200 font-medium text-xs">
-                      <span className="text-white font-black text-sm">✓</span>
-                      <span>{item.label}</span>
-                    </div>
-                    <span className="font-bold font-mono text-neutral-400 text-xs">
-                      {item.val}
-                    </span>
+                  <div key={i} className="flex items-center gap-2 text-slate-700 font-medium text-xs sm:text-sm">
+                    <span className="text-orange-500">✨</span>
+                    <span>{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Bottom Stack: Timer Directly Above CTA Button */}
-            <div className="space-y-2 pt-1">
-              {/* Countdown Timer */}
-              <div className="bg-yellow-400/10 border-2 border-yellow-400 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[11px] text-yellow-400 shadow-sm">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-yellow-400 animate-spin-slow" />
-                  <span className="font-bold text-yellow-400">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
-                </div>
-                <span className="font-mono font-black bg-yellow-400 text-black px-2 py-0.5 rounded text-xs shadow-xs">
-                  {hours}h : {minutes}m : {seconds}s
-                </span>
-              </div>
-
-              {/* Action Button (Solid White with Black Text) */}
+            <div className="space-y-3 pt-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onSelectPlan && onSelectPlan(899)}
-                className="group relative inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-white hover:bg-neutral-200 border-2 border-white text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-100 shadow-[3px_3px_0px_0px_rgba(255,255,255,0.4)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
+                className="w-full h-12 rounded-xl border-2 border-orange-400 text-orange-600 hover:bg-orange-50 font-bold text-sm uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-2"
               >
+                <Sparkles className="w-4 h-4" />
                 <span>{isHi ? "संपूर्ण रिपोर्ट अनलॉक करें →" : "Unlock Full Report →"}</span>
               </Button>
             </div>
           </div>
         </div>
+        
+        {/* Universal Countdown Timer */}
+        <div className="flex justify-center pt-2">
+          <div className="bg-amber-100 border border-amber-300 rounded-full px-4 py-1.5 flex items-center justify-center gap-2 text-xs text-amber-900 shadow-sm">
+            <Clock className="w-4 h-4 text-amber-600 animate-spin-slow" />
+            <span className="font-bold">{isHi ? "विशेष छूट समाप्त:" : "Special Offer Ends:"}</span>
+            <span className="font-mono font-black text-amber-700">
+              {hours}h : {minutes}m : {seconds}s
+            </span>
+          </div>
+        </div>
+
       </div>
     </section>
   );
 };
 
 export default ProductPacks;
+
