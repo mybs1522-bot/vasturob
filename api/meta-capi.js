@@ -11,8 +11,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN || process.env.VITE_META_CAPI_TOKEN;
-  const PIXEL_ID = process.env.VITE_META_PIXEL_ID || process.env.META_PIXEL_ID;
+  const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN || process.env.VITE_META_CAPI_TOKEN || 'EAADE6Lnxf9MBSl1PEnbVjzfZATkGgCcZAzkfDaTeSrTYVEpvESH6mCY9I4kbB9vLWHZCZCWAC7FzojK1avmwZBg2mlwX0fePZASVD4qGVGPgk5QPUQWWkdjDf8C5dMLDvD9ZCNt8u0hdUhX6Q1n7SHBUEz5ojIsPd8RnZAc4p6XO2CZCS1ZAer3SuobHcIhevvPycZBPwZDZD';
+  const PIXEL_ID = process.env.VITE_META_PIXEL_ID || process.env.META_PIXEL_ID || '4679956578947738';
 
   if (!META_CAPI_TOKEN || !PIXEL_ID) {
     console.error('[Meta CAPI] Missing token or pixel ID');
