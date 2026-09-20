@@ -270,6 +270,7 @@ export default function AdminPanel({ onBackToApp }) {
                     <th className="py-3.5 px-4">Plan Blueprint</th>
                     <th className="py-3.5 px-4">User Details</th>
                     <th className="py-3.5 px-4">Phone / WhatsApp</th>
+                    <th className="py-3.5 px-4 text-center">Direction</th>
                     <th className="py-3.5 px-4 text-center">Score</th>
                     <th className="py-3.5 px-4 text-center">Plan Paid</th>
                     <th className="py-3.5 px-4 text-center">Date</th>
@@ -294,7 +295,7 @@ export default function AdminPanel({ onBackToApp }) {
                               <button
                                 type="button"
                                 onClick={() => setSelectedReportForModal(rep)}
-                                className="w-14 h-10 rounded-lg border border-amber-400/50 bg-slate-950 overflow-hidden flex items-center justify-center hover:scale-105 transition-all cursor-pointer relative group"
+                                className="w-20 h-16 rounded-lg border border-amber-400/50 bg-slate-950 overflow-hidden flex items-center justify-center hover:scale-105 transition-all cursor-pointer relative group"
                                 title="Click to view submitted floor plan blueprint"
                               >
                                 {zoneInfo.plan_image ? (
@@ -319,6 +320,11 @@ export default function AdminPanel({ onBackToApp }) {
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="font-mono font-bold text-emerald-400">{rep.user_phone || 'N/A'}</div>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                              {zoneInfo.north_angle || 0}° N
+                            </span>
                           </td>
                           <td className="py-3.5 px-4 text-center">
                             <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black font-mono text-xs">
@@ -494,7 +500,7 @@ export default function AdminPanel({ onBackToApp }) {
                     Submitted Floor Plan Blueprint
                   </h3>
                   <span className="text-xs text-amber-300 font-mono">
-                    User: {selectedReportForModal.user_name} • Phone: {selectedReportForModal.user_phone}
+                    User: {selectedReportForModal.user_name} • Phone: {selectedReportForModal.user_phone} • Direction: {Array.isArray(selectedReportForModal.evaluated_zones) && selectedReportForModal.evaluated_zones[0] ? selectedReportForModal.evaluated_zones[0].north_angle || 0 : 0}° N
                   </span>
                 </div>
               </div>
