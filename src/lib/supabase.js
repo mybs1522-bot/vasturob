@@ -285,6 +285,9 @@ export async function saveVastuReport(report) {
       }
     ],
     is_paid: Boolean(report.is_paid || false),
+    plan_type: report.plan_type || 'basic_299',
+    status: report.status || 'completed',
+    payment_id: report.payment_id || '',
   };
 
   if (report.id && isValidUUID(report.id)) {

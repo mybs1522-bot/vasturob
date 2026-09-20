@@ -349,13 +349,13 @@ export default function App() {
 
                 <div className="space-y-3 pt-1">
                   {/* Option 1: Upload Floor Plan */}
-                  <label className="cursor-pointer p-4 rounded-2xl border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 flex items-center gap-3.5 transition-all group">
-                    <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold flex-shrink-0">
+                  <label className="cursor-pointer p-4 rounded-2xl border-2 border-amber-400 bg-amber-50/70 hover:bg-amber-100/80 flex items-center gap-3.5 transition-all group shadow-2xs">
+                    <div className="w-11 h-11 rounded-xl bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold flex-shrink-0">
                       <Upload className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <span className="font-bold text-sm text-slate-900 group-hover:text-amber-800 block">{t('upload_plan_title')}</span>
-                      <span className="text-xs text-slate-500 block">{t('upload_plan_desc')}</span>
+                      <span className="font-extrabold text-sm text-slate-900 group-hover:text-amber-900 block">{t('upload_plan_title')}</span>
+                      <span className="text-xs text-slate-600 mt-0.5 block">{t('upload_plan_desc')}</span>
                     </div>
                     <input
                       type="file"
@@ -420,7 +420,7 @@ export default function App() {
                   {/* OR Divider */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-slate-200" />
-                    <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-widest font-mono">{t('or_divider')}</span>
+                    <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">{t('or_divider')}</span>
                     <div className="flex-1 h-px bg-slate-200" />
                   </div>
 
@@ -428,21 +428,21 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setIsExpertModalOpen(true)}
-                    className="w-full p-4 rounded-2xl border-2 border-amber-400 bg-amber-50/70 hover:bg-amber-100/80 flex items-center gap-3.5 transition-all group text-left shadow-2xs cursor-pointer"
+                    className="w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 flex items-center gap-3.5 transition-all group text-left cursor-pointer"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-slate-950 text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs flex-shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold flex-shrink-0">
                       <MessageSquare className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-sm text-slate-900 group-hover:text-amber-900 block">
+                        <span className="font-bold text-sm text-slate-900 group-hover:text-amber-800 block">
                           {t('chat_expert_title')}
                         </span>
-                        <span className="text-xs font-black text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full font-mono shadow-2xs">
+                        <span className="text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
                           {t('chat_expert_price')}
                         </span>
                       </div>
-                      <span className="text-xs text-slate-600 mt-0.5 block">
+                      <span className="text-xs text-slate-500 mt-0.5 block">
                         {t('chat_expert_desc')}
                       </span>
                     </div>

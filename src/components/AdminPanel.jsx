@@ -271,7 +271,7 @@ export default function AdminPanel({ onBackToApp }) {
                     <th className="py-3.5 px-4">User Details</th>
                     <th className="py-3.5 px-4">Phone / WhatsApp</th>
                     <th className="py-3.5 px-4 text-center">Score</th>
-                    <th className="py-3.5 px-4 text-center">Rooms Placed</th>
+                    <th className="py-3.5 px-4 text-center">Plan Paid</th>
                     <th className="py-3.5 px-4 text-center">Date</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -325,8 +325,14 @@ export default function AdminPanel({ onBackToApp }) {
                               {rep.overall_score || 52}/100
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 text-center text-slate-300 font-mono text-xs">
-                            {Array.isArray(rep.placed_rooms) ? rep.placed_rooms.length : 0} Rooms
+                          <td className="py-3.5 px-4 text-center">
+                            {rep.is_paid ? (
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${rep.plan_type === 'full_899' ? 'bg-amber-400 text-slate-900' : 'bg-slate-700 text-white'}`}>
+                                {rep.plan_type === 'full_899' ? '₹899 Full' : '₹299 Basic'}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-500 font-mono">Unpaid</span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-center text-slate-400 font-mono text-xs">
                             {new Date(rep.created_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
