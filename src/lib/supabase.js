@@ -134,7 +134,8 @@ export async function getLeads() {
       const { data, error } = await supabase
         .from('leads')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
       if (!error && Array.isArray(data)) {
         const cloudPhones = new Set(data.map(d => String(d.phone).trim()));
@@ -231,7 +232,8 @@ export async function getConsultations() {
       const { data, error } = await supabase
         .from('expert_consultations')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
       if (!error && Array.isArray(data)) {
         const merged = mergeDedupe(data, localConsultations, 'whatsapp_phone');
@@ -329,7 +331,8 @@ export async function getVastuReports() {
       const { data, error } = await supabase
         .from('vastu_reports')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
       if (!error && Array.isArray(data)) {
         const merged = mergeDedupe(data, localReports, 'report_id');

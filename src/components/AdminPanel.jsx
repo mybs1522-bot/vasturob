@@ -384,6 +384,7 @@ export default function AdminPanel({ onBackToApp }) {
                     <th className="py-3.5 px-4">Phone Number</th>
                     <th className="py-3.5 px-4">Email</th>
                     <th className="py-3.5 px-4 text-center">Score</th>
+                    <th className="py-3.5 px-4 text-center">Plan</th>
                     <th className="py-3.5 px-4 text-center">Status</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -405,6 +406,23 @@ export default function AdminPanel({ onBackToApp }) {
                           <span className="px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-bold font-mono">
                             {l.vastu_score || 52}/100
                           </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          {(() => {
+                            const leadRep = reports.find(r => r.user_phone === l.phone || (l.email && r.user_email === l.email));
+                            const hasPlan = leadRep && Array.isArray(leadRep.evaluated_zones) && leadRep.evaluated_zones[0] && (leadRep.evaluated_zones[0].plan_image || leadRep.evaluated_zones[0].svg_content);
+                            return hasPlan ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedReportForModal(leadRep)}
+                                className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 text-[10px] font-black font-mono transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
+                              >
+                                <Eye className="w-3 h-3" /> View Plan
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-slate-500 font-mono">No Plan</span>
+                            );
+                          })()}
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px]">
