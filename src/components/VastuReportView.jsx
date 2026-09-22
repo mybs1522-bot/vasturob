@@ -18,7 +18,7 @@ const DEFAULT_PREVIEW_ROOMS = [
   { id: '4', name: 'Washroom / Toilet', zone: { id: 'SE', name: 'South-East', color: '#ef4444', lord: 'Agni Dev' }, rating: 'defect', description: 'Disposal energy in Fire zone suppresses cash liquidity and causes digestive troubles.', remedy: 'Install 3-inch copper metal strip around the commode base boundary.' },
 ];
 
-export default function VastuReportView({ vastuData, userData, onRetry }) {
+export default function VastuReportView({ vastuData, userData, onRetry, imageUrl, svgContent, placedRooms, northAngle }) {
   const { lang, t } = useLanguage();
   const [activeTab, setActiveTab] = useState('rooms'); // 'rooms' | 'remedies' | 'yantras'
   const [isDownloading, setIsDownloading] = useState(false);
@@ -165,6 +165,10 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
             plan_type: amount === 299 ? 'basic_299' : 'full_899',
             status: amount === 299 ? 'completed' : 'under_expert_review',
             payment_id: payDetails.paymentId,
+            plan_image: imageUrl || '',
+            svg_content: svgContent || '',
+            placed_rooms: placedRooms || [],
+            north_angle: northAngle || 0,
             report_data: vastuData
           });
         } catch (err) {

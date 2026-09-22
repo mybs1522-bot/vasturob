@@ -619,7 +619,15 @@ export default function App() {
 
         {/* STEP 4: Vastu Report */}
         {wizardStep === 4 && (
-          <VastuReportView vastuData={vastuReport} userData={userData} onRetry={handleResetSession} />
+          <VastuReportView 
+            vastuData={vastuReport} 
+            userData={userData} 
+            onRetry={handleResetSession} 
+            imageUrl={imageUrl} 
+            svgContent={svgContent} 
+            placedRooms={placedRooms}
+            northAngle={northAngle}
+          />
         )}
       </main>
 
