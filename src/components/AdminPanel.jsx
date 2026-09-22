@@ -383,9 +383,9 @@ export default function AdminPanel({ onBackToApp }) {
                     <th className="py-3.5 px-4">Full Name</th>
                     <th className="py-3.5 px-4">Phone Number</th>
                     <th className="py-3.5 px-4">Email</th>
-                    <th className="py-3.5 px-4 text-center">Score</th>
-                    <th className="py-3.5 px-4 text-center">Plan</th>
-                    <th className="py-3.5 px-4 text-center">Status</th>
+                    <th className="py-3.5 px-4 text-center">Plan Uploaded</th>
+                    <th className="py-3.5 px-4 text-center">Payment Info</th>
+                    <th className="py-3.5 px-4 text-center">Date</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -403,13 +403,12 @@ export default function AdminPanel({ onBackToApp }) {
                         <td className="py-3.5 px-4 text-emerald-400 font-mono font-bold">{l.phone || 'N/A'}</td>
                         <td className="py-3.5 px-4 text-slate-400">{l.email || 'N/A'}</td>
                         <td className="py-3.5 px-4 text-center">
-                          <span className="px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-bold font-mono">
-                            {l.vastu_score || 52}/100
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
                           {(() => {
-                            const leadRep = reports.find(r => r.user_phone === l.phone || (l.email && r.user_email === l.email));
+                            const cleanLeadPhone = String(l.phone || '').replace(/[^0-9]/g, '');
+                            const leadRep = reports.find(r => 
+                              (cleanLeadPhone && String(r.user_phone || '').replace(/[^0-9]/g, '') === cleanLeadPhone) || 
+                              (l.email && r.user_email === l.email)
+                            );
                             const hasPlan = leadRep && Array.isArray(leadRep.evaluated_zones) && leadRep.evaluated_zones[0] && (leadRep.evaluated_zones[0].plan_image || leadRep.evaluated_zones[0].svg_content);
                             return hasPlan ? (
                               <button
@@ -425,9 +424,40 @@ export default function AdminPanel({ onBackToApp }) {
                           })()}
                         </td>
                         <td className="py-3.5 px-4 text-center">
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px]">
-                            {l.status || 'new'}
-                          </span>
+                          {(() => {
+                            const cleanLeadPhone = String(l.phone || '').replace(/[^0-9]/g, '');
+                            const leadRep = reports.find(r => 
+                              (cleanLeadPhone && String(r.user_phone || '').replace(/[^0-9]/g, '') === cleanLeadPhone) || 
+                              (l.email && r.user_email === l.email)
+                            );
+                            
+                            if (leadRep && leadRep.is_paid) {
+                              const planType = leadRep.plan_type === 'full_899' ? '₹899' : '₹299';
+                              return (
+                                <div className="space-y-0.5">
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-900 block w-max mx-auto">
+                                    Paid {planType}
+                                  </span>
+                                </div>
+                              );
+                            }
+                            return (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700 text-white">
+                                Unpaid
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="py-3.5 px-4 text-center text-slate-400 font-mono text-xs">
+                          {(() => {
+                            const cleanLeadPhone = String(l.phone || '').replace(/[^0-9]/g, '');
+                            const leadRep = reports.find(r => 
+                              (cleanLeadPhone && String(r.user_phone || '').replace(/[^0-9]/g, '') === cleanLeadPhone) || 
+                              (l.email && r.user_email === l.email)
+                            );
+                            const dateToUse = (leadRep && leadRep.is_paid && leadRep.created_at) ? leadRep.created_at : (l.created_at || Date.now());
+                            return new Date(dateToUse).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                          })()}
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           {l.phone && (
