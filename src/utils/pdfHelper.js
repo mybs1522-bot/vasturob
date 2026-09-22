@@ -16,8 +16,8 @@ export async function convertPdfFileToDataUrl(file) {
     // Get page 1
     const page = await pdf.getPage(1);
     
-    // Scale for high resolution
-    const viewport = page.getViewport({ scale: 2.0 });
+    // Scale for standard resolution to keep payload size under 1MB
+    const viewport = page.getViewport({ scale: 1.2 });
     
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -30,7 +30,7 @@ export async function convertPdfFileToDataUrl(file) {
     };
     
     await page.render(renderContext).promise;
-    return canvas.toDataURL('image/jpeg', 0.9);
+    return canvas.toDataURL('image/jpeg', 0.6); // Reduced to 60% quality to ensure successful DB save
   } catch (error) {
     console.error('Failed to convert PDF file:', error);
     throw new Error('Could not read PDF floor plan. Please upload a PNG or JPG file.');

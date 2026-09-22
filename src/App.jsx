@@ -376,18 +376,39 @@ export default function App() {
                           return;
                         }
 
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          const result = event.target?.result;
-                          if (isSvg) {
-                            handleImageUpload(null, result);
-                          } else {
-                            handleImageUpload(result, null);
-                          }
-                        };
                         if (isSvg) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => handleImageUpload(null, event.target?.result);
                           reader.readAsText(file);
                         } else {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              let width = img.width;
+                              let height = img.height;
+                              const MAX_DIM = 1200; // Cap at 1200px max dimension
+                              if (width > height) {
+                                if (width > MAX_DIM) {
+                                  height *= MAX_DIM / width;
+                                  width = MAX_DIM;
+                                }
+                              } else {
+                                if (height > MAX_DIM) {
+                                  width *= MAX_DIM / height;
+                                  height = MAX_DIM;
+                                }
+                              }
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext('2d');
+                              ctx.drawImage(img, 0, 0, width, height);
+                              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6); // 60% quality JPEG
+                              handleImageUpload(compressedDataUrl, null);
+                            };
+                            img.src = event.target?.result;
+                          };
                           reader.readAsDataURL(file);
                         }
                       }}
