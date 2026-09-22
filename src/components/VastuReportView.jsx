@@ -43,7 +43,13 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
   const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [selectedPlanAmount, setSelectedPlanAmount] = useState(299);
+  const [selectedPlanAmount, setSelectedPlanAmount] = useState(() => {
+    try {
+      return parseInt(localStorage.getItem('vastu_report_paid_amount')) || 299;
+    } catch {
+      return 299;
+    }
+  });
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [userName, setUserName] = useState(userData?.name || '');
   const [userPhone, setUserPhone] = useState(userData?.phone || '');
@@ -196,26 +202,16 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
           }).catch(console.error);
         } catch (e) {}
 
-        if (amount === 299) {
-          // Unlock Basic Macro Scoreboard
-          setIsBasicUnlocked(true);
-          setIsUnderReview(true);
-          try {
-            localStorage.setItem('vastu_report_basic_unlocked', 'true');
-            localStorage.setItem('vastu_report_under_review', 'true');
-          } catch {}
-          setIsReviewModalOpen(true);
-          alert(isHi ? '✅ भुगतान सफल! आपका मूल वास्तु स्कोर व जोखिम विश्लेषण अनलॉक हो गया है।' : '✅ Payment Successful! Your Basic Vastu Score & Risk Audit are unlocked.');
-        } else {
-          // ₹899 Full Plan: Unlock Scoreboard + Trigger Review In Progress Modal
-          setIsBasicUnlocked(true);
-          setIsUnderReview(true);
-          try {
-            localStorage.setItem('vastu_report_basic_unlocked', 'true');
-            localStorage.setItem('vastu_report_under_review', 'true');
-          } catch {}
-          setIsReviewModalOpen(true);
-        }
+        // Both plans now trigger the Review In Progress Modal and promise 24h delivery
+        setIsBasicUnlocked(true);
+        setIsUnderReview(true);
+        setSelectedPlanAmount(amount);
+        try {
+          localStorage.setItem('vastu_report_basic_unlocked', 'true');
+          localStorage.setItem('vastu_report_under_review', 'true');
+          localStorage.setItem('vastu_report_paid_amount', amount.toString());
+        } catch {}
+        setIsReviewModalOpen(true);
       },
       onFailure: (err) => {
         setIsDownloading(false);
@@ -526,15 +522,15 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
 
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-0.5 rounded-full inline-block">
-                {isHi ? '✅ भुगतान सत्यापित (₹899)' : '✅ Payment Verified (₹899)'}
+                {isHi ? `✅ भुगतान सत्यापित (₹${selectedPlanAmount})` : `✅ Payment Verified (₹${selectedPlanAmount})`}
               </span>
               <h3 className="text-lg sm:text-xl font-black text-slate-950 font-heading">
                 {isHi ? 'वास्तु विशेषज्ञ आपकी रिपोर्ट की समीक्षा कर रहे हैं' : 'Vastu Experts Are Reviewing Your Report'}
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 {isHi 
-                  ? 'वरिष्ठ वास्तु आचार्य आपके घर के 16 दिशाओं के नक्शे की गहन समीक्षा कर रहे हैं और 100% सटीक बिना तोड़फोड़ के वैदिक उपाय तैयार कर रहे हैं। आपकी संपूर्ण विस्तृत रिपोर्ट कुछ ही घंटों में आपके WhatsApp व ईमेल पर भेज दी जाएगी।'
-                  : 'Our senior certified Vastu Acharyas are manually auditing your 16-zone floor plan and finalizing high-precision non-demolition remedies. You will receive your complete certified report on WhatsApp and Email in a few hours.'}
+                  ? 'वरिष्ठ वास्तु आचार्य आपके घर के 16 दिशाओं के नक्शे की गहन समीक्षा कर रहे हैं और 100% सटीक बिना तोड़फोड़ के वैदिक उपाय तैयार कर रहे हैं। आपकी संपूर्ण विस्तृत रिपोर्ट 24 घंटे के भीतर आपके WhatsApp व ईमेल पर भेज दी जाएगी।'
+                  : 'Our senior certified Vastu Acharyas are manually auditing your 16-zone floor plan and finalizing high-precision non-demolition remedies. You will receive your complete certified report on WhatsApp and Email within 24 hours.'}
               </p>
             </div>
 
@@ -543,7 +539,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
               <div className="flex items-center justify-between border-b border-amber-200/60 pb-1.5 font-bold">
                 <span className="text-slate-600">{isHi ? 'डिलीवरी का समय:' : 'Estimated Delivery:'}</span>
                 <span className="text-amber-900 font-black font-mono">
-                  {isHi ? '2 से 4 घंटे के भीतर' : 'Within a few hours (2-4 hrs)'}
+                  {isHi ? '24 घंटे के भीतर' : 'Within 24 hours'}
                 </span>
               </div>
               <div className="flex items-center justify-between border-b border-amber-200/60 pb-1.5">
@@ -570,7 +566,7 @@ export default function VastuReportView({ vastuData, userData, onRetry }) {
                 onClick={() => {
                   const phoneClean = (userPhone || '').replace(/[^0-9]/g, '');
                   const formatted = phoneClean.length === 10 ? `91${phoneClean}` : phoneClean;
-                  const msg = encodeURIComponent(`Namaste Acharya Ji, I have completed the ₹899 payment for my Vastu audit. Name: ${userName}`);
+                  const msg = encodeURIComponent(`Namaste Acharya Ji, I have completed the ₹${selectedPlanAmount} payment for my Vastu audit. Name: ${userName}`);
                   window.open(`https://wa.me/918299584008?text=${msg}`, '_blank');
                 }}
                 className="w-full py-2 text-center text-xs font-bold text-slate-500 hover:text-emerald-700 transition-colors cursor-pointer flex items-center justify-center gap-1"
